@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Palawatta Warriers",
+    "slug": "palawatta-warriers",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/appIcon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#4BA593"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/appIcon.png",
+        "backgroundColor": "#A9D2C8"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e69173ce-1dd0-411a-b1ff-05320b4e350e"
+      }
+    },
+    "owner": "sandeepa097"
+  }
+}
