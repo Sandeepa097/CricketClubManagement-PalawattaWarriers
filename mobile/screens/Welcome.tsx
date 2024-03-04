@@ -3,14 +3,15 @@ import { View, Dimensions, StyleSheet } from 'react-native';
 import LogoWithName from '../assets/LogoWithName';
 import { Colors } from '../constants/Colors';
 import Button from '../components/Button';
+import { NavigationRoutes } from '../constants/NavigationRoutes';
 
 const width: number = Dimensions.get('window').width;
 const height: number = Dimensions.get('window').height;
 
-const Welcome = () => {
+const Welcome = ({ navigation }) => {
   const continueAsGuest = () => console.log('Continue as guest');
 
-  const adminPortal = () => console.log('Admin portal');
+  const adminPortal = () => navigation.navigate(NavigationRoutes.LOGIN);
 
   return (
     <View style={styles.container}>

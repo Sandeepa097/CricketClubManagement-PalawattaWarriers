@@ -25,7 +25,8 @@
     "react-native-svg": "14.1.0",
     "typescript": "^5.3.0",
     "react-native-gesture-handler": "~2.14.0",
-    "expo-updates": "~0.24.11"
+    "expo-updates": "~0.24.11",
+    "@react-native-masked-view/masked-view": "0.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

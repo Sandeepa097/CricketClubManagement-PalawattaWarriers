@@ -1,10 +1,15 @@
 import React from 'react';
 import { Text, View } from 'react-native';
+import BackgroundImage from '../assets/BackgroundImage';
 
-function Login() {
+interface LoginProps {
+  title?: string;
+}
+
+function Login(props: LoginProps) {
   return (
-    <View>
-      <Text>Hello this is login</Text>
+    <View style={{ backgroundColor: 'blue' }}>
+      <Text>{props.title ? props.title : 'Hey this is login'}</Text>
     </View>
   );
 }

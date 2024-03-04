@@ -49,7 +49,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    zIndex: -1,
+    zIndex: 10,
+    height,
+    width,
     backgroundColor: '#60AE9D',
   },
 });
