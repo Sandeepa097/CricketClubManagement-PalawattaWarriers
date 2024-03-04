@@ -77,12 +77,14 @@ const Button = (props: RectangleButtonProps | CircleButtonProps) => {
   };
 
   const textStyle: {
+    fontFamily: string;
     color: Colors;
     fontSize: number;
     height: number;
     textAlign: 'auto' | 'center' | 'left' | 'right' | 'justify';
     textAlignVertical: 'auto' | 'center' | 'top' | 'bottom';
   } = {
+    fontFamily: 'Anybody-Regular',
     color: props.style === 'filled' ? Colors.OFF_WHITE : props.color,
     fontSize: 20,
     height: props.hasOwnProperty('length') ? 50 : 0.139 * width,
