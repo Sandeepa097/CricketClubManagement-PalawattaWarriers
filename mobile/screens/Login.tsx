@@ -9,6 +9,7 @@ import { Colors } from '../constants/Colors';
 import LogoWithName from '../assets/LogoWithName';
 import Button from '../components/Button';
 import TextInput from '../components/TextInput';
+import { NavigationRoutes } from '../constants/NavigationRoutes';
 
 const width: number = Dimensions.get('window').width;
 const height: number = Dimensions.get('window').height;
@@ -17,7 +18,7 @@ const Login = ({ navigation }) => {
   const [username, setUserName] = useState('');
   const [password, setPassword] = useState('');
 
-  const login = () => console.log('login');
+  const login = () => navigation.navigate(NavigationRoutes.HOME);
   const goBack = () => navigation.goBack();
 
   return (

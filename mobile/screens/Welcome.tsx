@@ -9,7 +9,7 @@ const width: number = Dimensions.get('window').width;
 const height: number = Dimensions.get('window').height;
 
 const Welcome = ({ navigation }) => {
-  const continueAsGuest = () => console.log('Continue as guest');
+  const continueAsGuest = () => navigation.navigate(NavigationRoutes.HOME);
 
   const adminPortal = () => navigation.navigate(NavigationRoutes.LOGIN);
 
