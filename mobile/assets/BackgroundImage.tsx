@@ -8,9 +8,10 @@ const height: number = Dimensions.get('window').height;
 const BackgroundImage = () => (
   <View style={styles.container}>
     <Svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
+      width="100%"
+      height="100%"
+      viewBox="0 0 360 800"
+      preserveAspectRatio="xMidYMid meet"
       fill="none">
       <Path
         d="M953 400C953 689.949 717.949 925 428 925C138.051 925 -97 689.949 -97 400C-97 110.051 138.051 -125 428 -125C717.949 -125 953 110.051 953 400Z"
@@ -50,8 +51,8 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     zIndex: 10,
-    height,
-    width,
+    height: height,
+    width: width,
     backgroundColor: '#60AE9D',
   },
 });
