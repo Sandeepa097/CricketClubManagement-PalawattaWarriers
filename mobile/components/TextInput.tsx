@@ -17,7 +17,7 @@ interface TextInputProps {
 }
 
 const TextInput = (props: TextInputProps) => {
-  const [isPasswordVisible, setIsPasswordVisible] = useState(true);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const width: number = Dimensions.get('window').width;
 
