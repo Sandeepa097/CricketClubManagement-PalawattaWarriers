@@ -30,7 +30,18 @@ interface CircleButtonProps {
 const width: number = Dimensions.get('window').width;
 
 const Button = (props: RectangleButtonProps | CircleButtonProps) => {
-  const containerStyle = {
+  const containerStyle: {
+    marginBottom: number;
+    shadowColor: Colors;
+    shadowOpacity: number;
+    elevation: number;
+    backgroundColor: Colors;
+    borderColor?: Colors;
+    borderWidth?: number;
+    height: number;
+    width: number;
+    borderRadius: number;
+  } = {
     marginBottom: 10,
     shadowColor: Colors.BLACK,
     shadowOpacity: 0.25,

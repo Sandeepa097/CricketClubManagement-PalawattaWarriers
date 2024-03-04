@@ -1,10 +1,12 @@
+import 'react-native-gesture-handler';
 import React, { useEffect, useState, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BackgroundImage from './assets/BackgroundImage';
-import Welcome from './screens/Welcome';
+import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
   const [appLoading, setAppLoading] = useState(true);
@@ -32,7 +34,9 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar style="auto" />
       <BackgroundImage />
-      <Welcome />
+      <SafeAreaProvider>
+        <AppNavigator />
+      </SafeAreaProvider>
     </View>
   );
 }

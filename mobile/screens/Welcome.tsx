@@ -36,6 +36,8 @@ const Welcome = () => {
 
 const styles = StyleSheet.create({
   container: {
+    height: height,
+    width: width,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
