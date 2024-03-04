@@ -5,15 +5,28 @@ import Leaderboard from '../screens/Leaderboard';
 import Players from '../screens/Players';
 import Payments from '../screens/Payments';
 import MainHeader from '../headers/MainHeader';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, Text } from 'react-native';
+import { Colors } from '../constants/Colors';
 
 const width: number = Dimensions.get('window').width;
 
 const Tab = createBottomTabNavigator();
 
+const BottomTabBar = ({ state, descriptors, navigation }) => (
+  <View style={styles.container}>
+    {state.routes.map((route, index) => {
+      return (
+        <View key={index}>
+          <Text>{index}</Text>
+        </View>
+      );
+    })}
+  </View>
+);
+
 const BottomTabNavigator = () => (
   <Tab.Navigator
+    tabBar={(props) => <BottomTabBar {...props} />}
     screenOptions={{
       headerShown: true,
     }}>
@@ -50,15 +63,16 @@ const BottomTabNavigator = () => (
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     width: width,
-    height: 70,
+    height: 62,
     padding: 10,
     backgroundColor: Colors.LIGHT_TEAL,
+    borderTopColor: Colors.TINT,
+    borderTopWidth: 4,
   },
 });
 

@@ -9,7 +9,7 @@ const MainHeader = (props) => {
   return (
     <View style={styles.container}>
       <View style={styles.leftContainer}>
-        <Logo height={50} width={0.657 * 50} />
+        <Logo height={52} width={0.657 * 52} />
         <View style={{ marginLeft: 10 }}>
           <Text style={styles.textStyle}>{props.title}</Text>
         </View>
@@ -25,9 +25,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: width,
-    height: 70,
-    padding: 10,
+    height: 62,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     backgroundColor: Colors.LIGHT_TEAL,
+    borderBottomColor: '#00000040',
+    borderBottomWidth: 4,
   },
   leftContainer: {
     display: 'flex',
@@ -38,6 +41,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Anybody-Regular',
     fontSize: 32,
     color: Colors.BLACK,
+    textAlignVertical: 'center',
   },
 });
 
