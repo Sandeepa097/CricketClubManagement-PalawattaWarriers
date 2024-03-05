@@ -6,6 +6,7 @@ import * as Font from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BackgroundImage from './assets/BackgroundImage';
 import MainNavigationContainer from './navigation/MainNavigationContainer';
+import { Colors } from './constants/Colors';
 
 export default function App() {
   const [appLoading, setAppLoading] = useState(true);
@@ -31,7 +32,7 @@ export default function App() {
 
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar backgroundColor={Colors.LIGHT_TEAL} />
       <BackgroundImage />
       <SafeAreaProvider>
         <MainNavigationContainer />
