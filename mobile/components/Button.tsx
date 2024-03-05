@@ -1,5 +1,11 @@
 import React from 'react';
-import { TouchableOpacity, View, Text, Dimensions } from 'react-native';
+import {
+  TouchableOpacity,
+  View,
+  Text,
+  Dimensions,
+  FlexAlignType,
+} from 'react-native';
 import { Colors } from '../constants/Colors';
 
 type ButtonLength = 'short' | 'long';
@@ -8,22 +14,22 @@ type ButtonStyle = 'filled' | 'outlined';
 
 type ButtonShape = 'circle';
 
-type ButtonSize = 'small' | 'large';
-
 interface RectangleButtonProps {
   length: ButtonLength;
   style: ButtonStyle;
   color: Colors;
-  text: string;
+  text?: string;
+  icon?: React.FC;
   onPress: () => void;
 }
 
 interface CircleButtonProps {
   shape: ButtonShape;
-  size: ButtonSize;
+  size: number;
   color: Colors;
   style: ButtonStyle;
-  text: string;
+  text?: string;
+  icon?: React.FC;
   onPress: () => void;
 }
 
@@ -31,7 +37,7 @@ const width: number = Dimensions.get('window').width;
 
 const Button = (props: RectangleButtonProps | CircleButtonProps) => {
   const containerStyle: {
-    marginBottom: number;
+    marginBottom?: number;
     shadowColor: Colors;
     shadowOpacity: number;
     elevation: number;
@@ -41,8 +47,16 @@ const Button = (props: RectangleButtonProps | CircleButtonProps) => {
     height: number;
     width: number;
     borderRadius: number;
+    display?: 'flex' | 'none';
+    alignItems?: FlexAlignType;
+    justifyContent?:
+      | 'flex-start'
+      | 'flex-end'
+      | 'center'
+      | 'space-between'
+      | 'space-around'
+      | 'space-evenly';
   } = {
-    marginBottom: 10,
     shadowColor: Colors.BLACK,
     shadowOpacity: 0.25,
     elevation: 4,
@@ -55,6 +69,7 @@ const Button = (props: RectangleButtonProps | CircleButtonProps) => {
         }),
     ...(props.hasOwnProperty('length')
       ? {
+          marginBottom: 10,
           height: 50,
           borderRadius: 15,
           width:
@@ -63,16 +78,12 @@ const Button = (props: RectangleButtonProps | CircleButtonProps) => {
               : 0.798 * width,
         }
       : {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           borderRadius: (0.139 * width) / 2,
-          ...((props as CircleButtonProps).size === 'large'
-            ? {
-                height: 0.139 * width,
-                width: 0.139 * width,
-              }
-            : {
-                height: 0.117 * width,
-                width: 0.117 * width,
-              }),
+          height: (props as CircleButtonProps).size,
+          width: (props as CircleButtonProps).size,
         }),
   };
 
@@ -97,7 +108,10 @@ const Button = (props: RectangleButtonProps | CircleButtonProps) => {
       style={containerStyle}
       activeOpacity={0.5}
       onPress={props.onPress}>
-      <Text style={textStyle}>{props.text.toLocaleUpperCase()}</Text>
+      {props.text && !props.icon && (
+        <Text style={textStyle}>{props.text.toLocaleUpperCase()}</Text>
+      )}
+      {props.icon && !props.text && <props.icon />}
     </TouchableOpacity>
   );
 };
