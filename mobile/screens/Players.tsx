@@ -8,7 +8,7 @@ import SearchField from '../components/SearchField';
 const Players = () => {
   const [searchText, setSearchText] = useState('');
   return (
-    <View style={{ height: '100%' }}>
+    <View style={styles.container}>
       <SearchField
         value={searchText}
         onChangeText={(text) => setSearchText(text)}
