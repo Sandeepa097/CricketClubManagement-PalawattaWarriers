@@ -12,31 +12,44 @@ type ButtonLength = 'short' | 'long';
 
 type ButtonStyle = 'filled' | 'outlined';
 
-type ButtonShape = 'circle';
+type ButtonShape = 'circle' | 'square';
 
-interface RectangleButtonProps {
-  length: ButtonLength;
-  style: ButtonStyle;
+type PositioningOptions = {
+  top?: number;
+  bottom?: number;
+  right?: number;
+  left?: number;
+};
+
+interface BasicButtonProps {
+  sticky?: boolean;
+  position?: PositioningOptions;
   color: Colors;
   text?: string;
-  icon?: React.FC;
   onPress: () => void;
+  icon?: React.FC;
+  style: ButtonStyle;
+  borderRadius?: number;
 }
 
-interface CircleButtonProps {
+interface RectangleButtonProps extends BasicButtonProps {
+  length: ButtonLength;
+}
+
+interface CircleButtonProps extends BasicButtonProps {
   shape: ButtonShape;
   size: number;
-  color: Colors;
-  style: ButtonStyle;
-  text?: string;
-  icon?: React.FC;
-  onPress: () => void;
 }
 
 const width: number = Dimensions.get('window').width;
 
 const Button = (props: RectangleButtonProps | CircleButtonProps) => {
   const containerStyle: {
+    position?: 'absolute';
+    top?: number;
+    right?: number;
+    bottom?: number;
+    left?: number;
     marginBottom?: number;
     shadowColor: Colors;
     shadowOpacity: number;
@@ -57,6 +70,7 @@ const Button = (props: RectangleButtonProps | CircleButtonProps) => {
       | 'space-around'
       | 'space-evenly';
   } = {
+    ...(props.sticky ? { position: 'absolute', ...props.position } : {}),
     shadowColor: Colors.BLACK,
     shadowOpacity: 0.25,
     elevation: 4,
@@ -71,7 +85,7 @@ const Button = (props: RectangleButtonProps | CircleButtonProps) => {
       ? {
           marginBottom: 10,
           height: 50,
-          borderRadius: 15,
+          borderRadius: props.borderRadius || 15,
           width:
             (props as RectangleButtonProps).length === 'long'
               ? 0.944 * width
@@ -81,7 +95,10 @@ const Button = (props: RectangleButtonProps | CircleButtonProps) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: (0.139 * width) / 2,
+          borderRadius:
+            (props as CircleButtonProps).shape === 'circle'
+              ? (0.139 * width) / 2
+              : props.borderRadius || 15,
           height: (props as CircleButtonProps).size,
           width: (props as CircleButtonProps).size,
         }),
