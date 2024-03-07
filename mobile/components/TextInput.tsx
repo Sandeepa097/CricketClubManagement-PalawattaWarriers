@@ -25,7 +25,7 @@ const TextInput = (props: TextInputProps) => {
     <View
       style={[
         styles.container,
-        { width: props.length === 'long' ? 0.944 * width : 0.798 * width },
+        { width: props.length === 'long' ? width - 20 : 0.798 * width },
       ]}>
       <ReactNative.TextInput
         style={styles.input}
