@@ -7,16 +7,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const width: number = Dimensions.get('window').width;
 
-const ProfileIcon = () => {
-  return (
-    <MaterialCommunityIcons
-      name="face-man-outline"
-      size={24}
-      color={Colors.OFF_WHITE}
-    />
-  );
-};
-
 const MainHeader = (props) => {
   const onPress = () => console.log('Profile pressed');
   return (
@@ -30,7 +20,13 @@ const MainHeader = (props) => {
       <Button
         shape="circle"
         size={52}
-        icon={ProfileIcon}
+        icon={() => (
+          <MaterialCommunityIcons
+            name="face-man-outline"
+            size={24}
+            color={Colors.OFF_WHITE}
+          />
+        )}
         style="filled"
         color={Colors.DEEP_TEAL}
         onPress={onPress}
