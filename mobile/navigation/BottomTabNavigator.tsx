@@ -59,7 +59,7 @@ const BottomTabBar = ({ state, descriptors, navigation }) => (
           <options.tabBarIcon focused={isFocused} />
           <Text
             style={{
-              color: isFocused ? Colors.DARK_TEAL : Colors.OFF_WHITE,
+              color: isFocused ? Colors.DEEP_TEAL : Colors.OFF_WHITE,
               fontFamily: 'Anybody-Regular',
               fontSize: 12,
             }}>
