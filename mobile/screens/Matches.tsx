@@ -4,14 +4,25 @@ import Button from '../components/Button';
 import { Colors } from '../constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import SearchField from '../components/SearchField';
+import TabBar from '../components/TabBar';
 
 const Matches = () => {
   const [searchText, setSearchText] = useState('');
+  const [selectedTabItem, setSelectedTabItem] = useState('outdoor');
+
   return (
     <View style={styles.container}>
       <SearchField
         value={searchText}
         onChangeText={(text) => setSearchText(text)}
+      />
+      <TabBar
+        selected={selectedTabItem}
+        items={[
+          { id: 'outdoor', name: 'Outdoor' },
+          { id: 'ppl', name: 'PPL' },
+        ]}
+        onPressItem={(id) => setSelectedTabItem(id.toString())}
       />
       <Button
         sticky={true}
