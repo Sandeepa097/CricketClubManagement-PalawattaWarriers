@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: width,
     height: 42,
-    marginVertical: 10,
+    marginBottom: 10,
   },
   itemsContainer: {
     width: width - 20,

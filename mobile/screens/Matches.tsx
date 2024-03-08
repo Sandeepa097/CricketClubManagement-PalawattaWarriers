@@ -11,7 +11,7 @@ const Matches = () => {
   const [searchText, setSearchText] = useState('');
   const [selectedTabItem, setSelectedTabItem] = useState('outdoor');
 
-  const sampleMatchesList = [
+  const sampleOutdoorMatchesList = [
     {
       id: 1,
       title: 'Green Lions',
@@ -154,6 +154,149 @@ const Matches = () => {
     },
   ];
 
+  const samplePPLMatchesList = [
+    {
+      id: 1,
+      title: '20th January 2024',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 2,
+      title: '20th January 2024',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 3,
+      title: '20th January 2024',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 4,
+      title: '20th January 2024',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 5,
+      title: '20th January 2024',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 6,
+      title: '20th January 2024',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 7,
+      title: '20th January 2024',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 8,
+      title: '20th January 2024',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 9,
+      title: '20th January 2024',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 10,
+      title: '20th January 2024',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+  ];
+
   return (
     <View style={styles.container}>
       <SearchField
@@ -169,7 +312,11 @@ const Matches = () => {
         onPressItem={(id) => setSelectedTabItem(id.toString())}
       />
       <FlatList
-        data={sampleMatchesList}
+        data={
+          selectedTabItem === 'outdoor'
+            ? sampleOutdoorMatchesList
+            : samplePPLMatchesList
+        }
         renderItem={({ item }) => (
           <CompactMatchItem key={item.id} {...item} onPress={(id) => id} />
         )}

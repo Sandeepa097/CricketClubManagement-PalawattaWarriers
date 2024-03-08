@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Dimensions,
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Pressable,
-} from 'react-native';
+import { Dimensions, StyleSheet, View, Text, Pressable } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Logo from '../assets/Logo';
@@ -24,7 +17,7 @@ interface CompactMatchItemProps {
   bestBatsman: PlayerDetailsType | null;
   bestBowler: PlayerDetailsType | null;
   winningPercentage?: number | null;
-  onPress: (id) => void;
+  onPress: (id: string | number) => void;
 }
 
 interface BestPlayerContainerProps extends PlayerDetailsType {
@@ -64,7 +57,7 @@ const CompactMatchItem = (props: CompactMatchItemProps) => {
 const BestPlayerContainer = (props: BestPlayerContainerProps) => {
   return (
     <View style={styles.singleBestPlayerContainer}>
-      <View>
+      <View style={{ width: (width - 60) / 2 - 60 }}>
         <View style={styles.scoreContainer}>
           <Text style={styles.score}>{props.score}</Text>
           {props.roll === 'batsman' ? (
@@ -77,7 +70,9 @@ const BestPlayerContainer = (props: BestPlayerContainerProps) => {
             <Ionicons name="tennisball" size={20} color={Colors.BLACK} />
           )}
         </View>
-        <Text>{props.name}</Text>
+        <Text style={styles.name} ellipsizeMode="tail" numberOfLines={1}>
+          {props.name}
+        </Text>
       </View>
       <View style={styles.avatarContainer}>
         <Logo height={30} />
