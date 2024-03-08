@@ -4,19 +4,14 @@ import { Svg, Path } from 'react-native-svg';
 
 interface LogoProps {
   height?: number;
-  width?: number;
 }
 
 const defaultProps = {
-  width: 67,
   height: 102,
 };
 
-const Logo = ({
-  height = defaultProps.height,
-  width = defaultProps.width,
-}: LogoProps) => (
-  <View style={{ height: height, width: width }}>
+const Logo = ({ height = defaultProps.height }: LogoProps) => (
+  <View style={{ height: height, width: 0.657 * height }}>
     <Svg
       width="100%"
       height="100%"

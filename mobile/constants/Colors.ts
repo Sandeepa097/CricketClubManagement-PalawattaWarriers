@@ -10,5 +10,6 @@ export enum Colors {
   OFF_WHITE = '#f0f0f0',
   BLACK = '#000000',
   SHADOW = '#00000040',
+  LIGHT_SHADOW = '#0000001a',
   TINT = '#ffffff40',
 }

@@ -12,7 +12,7 @@ const MainHeader = (props) => {
   return (
     <View style={styles.container}>
       <View style={styles.leftContainer}>
-        <Logo height={52} width={0.657 * 52} />
+        <Logo height={52} />
         <View style={{ marginLeft: 10 }}>
           <Text style={styles.textStyle}>{props.title}</Text>
         </View>
