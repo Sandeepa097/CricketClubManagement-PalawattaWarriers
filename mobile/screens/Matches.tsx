@@ -1,14 +1,158 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, FlatList } from 'react-native';
 import Button from '../components/Button';
 import { Colors } from '../constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import SearchField from '../components/SearchField';
 import TabBar from '../components/TabBar';
+import CompactMatchItem from '../components/CompactMatchItem';
 
 const Matches = () => {
   const [searchText, setSearchText] = useState('');
   const [selectedTabItem, setSelectedTabItem] = useState('outdoor');
+
+  const sampleMatchesList = [
+    {
+      id: 1,
+      title: 'Green Lions',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 2,
+      title: 'Green Lions',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 3,
+      title: 'Green Lions',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 4,
+      title: 'Green Lions',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 5,
+      title: 'Green Lions',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 6,
+      title: 'Green Lions',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 7,
+      title: 'Green Lions',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 8,
+      title: 'Green Lions',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 9,
+      title: 'Green Lions',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+    {
+      id: 10,
+      title: 'Green Lions',
+      bestBatsman: {
+        id: 1,
+        name: 'Adonis Ross',
+        score: '255/134',
+      },
+      bestBowler: {
+        id: 1,
+        name: 'Robert Robinson',
+        score: '8/67',
+      },
+    },
+  ];
 
   return (
     <View style={styles.container}>
@@ -23,6 +167,12 @@ const Matches = () => {
           { id: 'ppl', name: 'PPL' },
         ]}
         onPressItem={(id) => setSelectedTabItem(id.toString())}
+      />
+      <FlatList
+        data={sampleMatchesList}
+        renderItem={({ item }) => (
+          <CompactMatchItem key={item.id} {...item} onPress={(id) => id} />
+        )}
       />
       <Button
         sticky={true}
