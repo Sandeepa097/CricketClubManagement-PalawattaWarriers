@@ -27,6 +27,7 @@ const TabBar = (props: TabBarProps) => {
       <View style={styles.itemsContainer}>
         {props.items.map((item) => (
           <TouchableOpacity
+            key={item.id}
             style={{
               width: (width - 20) / props.items.length,
               height: '100%',
