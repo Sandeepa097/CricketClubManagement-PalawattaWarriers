@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import TabBar from '../components/TabBar';
+import Toggle from '../components/Toggle';
 
 const Leaderboard = () => {
   const [selectedTabItem, setSelectedTabItem] = useState('overall');
   return (
     <View style={styles.container}>
+      <Toggle
+        left={{ id: 'left', name: 'Outdoor' }}
+        right={{ id: 'right', name: 'PPL' }}
+        onPress={(id) => id}
+      />
       <TabBar
         selected={selectedTabItem}
         items={[
