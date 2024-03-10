@@ -8,6 +8,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import SectionTitle from '../components/SectionTitle';
 import PaymentPlan from '../components/PaymentPlan';
 import PaymentItem from '../components/PaymentItem';
+import MonthlyPaymentSummery from '../components/MonthlyPaymentSummary';
 
 const samplePayments = [
   { id: 1, name: 'Adonis Ross', payment: 50, pending: true },
@@ -22,6 +23,12 @@ const samplePayments = [
   { id: 10, name: 'Robert Robinson', payment: 1500, pending: true },
 ];
 
+const sampleCollectionData = {
+  projected: 1150,
+  received: 1100,
+  due: 50,
+};
+
 const Payments = ({ navigation }) => {
   return (
     <View style={styles.container}>
@@ -29,12 +36,22 @@ const Payments = ({ navigation }) => {
         contentContainerStyle={{ display: 'flex', alignItems: 'center' }}>
         <SectionTitle title="Ongoing Plan" marginTop={10} />
         <PaymentPlan fee={50} effective="January 2024" />
+
         <SectionTitle title="Future Plan" />
         <PaymentPlan fee={100} effective="November 2024" />
+
+        <SectionTitle title="Collection Details" />
+        <MonthlyPaymentSummery
+          loading={false}
+          data={sampleCollectionData}
+          onDateChange={({ month, year }) => console.log(month, ', ', year)}
+        />
+
         <SectionTitle title="Pending Payments" />
         {samplePayments.map((item) => (
           <PaymentItem key={item.id} {...item} />
         ))}
+
         <SectionTitle title="Previous Payments" />
         {samplePayments.map((item) => (
           <PaymentItem key={item.id} {...item} pending={false} />
