@@ -63,7 +63,10 @@ const TopPlayerItem = (props: TopPlayerProps) => {
         </View>
       </View>
       <View style={[styles.singleTopPlayerDetailsContainer, { marginTop: 8 }]}>
-        <Text style={[styles.topPlayerName, { color: props.color }]}>
+        <Text
+          style={[styles.topPlayerName, { color: props.color }]}
+          numberOfLines={1}
+          ellipsizeMode="tail">
           {props.name}
         </Text>
         <View
@@ -90,7 +93,7 @@ const PlayerItem = (props: PlayerProps) => {
       <View style={styles.playerDetailsContainer}>
         <Text style={styles.playerText}>{props.placement}</Text>
         <View style={styles.playerAvatarContainer}>
-          <Logo height={20} fill={Colors.DEEP_TEAL} />
+          <Logo height={30} fill={Colors.DEEP_TEAL} />
         </View>
         <Text style={styles.playerText}>{props.name}</Text>
       </View>
@@ -111,7 +114,7 @@ const PlayerRanking = ({ items }: { items: RankingProps[] }) => {
               color={Colors.DEEP_ORANGE}
             />
           </View>
-          <View style={{ marginBottom: 40 }}>
+          <View style={{ marginBottom: 80 }}>
             <TopPlayerItem {...items[0]} placement={1} color={Colors.PURPLE} />
           </View>
           <View>
@@ -202,6 +205,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   topPlayerName: {
+    width: '100%',
     fontFamily: 'Anybody-Regular',
     fontSize: 15,
     textAlign: 'center',

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Dimensions, StyleSheet, View, Text } from 'react-native';
+import React, { useState } from 'react';
+import { Dimensions, StyleSheet, View, Text, Modal } from 'react-native';
 import { Colors } from '../constants/Colors';
 import Logo from '../assets/Logo';
 import Button from '../components/Button';
@@ -8,7 +8,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 const width: number = Dimensions.get('window').width;
 
 const MainHeader = (props) => {
-  const onPress = () => console.log('Profile pressed');
+  const [optionsVisible, setOptionsVisible] = useState(false);
+  const onPress = () => setOptionsVisible(!optionsVisible);
   return (
     <View style={styles.container}>
       <View style={styles.leftContainer}>
@@ -31,6 +32,19 @@ const MainHeader = (props) => {
         color={Colors.DEEP_TEAL}
         onPress={onPress}
       />
+      {/* <Modal visible={optionsVisible} transparent={true}>
+        <View
+          style={{
+            height: 50,
+            width: 50,
+            position: 'absolute',
+            top: 62,
+            right: 10,
+            backgroundColor: 'green',
+          }}>
+          <Text>Modal</Text>
+        </View>
+      </Modal> */}
     </View>
   );
 };
