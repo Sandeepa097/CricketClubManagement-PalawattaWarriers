@@ -39,12 +39,6 @@ const Payments = ({ navigation }) => {
         {samplePayments.map((item) => (
           <PaymentItem key={item.id} {...item} pending={false} />
         ))}
-        <TouchableOpacity
-          onPress={() => navigation.navigate(NavigationRoutes.WELCOME)}>
-          <View>
-            <Text>Go Back</Text>
-          </View>
-        </TouchableOpacity>
       </ScrollView>
       <Button
         sticky={true}

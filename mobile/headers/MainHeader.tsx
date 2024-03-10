@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Dimensions, StyleSheet, View, Text, Modal } from 'react-native';
+import { Dimensions, StyleSheet, View, Text } from 'react-native';
 import { Colors } from '../constants/Colors';
 import Logo from '../assets/Logo';
 import Button from '../components/Button';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
+import ConfirmBox from '../components/ConfirmBox';
+import navigation from '../navigation/rootNavigation';
+import { NavigationRoutes } from '../constants/NavigationRoutes';
 
 const width: number = Dimensions.get('window').width;
 
@@ -22,29 +25,24 @@ const MainHeader = (props) => {
         shape="circle"
         size={52}
         icon={() => (
-          <MaterialCommunityIcons
-            name="face-man-outline"
-            size={24}
-            color={Colors.OFF_WHITE}
-          />
+          <MaterialIcons name="logout" size={24} color={Colors.OFF_WHITE} />
         )}
         style="filled"
         color={Colors.DEEP_TEAL}
         onPress={onPress}
       />
-      {/* <Modal visible={optionsVisible} transparent={true}>
-        <View
-          style={{
-            height: 50,
-            width: 50,
-            position: 'absolute',
-            top: 62,
-            right: 10,
-            backgroundColor: 'green',
-          }}>
-          <Text>Modal</Text>
-        </View>
-      </Modal> */}
+      <ConfirmBox
+        visible={optionsVisible}
+        title="Are you sure you want to logout?"
+        ok={{
+          text: 'Logout',
+          onPress: () => {
+            setOptionsVisible(false);
+            navigation.navigate(NavigationRoutes.WELCOME);
+          },
+        }}
+        cancel={{ text: 'Cancel', onPress: () => setOptionsVisible(false) }}
+      />
     </View>
   );
 };
