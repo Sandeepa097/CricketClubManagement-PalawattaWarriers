@@ -2,6 +2,7 @@ import React, { Children } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import Logo from '../assets/Logo';
 import { Colors } from '../constants/Colors';
+import StrokedText from './StrokedText';
 
 interface PaymentProps {
   id: string | number;
@@ -33,10 +34,18 @@ const ChildPaymentItem = (props: PaymentProps) => {
           {props.name}
         </Text>
       </View>
-      <Text
-        style={props.pending ? styles.pendingPayment : styles.previousPayment}>
-        {props.payment}
-      </Text>
+      {!props.pending && (
+        <Text style={styles.previousPayment}>{props.payment}</Text>
+      )}
+      {props.pending && (
+        <StrokedText
+          text={props.payment}
+          color={Colors.DEEP_ORANGE}
+          strokedColor={Colors.WHITE}
+          strokedSize={1}
+          fontSize={20}
+        />
+      )}
     </View>
   );
 };
@@ -106,12 +115,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Anybody-Regular',
     fontSize: 15,
     color: Colors.DARK_TEAL,
-  },
-  pendingPayment: {
-    fontFamily: 'Anybody-Regular',
-    fontSize: 18,
-    color: Colors.DEEP_ORANGE,
-    fontWeight: 'bold',
   },
   previousPayment: {
     fontFamily: 'Anybody-Regular',

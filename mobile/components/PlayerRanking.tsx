@@ -2,6 +2,7 @@ import React from 'react';
 import { Dimensions, StyleSheet, Text, View, FlatList } from 'react-native';
 import Logo from '../assets/Logo';
 import { Colors } from '../constants/Colors';
+import StrokedText from './StrokedText';
 
 interface RankingProps {
   id: string | number;
@@ -69,19 +70,13 @@ const TopPlayerItem = (props: TopPlayerProps) => {
           ellipsizeMode="tail">
           {props.name}
         </Text>
-        <View
-          style={[
-            styles.topPlayerPointsContainer,
-            { borderColor: props.color + '33' },
-          ]}>
-          <Text style={styles.textStrokeOne}>{props.points}</Text>
-          <Text style={styles.textStrokeTwo}>{props.points}</Text>
-          <Text style={styles.textStrokeThree}>{props.points}</Text>
-          <Text style={styles.textStrokeFour}>{props.points}</Text>
-          <Text style={[styles.topPlayerPoints, { color: props.color }]}>
-            {props.points}
-          </Text>
-        </View>
+        <StrokedText
+          text={props.points}
+          color={Colors.DEEP_ORANGE}
+          strokedColor={Colors.WHITE}
+          strokedSize={1}
+          fontSize={20}
+        />
       </View>
     </View>
   );
@@ -213,40 +208,6 @@ const styles = StyleSheet.create({
   topPlayerPointsContainer: {
     borderBottomWidth: 4,
     borderRadius: 15,
-  },
-  topPlayerPoints: {
-    fontFamily: 'Anybody-Regular',
-    fontSize: 15,
-  },
-  textStrokeOne: {
-    marginLeft: 1,
-    fontFamily: 'Anybody-Regular',
-    fontSize: 16,
-    color: Colors.OFF_WHITE,
-    position: 'absolute',
-  },
-  textStrokeTwo: {
-    marginLeft: -1,
-    fontFamily: 'Anybody-Regular',
-    fontSize: 16,
-    color: Colors.OFF_WHITE,
-    position: 'absolute',
-  },
-  textStrokeThree: {
-    marginLeft: 1,
-    marginBottom: 1,
-    fontFamily: 'Anybody-Regular',
-    fontSize: 16,
-    color: Colors.OFF_WHITE,
-    position: 'absolute',
-  },
-  textStrokeFour: {
-    marginLeft: -1,
-    marginBottom: 1,
-    fontFamily: 'Anybody-Regular',
-    fontSize: 16,
-    color: Colors.OFF_WHITE,
-    position: 'absolute',
   },
   playerContainer: {
     display: 'flex',
