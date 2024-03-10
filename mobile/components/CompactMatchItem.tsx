@@ -38,8 +38,11 @@ const CompactMatchItem = (props: CompactMatchItemProps) => {
       onPressOut={() => setInPress(false)}
       onPress={() => props.onPress(props.id)}>
       <View style={styles.container}>
-        <View>
+        <View style={styles.header}>
           <Text style={styles.title}>{props.title}</Text>
+          {props.winningPercentage !== null && (
+            <Text style={styles.title}>{props.winningPercentage}%</Text>
+          )}
         </View>
         <View style={styles.bestPlayersContainer}>
           {props.bestBatsman !== null && (
@@ -95,6 +98,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.OFF_WHITE,
     padding: 15,
     borderRadius: 15,
+  },
+  header: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   title: {
     color: Colors.DEEP_TEAL,
