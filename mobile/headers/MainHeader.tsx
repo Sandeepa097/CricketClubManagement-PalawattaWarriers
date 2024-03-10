@@ -10,7 +10,7 @@ import { NavigationRoutes } from '../constants/NavigationRoutes';
 
 const width: number = Dimensions.get('window').width;
 
-const MainHeader = (props) => {
+const MainHeader = (props: { title: string }) => {
   const [optionsVisible, setOptionsVisible] = useState(false);
   const onPress = () => setOptionsVisible(!optionsVisible);
   return (
@@ -70,7 +70,8 @@ const styles = StyleSheet.create({
   textStyle: {
     fontFamily: 'Anybody-Regular',
     fontSize: 32,
-    color: Colors.BLACK,
+    color: Colors.DEEP_TEAL,
+    fontWeight: 'bold',
     textAlignVertical: 'center',
   },
 });
