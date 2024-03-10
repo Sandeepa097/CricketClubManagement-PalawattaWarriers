@@ -6,4 +6,6 @@ export enum NavigationRoutes {
   LEADERBOARD = 'LeaderboardScreen',
   PLAYERS = 'PlayersScreen',
   PAYMENTS = 'PaymentsScreen',
+
+  CREATE_PLAYER = 'CreatePlayerScreen',
 }

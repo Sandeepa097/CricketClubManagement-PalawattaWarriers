@@ -5,8 +5,9 @@ import { AntDesign } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import SearchField from '../components/SearchField';
 import PlayerItem from '../components/PlayerItem';
+import { NavigationRoutes } from '../constants/NavigationRoutes';
 
-const Players = () => {
+const Players = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
 
   const samplePlayersList: {
@@ -109,7 +110,7 @@ const Players = () => {
         icon={() => (
           <AntDesign name="adduser" size={24} color={Colors.OFF_WHITE} />
         )}
-        onPress={() => console.log('pressed')}
+        onPress={() => navigation.navigate(NavigationRoutes.CREATE_PLAYER)}
       />
     </View>
   );
