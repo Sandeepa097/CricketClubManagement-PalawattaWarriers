@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import SelectionPopUp from './base/SelectionPopUp';
+import ClickableInput from './base/ClickableInput';
 import { AntDesign, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import Modal from 'react-native-modal';
@@ -58,7 +58,7 @@ const MonthYearPicker = (props: MonthYearPickerProps) => {
 
   return (
     <View>
-      <SelectionPopUp
+      <ClickableInput
         placeholder={props.placeholder}
         value={
           props.value

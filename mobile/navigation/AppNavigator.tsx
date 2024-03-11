@@ -8,6 +8,7 @@ import BottomTabNavigator from './BottomTabNavigator';
 import CreatePlayer from '../screens/CreatePlayer';
 import SubHeader from '../headers/SubHeader';
 import OverviewPlayer from '../screens/OverviewPlayer';
+import CreatePayments from '../screens/CreatePayments';
 
 const Stack = createStackNavigator();
 
@@ -37,6 +38,11 @@ const AppNavigator = () => (
       name={NavigationRoutes.OVERVIEW_PLAYER}
       component={OverviewPlayer}
       options={{ header: () => <SubHeader title="Overview Player" /> }}
+    />
+    <Stack.Screen
+      name={NavigationRoutes.CREATE_PAYMENTS}
+      component={CreatePayments}
+      options={{ header: () => <SubHeader title="Create Payments" /> }}
     />
   </Stack.Navigator>
 );

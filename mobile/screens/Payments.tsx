@@ -71,7 +71,7 @@ const Payments = ({ navigation }) => {
             color={Colors.OFF_WHITE}
           />
         )}
-        onPress={() => console.log('pressed')}
+        onPress={() => navigation.navigate(NavigationRoutes.CREATE_PAYMENTS)}
       />
     </View>
   );

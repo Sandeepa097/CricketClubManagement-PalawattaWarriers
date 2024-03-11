@@ -9,4 +9,6 @@ export enum NavigationRoutes {
 
   CREATE_PLAYER = 'CreatePlayerScreen',
   OVERVIEW_PLAYER = 'OverviewPlayerScreen',
+
+  CREATE_PAYMENTS = 'CreatePaymentsScreen',
 }

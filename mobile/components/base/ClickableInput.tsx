@@ -4,22 +4,27 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  ViewStyle,
 } from 'react-native';
 import { Colors } from '../../constants/Colors';
 
 const width: number = Dimensions.get('window').width;
 
-interface SelectionPopUp {
+interface ClickableInputProps {
+  containerStyle?: ViewStyle;
   placeholder: string;
   value: string;
   onPress: () => void;
   icon?: React.FC;
 }
 
-const SelectionPopUp = (props: SelectionPopUp) => {
+const ClickableInput = (props: ClickableInputProps) => {
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={[
+        styles.container,
+        props.containerStyle ? { ...props.containerStyle } : {},
+      ]}
       activeOpacity={1}
       onPress={props.onPress}>
       <TextInput
@@ -57,4 +62,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SelectionPopUp;
+export default ClickableInput;

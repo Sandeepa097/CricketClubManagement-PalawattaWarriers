@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
-import SelectionPopUp from './base/SelectionPopUp';
+import ClickableInput from './base/ClickableInput';
 import { Entypo } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import Modal from 'react-native-modal';
@@ -72,7 +72,7 @@ const RollsSelection = (props: RollsSelectionProps) => {
 
   return (
     <View>
-      <SelectionPopUp
+      <ClickableInput
         placeholder="Rolls"
         value={props.value ? getValueAsString(props.value) : ''}
         icon={() => (
