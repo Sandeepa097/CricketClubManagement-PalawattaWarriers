@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dimensions, StyleSheet, View, Text } from 'react-native';
 import { Colors } from '../constants/Colors';
-import Button from '../components/Button';
+import Button from '../components/base/Button';
 import { AntDesign } from '@expo/vector-icons';
 import { navigationRef } from '../navigation/rootNavigation';
 

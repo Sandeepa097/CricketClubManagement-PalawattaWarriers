@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-import Button from '../components/Button';
+import Button from '../components/base/Button';
 import { AntDesign } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
-import SearchField from '../components/SearchField';
+import SearchField from '../components/base/SearchField';
 import PlayerItem from '../components/PlayerItem';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 

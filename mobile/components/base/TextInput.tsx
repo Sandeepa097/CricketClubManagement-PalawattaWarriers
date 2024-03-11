@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactNative, { View, Dimensions, StyleSheet } from 'react-native';
-import { Colors } from '../constants/Colors';
+import { Colors } from '../../constants/Colors';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 type InputLength = 'short' | 'long';

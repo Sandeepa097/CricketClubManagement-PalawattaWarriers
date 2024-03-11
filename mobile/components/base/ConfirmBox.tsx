@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Modal from 'react-native-modal';
-import { Colors } from '../constants/Colors';
+import { Colors } from '../../constants/Colors';
 
 interface ActionButtonProps {
   text: string;

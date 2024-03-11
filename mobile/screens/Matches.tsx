@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-import Button from '../components/Button';
+import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
-import SearchField from '../components/SearchField';
-import TabBar from '../components/TabBar';
+import SearchField from '../components/base/SearchField';
+import TabBar from '../components/base/TabBar';
 import CompactMatchItem from '../components/CompactMatchItem';
 
 const Matches = () => {

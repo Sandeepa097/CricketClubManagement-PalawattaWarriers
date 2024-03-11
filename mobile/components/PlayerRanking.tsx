@@ -2,7 +2,7 @@ import React from 'react';
 import { Dimensions, StyleSheet, Text, View, FlatList } from 'react-native';
 import Logo from '../assets/Logo';
 import { Colors } from '../constants/Colors';
-import StrokedText from './StrokedText';
+import StrokedText from './base/StrokedText';
 
 interface RankingProps {
   id: string | number;

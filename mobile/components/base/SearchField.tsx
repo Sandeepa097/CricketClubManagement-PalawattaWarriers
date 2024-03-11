@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dimensions, StyleSheet, TextInput, View } from 'react-native';
-import { Colors } from '../constants/Colors';
+import { Colors } from '../../constants/Colors';
 import { FontAwesome } from '@expo/vector-icons';
 
 interface SearchFieldProps {

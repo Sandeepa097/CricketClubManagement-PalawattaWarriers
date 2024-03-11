@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Dimensions, StyleSheet } from 'react-native';
 import LogoWithName from '../assets/LogoWithName';
 import { Colors } from '../constants/Colors';
-import Button from '../components/Button';
+import Button from '../components/base/Button';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 
 const width: number = Dimensions.get('window').width;

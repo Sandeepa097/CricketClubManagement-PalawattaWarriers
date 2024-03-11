@@ -7,8 +7,8 @@ import {
 } from 'react-native';
 import { Colors } from '../constants/Colors';
 import LogoWithName from '../assets/LogoWithName';
-import Button from '../components/Button';
-import TextInput from '../components/TextInput';
+import Button from '../components/base/Button';
+import TextInput from '../components/base/TextInput';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 
 const width: number = Dimensions.get('window').width;

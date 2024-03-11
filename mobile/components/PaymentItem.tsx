@@ -2,7 +2,7 @@ import React, { Children } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import Logo from '../assets/Logo';
 import { Colors } from '../constants/Colors';
-import StrokedText from './StrokedText';
+import StrokedText from './base/StrokedText';
 
 interface PaymentProps {
   id: string | number;

@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Dimensions, StyleSheet, View, Text } from 'react-native';
 import { Colors } from '../constants/Colors';
 import Logo from '../assets/Logo';
-import Button from '../components/Button';
+import Button from '../components/base/Button';
 import { MaterialIcons } from '@expo/vector-icons';
-import ConfirmBox from '../components/ConfirmBox';
+import ConfirmBox from '../components/base/ConfirmBox';
 import navigation from '../navigation/rootNavigation';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 

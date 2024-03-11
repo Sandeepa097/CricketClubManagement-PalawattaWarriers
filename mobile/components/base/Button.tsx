@@ -6,7 +6,7 @@ import {
   Dimensions,
   FlexAlignType,
 } from 'react-native';
-import { Colors } from '../constants/Colors';
+import { Colors } from '../../constants/Colors';
 
 type ButtonLength = 'short' | 'long';
 
