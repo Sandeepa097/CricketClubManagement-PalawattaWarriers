@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Dimensions,
   StyleSheet,
-  View,
   TextInput,
   TouchableOpacity,
 } from 'react-native';
