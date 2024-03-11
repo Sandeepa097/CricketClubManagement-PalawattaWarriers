@@ -7,6 +7,7 @@ import { NavigationRoutes } from '../constants/NavigationRoutes';
 import BottomTabNavigator from './BottomTabNavigator';
 import CreatePlayer from '../screens/CreatePlayer';
 import SubHeader from '../headers/SubHeader';
+import OverviewPlayer from '../screens/OverviewPlayer';
 
 const Stack = createStackNavigator();
 
@@ -31,6 +32,11 @@ const AppNavigator = () => (
       name={NavigationRoutes.CREATE_PLAYER}
       component={CreatePlayer}
       options={{ header: () => <SubHeader title="New Player" /> }}
+    />
+    <Stack.Screen
+      name={NavigationRoutes.OVERVIEW_PLAYER}
+      component={OverviewPlayer}
+      options={{ header: () => <SubHeader title="Overview Player" /> }}
     />
   </Stack.Navigator>
 );

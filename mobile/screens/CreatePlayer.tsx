@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import ImagePicker from '../components/base/ImagePicker';
 import TextInput from '../components/base/TextInput';
 import RollsSelection from '../components/RollsSelection';
@@ -15,39 +15,42 @@ const CreatePlayer = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <ImagePicker />
-      <TextInput
-        length="long"
-        placeholder="Name"
-        onChangeText={(text) => setName(text)}
-        value={name}
-      />
-      <RollsSelection
-        value={selectedRolls}
-        onChangeValue={(selection) => setSelectedRolls(selection)}
-      />
-      <MonthYearPicker
-        placeholder="Fees Paying Since"
-        title="Fees Paying Since"
-        value={payingSince}
-        onSelect={(value) => setPayingSince(value)}
-      />
-      <View style={{ marginTop: 40 }}>
-        <Button
+      <ScrollView
+        contentContainerStyle={{ display: 'flex', alignItems: 'center' }}>
+        <ImagePicker />
+        <TextInput
           length="long"
-          style="filled"
-          color={Colors.DEEP_TEAL}
-          text="Create"
-          onPress={() => console.log('create')}
+          placeholder="Name"
+          onChangeText={(text) => setName(text)}
+          value={name}
         />
-        <Button
-          length="long"
-          style="outlined"
-          color={Colors.DEEP_TEAL}
-          text="Cancel"
-          onPress={() => navigation.goBack()}
+        <RollsSelection
+          value={selectedRolls}
+          onChangeValue={(selection) => setSelectedRolls(selection)}
         />
-      </View>
+        <MonthYearPicker
+          placeholder="Fees Paying Since"
+          title="Fees Paying Since"
+          value={payingSince}
+          onSelect={(value) => setPayingSince(value)}
+        />
+        <View style={{ marginTop: 40 }}>
+          <Button
+            length="long"
+            style="filled"
+            color={Colors.DEEP_TEAL}
+            text="Create"
+            onPress={() => console.log('create')}
+          />
+          <Button
+            length="long"
+            style="outlined"
+            color={Colors.DEEP_TEAL}
+            text="Cancel"
+            onPress={() => navigation.goBack()}
+          />
+        </View>
+      </ScrollView>
     </View>
   );
 };

@@ -97,7 +97,13 @@ const Players = ({ navigation }) => {
       <FlatList
         data={samplePlayersList}
         renderItem={({ item }) => (
-          <PlayerItem key={item.id} {...item} onPress={(id) => id} />
+          <PlayerItem
+            key={item.id}
+            {...item}
+            onPress={(id) =>
+              navigation.navigate(NavigationRoutes.OVERVIEW_PLAYER, item)
+            }
+          />
         )}
       />
       <Button
