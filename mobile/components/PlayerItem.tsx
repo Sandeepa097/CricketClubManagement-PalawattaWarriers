@@ -10,47 +10,94 @@ interface PlayerItemProps {
   mainRoll: 'batsman' | 'bowler' | 'allRounder';
   isWicketKeeper: boolean;
   isCaptain: boolean;
+  flat?: boolean;
+  width?: number;
+  verticalSpaceBetweenText?: number;
+  avatarSize?: number;
   onPress: (id: string | number) => void;
 }
 
 const width: number = Dimensions.get('window').width;
 
-const SpecialRollItem = ({ text }: { text: 'C' | 'W' }) => (
-  <View style={styles.singleSpecialRollContainer}>
+const SpecialRollItem = ({
+  text,
+  flat,
+}: {
+  text: 'C' | 'W';
+  flat: boolean | undefined;
+}) => (
+  <View
+    style={[styles.singleSpecialRollContainer, { borderWidth: flat ? 0 : 1 }]}>
     <Text style={styles.specialRollText}>{text}</Text>
   </View>
 );
 
+const BasicPlayerItem = (props: PlayerItemProps) => {
+  return (
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: props.flat ? Colors.MEDIUM_TEAL : Colors.OFF_WHITE,
+          width: props.width ? width : width - 20,
+        },
+      ]}>
+      <View style={styles.leftSideContainer}>
+        <View
+          style={[
+            styles.avatarContainer,
+            {
+              width: props.avatarSize || 40,
+              height: props.avatarSize || 40,
+              borderRadius: props.avatarSize ? props.avatarSize / 2 : 20,
+            },
+          ]}>
+          <Logo height={props.avatarSize ? props.avatarSize - 10 : 40} />
+        </View>
+        <View>
+          <Text
+            style={[
+              styles.name,
+              { color: props.flat ? Colors.OFF_WHITE : Colors.DEEP_TEAL },
+            ]}>
+            {props.name}
+          </Text>
+          <Text
+            style={[
+              styles.roll,
+              { color: props.flat ? Colors.OFF_WHITE : Colors.DEEP_TEAL },
+              { marginTop: props.verticalSpaceBetweenText || 0 },
+            ]}>
+            {props.mainRoll.charAt(0).toUpperCase() +
+              props.mainRoll.replace(/([A-Z])/g, ' $1').slice(1)}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.specialRollsContainer}>
+        {props.isWicketKeeper && <SpecialRollItem text="W" flat={props.flat} />}
+        {props.isCaptain && <SpecialRollItem text="C" flat={props.flat} />}
+      </View>
+    </View>
+  );
+};
+
 const PlayerItem = (props: PlayerItemProps) => {
   const [inPress, setInPress] = useState(false);
+
+  if (props.onPress === undefined) {
+    return <BasicPlayerItem {...props} />;
+  }
 
   return (
     <Pressable
       style={[
-        styles.shadowContainer,
+        props.flat ? {} : styles.shadowContainer,
         inPress ? { backgroundColor: 'transparent', opacity: 0.5 } : {},
       ]}
       onPressIn={() => setInPress(true)}
       onPressOut={() => setInPress(false)}
       onPress={() => props.onPress(props.id)}>
-      <View style={styles.container}>
-        <View style={styles.leftSideContainer}>
-          <View style={styles.avatarContainer}>
-            <Logo height={40} />
-          </View>
-          <View>
-            <Text style={styles.name}>{props.name}</Text>
-            <Text style={styles.roll}>
-              {props.mainRoll.charAt(0).toUpperCase() +
-                props.mainRoll.replace(/([A-Z])/g, ' $1').slice(1)}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.specialRollsContainer}>
-          {props.isWicketKeeper && <SpecialRollItem text="W" />}
-          {props.isCaptain && <SpecialRollItem text="C" />}
-        </View>
-      </View>
+      <BasicPlayerItem {...props} />
     </Pressable>
   );
 };
@@ -65,8 +112,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.LIGHT_SHADOW,
   },
   container: {
-    width: width - 20,
-    backgroundColor: Colors.OFF_WHITE,
     padding: 10,
     borderRadius: 15,
     display: 'flex',
@@ -80,9 +125,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: width / 2,
     backgroundColor: Colors.OFF_WHITE,
     display: 'flex',
     alignItems: 'center',
@@ -96,8 +138,8 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    borderWidth: 1,
     borderColor: Colors.DEEP_TEAL,
+    backgroundColor: Colors.OFF_WHITE,
     marginLeft: 10,
   },
   specialRollsContainer: {
@@ -111,12 +153,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Anybody-Regular',
   },
   name: {
-    color: Colors.BLACK,
     fontSize: 20,
     fontFamily: 'Anybody-Regular',
   },
   roll: {
-    color: Colors.BLACK,
     fontSize: 15,
     fontFamily: 'Anybody-Regular',
   },

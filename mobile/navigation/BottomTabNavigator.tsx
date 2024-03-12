@@ -13,12 +13,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Colors } from '../constants/Colors';
-import {
-  FontAwesome5,
-  FontAwesome6,
-  MaterialCommunityIcons,
-  SimpleLineIcons,
-} from '@expo/vector-icons';
 import PaymentsIcon from '../assets/PaymentsIcon';
 import PlayersIcon from '../assets/PlayersIcon';
 import LeaderboardIcon from '../assets/LeaderboardIcon';

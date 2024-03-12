@@ -31,7 +31,12 @@ const OverviewPlayer = ({ route }) => {
       <ScrollView
         contentContainerStyle={{ display: 'flex', alignItems: 'center' }}>
         <SectionTitle title="Player Details" marginTop={10} />
-        <PlayerItem {...playerDetails} />
+        <PlayerItem
+          flat
+          verticalSpaceBetweenText={10}
+          avatarSize={60}
+          {...playerDetails}
+        />
         <SectionTitle title="Player Stats" />
         <PlayerStat
           header="Best Batting Score"
