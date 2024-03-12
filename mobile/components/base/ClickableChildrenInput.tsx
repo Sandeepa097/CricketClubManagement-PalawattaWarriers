@@ -12,33 +12,9 @@ import { Colors } from '../../constants/Colors';
 
 const width: number = Dimensions.get('window').width;
 
-interface InputText {
-  placeholder: string;
-}
-
-interface InputSwitch {
-  textOn: string;
-  textOff: string;
-}
-
-interface ChildPropertyText extends InputText {
-  type: 'text';
-  name: string;
-}
-
-interface ChildPropertySwitch extends InputSwitch {
-  type: 'switch';
-  name: string;
-}
-
 interface ChildItem {
   id: string | number;
   text: string;
-}
-
-interface ChildItemValues {
-  id: string | number;
-  values: object;
 }
 
 interface ClickableChildrenInputProps {
@@ -101,15 +77,25 @@ const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
     name: string,
     value: string | number | boolean
   ) => {
-    const updatedValues = props.itemValues.map((itemValue) => {
-      if (itemValue.id === id) {
-        return { ...itemValue, [name]: value };
-      }
+    if (props.itemValues.find((item) => item.id === id)) {
+      props.onChange([
+        ...props.itemValues,
+        { id: id, values: { [name]: value } },
+      ]);
+    } else {
+      const updatedValues = props.itemValues.map((itemValue) => {
+        if (itemValue.id === id) {
+          return {
+            ...itemValue,
+            values: { ...itemValue.values, [name]: value },
+          };
+        }
 
-      return itemValue;
-    });
+        return itemValue;
+      });
 
-    props.onChange(updatedValues);
+      props.onChange(updatedValues);
+    }
   };
 
   return (
@@ -149,7 +135,7 @@ const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
                         value={
                           props.itemValues.find(
                             (itemValue) => itemValue.id === item.id
-                          ).values[itemProperty.name]
+                          )?.values[itemProperty.name]
                         }
                         onChange={(text) =>
                           updateValues(item.id, itemProperty.name, text)
@@ -163,7 +149,7 @@ const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
                         value={
                           props.itemValues.find(
                             (itemValue) => itemValue.id === item.id
-                          ).values[itemProperty.name]
+                          )?.values[itemProperty.name]
                         }
                         onChange={(value) =>
                           updateValues(item.id, itemProperty.name, value)

@@ -39,7 +39,7 @@ const BasicPlayerItem = (props: PlayerItemProps) => {
         styles.container,
         {
           backgroundColor: props.flat ? Colors.MEDIUM_TEAL : Colors.OFF_WHITE,
-          width: props.width ? width : width - 20,
+          width: props.width ? props.width : width - 20,
         },
       ]}>
       <View style={styles.leftSideContainer}>
@@ -91,7 +91,8 @@ const PlayerItem = (props: PlayerItemProps) => {
   return (
     <Pressable
       style={[
-        props.flat ? {} : styles.shadowContainer,
+        props.flat ? { marginBottom: 10 } : styles.shadowContainer,
+        { width: props.width ? props.width + 4 : width - 16 },
         inPress ? { backgroundColor: 'transparent', opacity: 0.5 } : {},
       ]}
       onPressIn={() => setInPress(true)}

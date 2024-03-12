@@ -1,11 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import InsertPaymentDetails from '../components/InsertPaymentDetails';
+import ChildInputWithPlayers from '../components/ChildInputWithPlayers';
 
 const CreatePayments = () => {
+  const [paymentDetails, setPaymentDetails] = useState([]);
+
   return (
     <View style={styles.container}>
-      <InsertPaymentDetails />
+      <ChildInputWithPlayers
+        placeholder="Select Payees"
+        values={paymentDetails}
+        onChangeValues={(values) => {
+          console.log(values);
+          setPaymentDetails(values);
+        }}
+        itemProperties={[
+          { type: 'text', name: 'amount', placeholder: 'Paid Amount' },
+        ]}
+      />
     </View>
   );
 };
