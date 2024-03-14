@@ -77,7 +77,7 @@ const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
     name: string,
     value: string | number | boolean
   ) => {
-    if (props.itemValues.find((item) => item.id === id)) {
+    if (!props.itemValues.find((item) => item.id === id)) {
       props.onChange([
         ...props.itemValues,
         { id: id, values: { [name]: value } },
