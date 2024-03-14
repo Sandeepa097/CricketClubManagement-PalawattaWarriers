@@ -130,6 +130,7 @@ const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
                   props.itemProperties.map((itemProperty) =>
                     itemProperty.type === 'text' ? (
                       <ItemInputText
+                        key={`${item.id}-${itemProperty.name}`}
                         width={inputPropertyWidth}
                         placeholder={itemProperty.placeholder}
                         value={
@@ -143,6 +144,7 @@ const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
                       />
                     ) : (
                       <ItemInputSwitch
+                        key={`${item.id}-${itemProperty.name}`}
                         width={inputPropertyWidth}
                         textOn={itemProperty.textOn}
                         textOff={itemProperty.textOff}

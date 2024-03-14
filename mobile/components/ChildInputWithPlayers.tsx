@@ -94,13 +94,20 @@ interface ChildInputWithPlayersProps {
 const ChildInputWithPlayers = (props: ChildInputWithPlayersProps) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState([]);
+  const [values, setValues] = useState(props.values);
 
   const onPressItem = (id: string | number) => {
     if (selectedPlayerIds.includes(id)) {
       setSelectedPlayerIds(selectedPlayerIds.filter((itemId) => itemId !== id));
+      onChangeValues(values.filter((value) => value.id !== id));
     } else {
       setSelectedPlayerIds([...selectedPlayerIds, id]);
     }
+  };
+
+  const onChangeValues = (values: ChildItemValues[]) => {
+    setValues(values);
+    props.onChangeValues(values);
   };
 
   return (
@@ -123,7 +130,7 @@ const ChildInputWithPlayers = (props: ChildInputWithPlayersProps) => {
         itemProperties={props.itemProperties}
         itemValues={props.values}
         onPress={() => setModalVisible(true)}
-        onChange={(values) => props.onChangeValues(values)}
+        onChange={(values) => onChangeValues(values)}
       />
       <PlayersSelection
         isVisible={modalVisible}
