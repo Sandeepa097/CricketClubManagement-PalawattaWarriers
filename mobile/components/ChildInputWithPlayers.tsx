@@ -3,88 +3,10 @@ import { View } from 'react-native';
 import ClickableChildrenInput from './base/ClickableChildrenInput';
 import { Entypo } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
-import PlayersSelection from './PlayersSelection';
-
-const samplePlayersList: {
-  id: number;
-  name: string;
-  mainRoll: 'batsman' | 'bowler' | 'allRounder';
-  isWicketKeeper: boolean;
-  isCaptain: boolean;
-}[] = [
-  {
-    id: 1,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 2,
-    name: 'Robert Robinson',
-    mainRoll: 'bowler',
-    isWicketKeeper: true,
-    isCaptain: false,
-  },
-  {
-    id: 3,
-    name: 'Adonis Ross',
-    mainRoll: 'allRounder',
-    isWicketKeeper: false,
-    isCaptain: true,
-  },
-  {
-    id: 4,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: false,
-    isCaptain: false,
-  },
-  {
-    id: 5,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 6,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 7,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 8,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 9,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 10,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-];
+import PlayersSelectionModal from './PlayersSelectionModal';
 
 interface ChildInputWithPlayersProps {
+  players: PlayerType[];
   placeholder: string;
   itemProperties: (ChildPropertyText | ChildPropertySwitch)[];
   values: ChildItemValues[];
@@ -116,26 +38,29 @@ const ChildInputWithPlayers = (props: ChildInputWithPlayersProps) => {
         placeholder={props.placeholder}
         value={selectedPlayerIds
           .map((id) => {
-            const player = samplePlayersList.find((player) => player.id === id);
-            return player.name;
+            const player = props.players.find((player) => player.id === id);
+            return player?.name;
           })
+          .filter((playerName) => playerName)
           .join(', ')}
         icon={() => (
           <Entypo name="chevron-right" size={24} color={Colors.DEEP_TEAL} />
         )}
-        items={selectedPlayerIds.map((id) => {
-          const player = samplePlayersList.find((player) => player.id === id);
-          return { id: player.id, text: player.name };
-        })}
+        items={selectedPlayerIds
+          .map((id) => {
+            const player = props.players.find((player) => player.id === id);
+            return { id: player?.id, text: player?.name };
+          })
+          .filter((player) => player?.id)}
         itemProperties={props.itemProperties}
         itemValues={props.values}
         onPress={() => setModalVisible(true)}
         onChange={(values) => onChangeValues(values)}
       />
-      <PlayersSelection
+      <PlayersSelectionModal
         isVisible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
-        players={samplePlayersList}
+        players={props.players}
         selected={selectedPlayerIds}
         onPressItem={onPressItem}
       />

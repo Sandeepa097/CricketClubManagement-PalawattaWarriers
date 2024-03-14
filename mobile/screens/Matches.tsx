@@ -6,8 +6,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import SearchField from '../components/base/SearchField';
 import TabBar from '../components/base/TabBar';
 import CompactMatchItem from '../components/CompactMatchItem';
+import { NavigationRoutes } from '../constants/NavigationRoutes';
 
-const Matches = () => {
+const Matches = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [selectedTabItem, setSelectedTabItem] = useState('outdoor');
 
@@ -351,7 +352,7 @@ const Matches = () => {
         icon={() => (
           <MaterialIcons name="post-add" size={24} color={Colors.OFF_WHITE} />
         )}
-        onPress={() => console.log('pressed')}
+        onPress={() => navigation.navigate(NavigationRoutes.CREATE_MATCH)}
       />
     </View>
   );

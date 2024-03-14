@@ -11,7 +11,7 @@ interface Selection {
   isWicketKeeper: boolean;
 }
 
-interface RollsSelectionProps {
+interface RollsPickerProps {
   value: null | Selection;
   onChangeValue: (selection: Selection) => void;
 }
@@ -47,7 +47,7 @@ const SelectionOption = ({
   );
 };
 
-const RollsSelection = (props: RollsSelectionProps) => {
+const RollsPicker = (props: RollsPickerProps) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const setMainRoll = (value: 'batsman' | 'bowler' | 'allRounder') => {
@@ -150,4 +150,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RollsSelection;
+export default RollsPicker;

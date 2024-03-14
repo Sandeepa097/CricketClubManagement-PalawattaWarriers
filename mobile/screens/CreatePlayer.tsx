@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import ImagePicker from '../components/base/ImagePicker';
 import TextInput from '../components/base/TextInput';
-import RollsSelection from '../components/RollsSelection';
+import RollsPicker from '../components/RollsPicker';
 import MonthYearPicker from '../components/MonthYearPicker';
 import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
@@ -24,7 +24,7 @@ const CreatePlayer = ({ navigation }) => {
           onChangeText={(text) => setName(text)}
           value={name}
         />
-        <RollsSelection
+        <RollsPicker
           value={selectedRolls}
           onChangeValue={(selection) => setSelectedRolls(selection)}
         />

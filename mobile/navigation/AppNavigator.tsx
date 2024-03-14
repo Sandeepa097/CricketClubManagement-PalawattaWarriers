@@ -1,12 +1,12 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-
 import Login from '../screens/Login';
 import Welcome from '../screens/Welcome';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 import BottomTabNavigator from './BottomTabNavigator';
-import CreatePlayer from '../screens/CreatePlayer';
 import SubHeader from '../headers/SubHeader';
+import CreateMatch from '../screens/CreateMatch';
+import CreatePlayer from '../screens/CreatePlayer';
 import OverviewPlayer from '../screens/OverviewPlayer';
 import CreatePayments from '../screens/CreatePayments';
 
@@ -30,6 +30,11 @@ const AppNavigator = () => (
       options={{ headerShown: false }}
     />
     <Stack.Screen
+      name={NavigationRoutes.CREATE_MATCH}
+      component={CreateMatch}
+      options={{ header: () => <SubHeader title="New Match" /> }}
+    />
+    <Stack.Screen
       name={NavigationRoutes.CREATE_PLAYER}
       component={CreatePlayer}
       options={{ header: () => <SubHeader title="New Player" /> }}
@@ -42,7 +47,7 @@ const AppNavigator = () => (
     <Stack.Screen
       name={NavigationRoutes.CREATE_PAYMENTS}
       component={CreatePayments}
-      options={{ header: () => <SubHeader title="Create Payments" /> }}
+      options={{ header: () => <SubHeader title="New Payments" /> }}
     />
   </Stack.Navigator>
 );

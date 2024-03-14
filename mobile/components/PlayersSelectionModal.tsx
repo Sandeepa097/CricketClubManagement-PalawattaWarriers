@@ -7,15 +7,7 @@ import { Colors } from '../constants/Colors';
 const width: number = Dimensions.get('window').width;
 const height: number = Dimensions.get('window').height;
 
-interface PlayerType {
-  id: string | number;
-  name: string;
-  mainRoll: 'batsman' | 'bowler' | 'allRounder';
-  isWicketKeeper: boolean;
-  isCaptain: boolean;
-}
-
-interface PlayersSelectionProps {
+interface PlayersSelectionModalProps {
   isVisible: boolean;
   players: PlayerType[];
   selected: (string | number)[];
@@ -23,7 +15,7 @@ interface PlayersSelectionProps {
   onRequestClose: () => void;
 }
 
-const PlayersSelection = (props: PlayersSelectionProps) => {
+const PlayersSelectionModal = (props: PlayersSelectionModalProps) => {
   return (
     <Modal
       isVisible={props.isVisible}
@@ -69,4 +61,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PlayersSelection;
+export default PlayersSelectionModal;

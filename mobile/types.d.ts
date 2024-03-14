@@ -1,3 +1,11 @@
+interface PlayerType {
+  id: string | number;
+  name: string;
+  mainRoll: 'batsman' | 'bowler' | 'allRounder';
+  isWicketKeeper: boolean;
+  isCaptain: boolean;
+}
+
 interface InputText {
   placeholder: string;
 }
