@@ -81,6 +81,7 @@ const samplePlayersList: PlayerType[] = [
 ];
 
 const CreateMatch = ({ navigation }) => {
+  const emptyPlayersMessage = 'No players found in the team';
   const [location, setLocation] = useState('');
   const [officialPlayers, setOfficialPlayers] = useState([]);
   const [battingDetails, setBattingDetails] = useState([]);
@@ -120,6 +121,7 @@ const CreateMatch = ({ navigation }) => {
         <SectionTitle title="Batting Details" />
         <ChildInputWithPlayers
           placeholder="Select Batsmen"
+          emptyMessage={emptyPlayersMessage}
           players={samplePlayersList.filter((player) =>
             officialPlayers.includes(player.id)
           )}
@@ -141,6 +143,7 @@ const CreateMatch = ({ navigation }) => {
         <SectionTitle title="Bowling Details" />
         <ChildInputWithPlayers
           placeholder="Select Bowlers"
+          emptyMessage={emptyPlayersMessage}
           players={samplePlayersList.filter((player) =>
             officialPlayers.includes(player.id)
           )}
@@ -156,6 +159,7 @@ const CreateMatch = ({ navigation }) => {
         <SectionTitle title="Fielding Details" />
         <ChildInputWithPlayers
           placeholder="Select Fielders"
+          emptyMessage={emptyPlayersMessage}
           players={samplePlayersList.filter((player) =>
             officialPlayers.includes(player.id)
           )}

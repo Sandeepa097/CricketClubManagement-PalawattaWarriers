@@ -5,6 +5,7 @@ import PlayersSelectionModal from './PlayersSelectionModal';
 
 interface PlayersPickerProps {
   placeholder: string;
+  emptyMessage?: string;
   players: PlayerType[];
   selected: (string | number)[];
   onChangeSelection: (values: (string | number)[]) => void;
@@ -37,6 +38,7 @@ const PlayersPicker = (props: PlayersPickerProps) => {
         isVisible={modalVisible}
         players={props.players}
         selected={props.selected}
+        emptyMessage={props.emptyMessage}
         onPressItem={(id) => onPressItem(id)}
         onRequestClose={() => setModalVisible(false)}
       />

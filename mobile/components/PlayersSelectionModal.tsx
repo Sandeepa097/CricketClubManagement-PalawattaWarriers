@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, Dimensions } from 'react-native';
+import { View, StyleSheet, FlatList, Dimensions, Text } from 'react-native';
 import Modal from 'react-native-modal';
 import PlayerItem from './PlayerItem';
 import { Colors } from '../constants/Colors';
@@ -10,6 +10,7 @@ const height: number = Dimensions.get('window').height;
 interface PlayersSelectionModalProps {
   isVisible: boolean;
   players: PlayerType[];
+  emptyMessage?: string;
   selected: (string | number)[];
   onPressItem: (id: string | number) => void;
   onRequestClose: () => void;
@@ -33,6 +34,13 @@ const PlayersSelectionModal = (props: PlayersSelectionModalProps) => {
                 width={width - 50}
                 onPress={(id) => props.onPressItem(id)}
               />
+            )}
+            ListEmptyComponent={() => (
+              <View style={styles.emptyMessageContainer}>
+                <Text style={styles.emptyText}>
+                  {props.emptyMessage || 'No players found'}
+                </Text>
+              </View>
             )}
           />
         </View>
@@ -58,6 +66,18 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
+  },
+  emptyMessageContainer: {
+    display: 'flex',
+    width: width - 30,
+    height: (height * 3) / 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    color: Colors.DEEP_TEAL,
+    fontSize: 20,
+    fontFamily: 'Anybody-Regular',
   },
 });
 

@@ -7,6 +7,7 @@ import PlayersSelectionModal from './PlayersSelectionModal';
 
 interface ChildInputWithPlayersProps {
   players: PlayerType[];
+  emptyMessage?: string;
   placeholder: string;
   itemProperties: (ChildPropertyText | ChildPropertySwitch)[];
   values: ChildItemValues[];
@@ -61,6 +62,7 @@ const ChildInputWithPlayers = (props: ChildInputWithPlayersProps) => {
         isVisible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
         players={props.players}
+        emptyMessage={props.emptyMessage}
         selected={selectedPlayerIds}
         onPressItem={onPressItem}
       />
