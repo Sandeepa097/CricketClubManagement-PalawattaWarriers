@@ -7,6 +7,7 @@ import ChildInputWithPlayers from '../components/ChildInputWithPlayers';
 import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
 import SwitchInput from '../components/base/SwitchInput';
+import ResultsPicker from '../components/ResultsPicker';
 
 const samplePlayersList: PlayerType[] = [
   {
@@ -86,6 +87,7 @@ const CreateMatch = ({ navigation }) => {
 
   const [isPPL, setIsPPL] = useState(false);
   const [location, setLocation] = useState('');
+  const [result, setResult] = useState(null);
   const [officialPlayers, setOfficialPlayers] = useState([]);
   const [battingDetails, setBattingDetails] = useState([]);
   const [bowlingDetails, setBowlingDetails] = useState([]);
@@ -119,6 +121,12 @@ const CreateMatch = ({ navigation }) => {
           onChangeText={setLocation}
           length="long"
           placeholder="Location"
+        />
+        <ResultsPicker
+          title="Select result"
+          placeholder="Results"
+          value={result}
+          onChangeValue={setResult}
         />
         <PlayersPicker
           placeholder="Players of Your Team"
