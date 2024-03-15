@@ -6,6 +6,7 @@ import PlayersPicker from '../components/PlayersPicker';
 import ChildInputWithPlayers from '../components/ChildInputWithPlayers';
 import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
+import SwitchInput from '../components/base/SwitchInput';
 
 const samplePlayersList: PlayerType[] = [
   {
@@ -82,6 +83,8 @@ const samplePlayersList: PlayerType[] = [
 
 const CreateMatch = ({ navigation }) => {
   const emptyPlayersMessage = 'No players found in the team';
+
+  const [isPPL, setIsPPL] = useState(false);
   const [location, setLocation] = useState('');
   const [officialPlayers, setOfficialPlayers] = useState([]);
   const [battingDetails, setBattingDetails] = useState([]);
@@ -106,6 +109,11 @@ const CreateMatch = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={{ display: 'flex', alignItems: 'center' }}>
         <SectionTitle title="Match Details" marginTop={10} />
+        <SwitchInput
+          placeholder="Mark as PPL"
+          value={isPPL}
+          onChangeValue={() => setIsPPL(!isPPL)}
+        />
         <TextInput
           value={location}
           onChangeText={setLocation}
@@ -134,9 +142,8 @@ const CreateMatch = ({ navigation }) => {
             { type: 'text', name: '4s', placeholder: '4s' },
             {
               type: 'switch',
-              name: 'notOut',
-              textOn: 'Not Out',
-              textOff: 'Out',
+              name: 'out',
+              text: 'Out',
             },
           ]}
         />
