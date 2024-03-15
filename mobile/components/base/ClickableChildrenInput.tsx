@@ -6,6 +6,7 @@ import {
   View,
   TextInput,
   Switch,
+  TouchableOpacity,
 } from 'react-native';
 import ClickableInput from './ClickableInput';
 import { Colors } from '../../constants/Colors';
@@ -56,13 +57,16 @@ const ItemInputText = (props: TextItemInputProps) => {
 
 const ItemInputSwitch = (props: SwitchInputProps) => {
   return (
-    <View style={[styles.switchInputContainer, { width: props.width }]}>
-      <Text>{props.value ? props.textOn : props.textOff}</Text>
+    <TouchableOpacity
+      style={[styles.switchInputContainer, { width: props.width }]}
+      activeOpacity={1}
+      onPress={() => props.onChange(!props.value)}>
+      <Text style={styles.textSwitch}>{props.text}</Text>
       <Switch
         value={props.value}
         onChange={() => props.onChange(!props.value)}
       />
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -146,8 +150,7 @@ const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
                       <ItemInputSwitch
                         key={`${item.id}-${itemProperty.name}`}
                         width={inputPropertyWidth}
-                        textOn={itemProperty.textOn}
-                        textOff={itemProperty.textOff}
+                        text={itemProperty.text}
                         value={
                           props.itemValues.find(
                             (itemValue) => itemValue.id === item.id
@@ -220,6 +223,13 @@ const styles = StyleSheet.create({
     padding: 5,
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  textSwitch: {
+    flex: 1,
+    fontFamily: 'Anybody-Regular',
+    fontSize: 15,
+    color: Colors.DEEP_TEAL,
+    textAlignVertical: 'center',
   },
 });
 

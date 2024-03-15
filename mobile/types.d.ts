@@ -11,8 +11,7 @@ interface InputText {
 }
 
 interface InputSwitch {
-  textOn: string;
-  textOff: string;
+  text: string;
 }
 
 interface ChildPropertyText extends InputText {
