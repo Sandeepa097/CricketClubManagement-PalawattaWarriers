@@ -8,6 +8,8 @@ import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
 import SwitchInput from '../components/base/SwitchInput';
 import ResultsPicker from '../components/ResultsPicker';
+import DatePicker from '../components/DatePicker';
+import OppositeTeamPicker from '../components/OppositeTeamPicker';
 
 const samplePlayersList: PlayerType[] = [
   {
@@ -86,6 +88,8 @@ const CreateMatch = ({ navigation }) => {
   const emptyPlayersMessage = 'No players found in the team';
 
   const [isPPL, setIsPPL] = useState(false);
+  const [oppositeTeam, setOppositeTeam] = useState(null);
+  const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [result, setResult] = useState(null);
   const [officialPlayers, setOfficialPlayers] = useState([]);
@@ -116,6 +120,12 @@ const CreateMatch = ({ navigation }) => {
           value={isPPL}
           onChangeValue={() => setIsPPL(!isPPL)}
         />
+        <OppositeTeamPicker
+          placeholder="Opposite Team"
+          value={oppositeTeam}
+          onChange={setOppositeTeam}
+        />
+        <DatePicker placeholder="Date" value={date} onChange={setDate} />
         <TextInput
           value={location}
           onChangeText={setLocation}
