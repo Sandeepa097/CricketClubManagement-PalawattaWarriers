@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   FlatList,
-  TouchableOpacity,
   View,
   Text,
   StyleSheet,
@@ -9,7 +8,7 @@ import {
   Pressable,
 } from 'react-native';
 import ClickableInput from './base/ClickableInput';
-import { Entypo } from '@expo/vector-icons';
+import { Entypo, FontAwesome5 } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import Modal from 'react-native-modal';
 
@@ -22,30 +21,46 @@ interface ResultsPickerProps {
   onChangeValue: (value: ValueType) => void;
 }
 
-interface BasicResultItemProps {
+interface BasicResultType {
   text: string;
   value: ValueType;
-  icon: React.FC;
+  icon: 'smile-wink' | 'sad-tear' | 'meh';
 }
 
-interface ResultItemProps extends BasicResultItemProps {
+interface ResultItemProps extends BasicResultType {
   selected: boolean;
   onPress: () => void;
 }
 
-const results: BasicResultItemProps[] = [
-  { text: 'Won', value: 'won', icon: () => <></> },
-  { text: 'Lost', value: 'lost', icon: () => <></> },
-  { text: 'Draw', value: 'draw', icon: () => <></> },
+const results: BasicResultType[] = [
+  { text: 'Won', value: 'won', icon: 'smile-wink' },
+  { text: 'Lost', value: 'lost', icon: 'sad-tear' },
+  { text: 'Draw', value: 'draw', icon: 'meh' },
 ];
 
 const width: number = Dimensions.get('window').width;
 
-const BasicResultItem = (props: BasicResultItemProps) => {
+const BasicResultItem = (props: ResultItemProps) => {
   return (
-    <View style={styles.itemContainer}>
-      <Text style={styles.text}>{props.text}</Text>
-      <props.icon />
+    <View
+      style={[
+        styles.itemContainer,
+        props.selected
+          ? { backgroundColor: Colors.MEDIUM_TEAL, marginBottom: 10 }
+          : { backgroundColor: Colors.OFF_WHITE },
+      ]}>
+      <Text
+        style={[
+          styles.text,
+          { color: props.selected ? Colors.OFF_WHITE : Colors.DEEP_TEAL },
+        ]}>
+        {props.text}
+      </Text>
+      <FontAwesome5
+        name={props.icon}
+        size={24}
+        color={props.selected ? Colors.OFF_WHITE : Colors.DEEP_TEAL}
+      />
     </View>
   );
 };
@@ -76,14 +91,17 @@ const ResultsPicker = (props: ResultsPickerProps) => {
         isVisible={modalVisible}
         onBackdropPress={() => setModalVisible(false)}>
         <View style={styles.container}>
-          <Text>{props.title}</Text>
+          <Text style={styles.title}>Select Result</Text>
           <FlatList
             data={results}
             renderItem={({ item }) => (
               <ResultItem
                 key={item.value}
                 selected={props.value === item.value}
-                onPress={() => props.onChangeValue(item.value)}
+                onPress={() => {
+                  props.onChangeValue(item.value);
+                  setModalVisible(false);
+                }}
                 {...item}
               />
             )}
@@ -104,7 +122,6 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
     paddingBottom: 4,
     borderRadius: 15,
-    marginRight: 4,
     marginBottom: 10,
     backgroundColor: Colors.LIGHT_SHADOW,
   },
@@ -115,10 +132,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.OFF_WHITE,
+  },
+  title: {
+    width: '100%',
+    color: Colors.DEEP_TEAL,
+    fontSize: 24,
+    fontFamily: 'Anybody-Regular',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
   text: {
-    color: Colors.DEEP_TEAL,
     fontSize: 20,
     fontFamily: 'Anybody-Regular',
   },
