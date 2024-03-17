@@ -120,11 +120,13 @@ const CreateMatch = ({ navigation }) => {
           value={isPPL}
           onChangeValue={() => setIsPPL(!isPPL)}
         />
-        <OppositeTeamPicker
-          placeholder="Opposite Team"
-          value={oppositeTeam}
-          onChange={setOppositeTeam}
-        />
+        {!isPPL && (
+          <OppositeTeamPicker
+            placeholder="Opposite Team"
+            value={oppositeTeam}
+            onChange={setOppositeTeam}
+          />
+        )}
         <DatePicker placeholder="Date" value={date} onChange={setDate} />
         <TextInput
           value={location}
@@ -132,12 +134,14 @@ const CreateMatch = ({ navigation }) => {
           length="long"
           placeholder="Location"
         />
-        <ResultsPicker
-          title="Select result"
-          placeholder="Results"
-          value={result}
-          onChangeValue={setResult}
-        />
+        {!isPPL && (
+          <ResultsPicker
+            title="Select result"
+            placeholder="Results"
+            value={result}
+            onChangeValue={setResult}
+          />
+        )}
         <PlayersPicker
           placeholder="Players of Your Team"
           players={samplePlayersList}

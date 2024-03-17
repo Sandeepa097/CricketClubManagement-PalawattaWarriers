@@ -16,8 +16,14 @@ interface CompactMatchItemProps {
   title: string;
   bestBatsman: PlayerDetailsType | null;
   bestBowler: PlayerDetailsType | null;
+  counts?: {
+    all: number;
+    won: number;
+    lost: number;
+    draw: number;
+  };
   winningPercentage?: number | null;
-  onPress: (id: string | number) => void;
+  onPress: () => void;
 }
 
 interface BestPlayerContainerProps extends PlayerDetailsType {
@@ -36,7 +42,7 @@ const CompactMatchItem = (props: CompactMatchItemProps) => {
       ]}
       onPressIn={() => setInPress(true)}
       onPressOut={() => setInPress(false)}
-      onPress={() => props.onPress(props.id)}>
+      onPress={() => props.onPress()}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>{props.title}</Text>

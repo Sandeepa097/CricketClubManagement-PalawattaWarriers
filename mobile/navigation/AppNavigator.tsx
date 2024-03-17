@@ -9,6 +9,7 @@ import CreateMatch from '../screens/CreateMatch';
 import CreatePlayer from '../screens/CreatePlayer';
 import OverviewPlayer from '../screens/OverviewPlayer';
 import CreatePayments from '../screens/CreatePayments';
+import OppositeTeamMatches from '../screens/OppositeTeamMatches';
 
 const Stack = createStackNavigator();
 
@@ -28,6 +29,11 @@ const AppNavigator = () => (
       name={NavigationRoutes.HOME}
       component={BottomTabNavigator}
       options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name={NavigationRoutes.OPPOSITE_TEAM_MATCHES}
+      component={OppositeTeamMatches}
+      options={{ header: () => <SubHeader title="Matches List" /> }}
     />
     <Stack.Screen
       name={NavigationRoutes.CREATE_MATCH}

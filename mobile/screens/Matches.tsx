@@ -26,7 +26,30 @@ const Matches = ({ navigation }) => {
         name: 'Robert Robinson',
         score: '8/67',
       },
+      counts: {
+        all: 10,
+        won: 5,
+        lost: 3,
+        draw: 2,
+      },
       winningPercentage: 25,
+      matches: [
+        {
+          date: '27th January 2023',
+          location: 'Australia',
+          result: 'won',
+        },
+        {
+          date: '27th March 2023',
+          location: 'England',
+          result: 'lost',
+        },
+        {
+          date: '01th January 2024',
+          location: 'France',
+          result: 'draw',
+        },
+      ],
     },
     {
       id: 2,
@@ -40,6 +63,12 @@ const Matches = ({ navigation }) => {
         id: 1,
         name: 'Robert Robinson',
         score: '8/67',
+      },
+      counts: {
+        all: 10,
+        won: 5,
+        lost: 3,
+        draw: 2,
       },
       winningPercentage: 25,
     },
@@ -56,6 +85,12 @@ const Matches = ({ navigation }) => {
         name: 'Robert Robinson',
         score: '8/67',
       },
+      counts: {
+        all: 10,
+        won: 5,
+        lost: 3,
+        draw: 2,
+      },
       winningPercentage: 25,
     },
     {
@@ -70,6 +105,12 @@ const Matches = ({ navigation }) => {
         id: 1,
         name: 'Robert Robinson',
         score: '8/67',
+      },
+      counts: {
+        all: 10,
+        won: 5,
+        lost: 3,
+        draw: 2,
       },
       winningPercentage: 25,
     },
@@ -86,6 +127,12 @@ const Matches = ({ navigation }) => {
         name: 'Robert Robinson',
         score: '8/67',
       },
+      counts: {
+        all: 10,
+        won: 5,
+        lost: 3,
+        draw: 2,
+      },
       winningPercentage: 25,
     },
     {
@@ -100,6 +147,12 @@ const Matches = ({ navigation }) => {
         id: 1,
         name: 'Robert Robinson',
         score: '8/67',
+      },
+      counts: {
+        all: 10,
+        won: 5,
+        lost: 3,
+        draw: 2,
       },
       winningPercentage: 25,
     },
@@ -116,6 +169,12 @@ const Matches = ({ navigation }) => {
         name: 'Robert Robinson',
         score: '8/67',
       },
+      counts: {
+        all: 10,
+        won: 5,
+        lost: 3,
+        draw: 2,
+      },
       winningPercentage: 25,
     },
     {
@@ -130,6 +189,12 @@ const Matches = ({ navigation }) => {
         id: 1,
         name: 'Robert Robinson',
         score: '8/67',
+      },
+      counts: {
+        all: 10,
+        won: 5,
+        lost: 3,
+        draw: 2,
       },
       winningPercentage: 25,
     },
@@ -146,6 +211,12 @@ const Matches = ({ navigation }) => {
         name: 'Robert Robinson',
         score: '8/67',
       },
+      counts: {
+        all: 10,
+        won: 5,
+        lost: 3,
+        draw: 2,
+      },
       winningPercentage: 25,
     },
     {
@@ -160,6 +231,12 @@ const Matches = ({ navigation }) => {
         id: 1,
         name: 'Robert Robinson',
         score: '8/67',
+      },
+      counts: {
+        all: 10,
+        won: 5,
+        lost: 3,
+        draw: 2,
       },
       winningPercentage: 25,
     },
@@ -339,7 +416,13 @@ const Matches = ({ navigation }) => {
             : samplePPLMatchesList
         }
         renderItem={({ item }) => (
-          <CompactMatchItem key={item.id} {...item} onPress={(id) => id} />
+          <CompactMatchItem
+            key={item.id}
+            {...item}
+            onPress={() =>
+              navigation.navigate(NavigationRoutes.OPPOSITE_TEAM_MATCHES, item)
+            }
+          />
         )}
       />
       <Button
