@@ -430,6 +430,13 @@ const Matches = ({ navigation }) => {
                 item
               )
             }
+            {...(selectedTabItem === 'ppl'
+              ? {
+                  onRequestDelete: () => console.log('edit'),
+                  onRequestEdit: () =>
+                    navigation.navigate(NavigationRoutes.CREATE_MATCH),
+                }
+              : {})}
           />
         )}
       />

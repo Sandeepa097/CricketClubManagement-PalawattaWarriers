@@ -3,6 +3,7 @@ import { Dimensions, StyleSheet, View, Text, Pressable } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Logo from '../assets/Logo';
+import SwipeAction from './SwipeAction';
 
 interface PlayerDetailsType {
   id: string | number;
@@ -24,6 +25,8 @@ interface CompactMatchItemProps {
   };
   winningPercentage?: number | null;
   onPress: () => void;
+  onRequestEdit?: () => void;
+  onRequestDelete?: () => void;
 }
 
 interface BestPlayerContainerProps extends PlayerDetailsType {
@@ -33,6 +36,19 @@ interface BestPlayerContainerProps extends PlayerDetailsType {
 const width: number = Dimensions.get('window').width;
 
 const CompactMatchItem = (props: CompactMatchItemProps) => {
+  if (props.onRequestDelete !== undefined && props.onRequestEdit !== undefined)
+    return (
+      <SwipeAction
+        onRequestDelete={props.onRequestDelete}
+        onRequestEdit={props.onRequestEdit}>
+        <PressableCompactItem {...props} />
+      </SwipeAction>
+    );
+
+  return <PressableCompactItem {...props} />;
+};
+
+const PressableCompactItem = (props: CompactMatchItemProps) => {
   const [inPress, setInPress] = useState(false);
   return (
     <Pressable
