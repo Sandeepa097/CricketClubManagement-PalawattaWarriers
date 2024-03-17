@@ -3,7 +3,7 @@ import ReactNative, { View, Dimensions, StyleSheet } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-type InputLength = 'short' | 'long';
+type InputLength = 'short' | 'long' | number;
 
 type InputType = 'text' | 'password';
 
@@ -25,7 +25,14 @@ const TextInput = (props: TextInputProps) => {
     <View
       style={[
         styles.container,
-        { width: props.length === 'long' ? width - 20 : 0.798 * width },
+        {
+          width:
+            props.length === 'long'
+              ? width - 20
+              : props.length === 'short'
+              ? 0.798 * width
+              : props.length,
+        },
       ]}>
       <ReactNative.TextInput
         style={styles.input}

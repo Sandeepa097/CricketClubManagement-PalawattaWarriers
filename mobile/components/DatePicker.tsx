@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import ClickableInput from './base/ClickableInput';
-import { Fontisto } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
-import DateTimePicker, {
+import {
   DateTimePickerAndroid,
   DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
@@ -33,10 +33,10 @@ const DatePicker = (props: DatePickerProps) => {
         placeholder={props.placeholder}
         value={props.value}
         icon={() => (
-          <Fontisto
+          <Entypo
             style={{ marginRight: 5 }}
-            name="date"
-            size={15}
+            name="calendar"
+            size={20}
             color={Colors.DEEP_TEAL}
           />
         )}
