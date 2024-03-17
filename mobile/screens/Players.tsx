@@ -6,9 +6,12 @@ import { Colors } from '../constants/Colors';
 import SearchField from '../components/base/SearchField';
 import PlayerItem from '../components/PlayerItem';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
+import ConfirmBox from '../components/base/ConfirmBox';
 
 const Players = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
+  const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
+    useState(false);
 
   const samplePlayersList: {
     id: number;
@@ -88,6 +91,7 @@ const Players = ({ navigation }) => {
       isCaptain: true,
     },
   ];
+
   return (
     <View style={styles.container}>
       <SearchField
@@ -103,8 +107,21 @@ const Players = ({ navigation }) => {
             onPress={(id) =>
               navigation.navigate(NavigationRoutes.OVERVIEW_PLAYER, item)
             }
+            onRequestEdit={() =>
+              navigation.navigate(NavigationRoutes.CREATE_PLAYER)
+            }
+            onRequestDelete={() => setDeleteConfirmationVisible(true)}
           />
         )}
+      />
+      <ConfirmBox
+        visible={deleteConfirmationVisible}
+        title="Are you sure you want to delete this player?"
+        ok={{ text: 'Delete', onPress: () => console.log() }}
+        cancel={{
+          text: 'Cancel',
+          onPress: () => setDeleteConfirmationVisible(false),
+        }}
       />
       <Button
         sticky={true}

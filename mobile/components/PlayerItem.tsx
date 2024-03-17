@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
-import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Animated,
+  Dimensions,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Colors } from '../constants/Colors';
 import Logo from '../assets/Logo';
+import { RectButton, Swipeable } from 'react-native-gesture-handler';
+import SwipeAction from './SwipeAction';
 
 interface PlayerItemProps {
   id: string | number;
@@ -15,6 +24,8 @@ interface PlayerItemProps {
   verticalSpaceBetweenText?: number;
   avatarSize?: number;
   onPress: (id: string | number) => void;
+  onRequestDelete?: () => void;
+  onRequestEdit?: () => void;
 }
 
 const width: number = Dimensions.get('window').width;
@@ -81,7 +92,7 @@ const BasicPlayerItem = (props: PlayerItemProps) => {
   );
 };
 
-const PlayerItem = (props: PlayerItemProps) => {
+const PressableItem = (props: PlayerItemProps) => {
   const [inPress, setInPress] = useState(false);
 
   if (props.onPress === undefined) {
@@ -101,6 +112,19 @@ const PlayerItem = (props: PlayerItemProps) => {
       <BasicPlayerItem {...props} />
     </Pressable>
   );
+};
+
+const PlayerItem = (props: PlayerItemProps) => {
+  if (props.onRequestDelete !== undefined && props.onRequestEdit !== undefined)
+    return (
+      <SwipeAction
+        onRequestEdit={props.onRequestEdit}
+        onRequestDelete={props.onRequestDelete}>
+        <PressableItem {...props} />
+      </SwipeAction>
+    );
+
+  return <PressableItem {...props} />;
 };
 
 const styles = StyleSheet.create({
