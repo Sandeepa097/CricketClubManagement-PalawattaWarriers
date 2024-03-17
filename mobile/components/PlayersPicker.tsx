@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import ClickableInput from './base/ClickableInput';
 import PlayersSelectionModal from './PlayersSelectionModal';
+import { Entypo } from '@expo/vector-icons';
+import { Colors } from '../constants/Colors';
 
 interface PlayersPickerProps {
   placeholder: string;
@@ -32,6 +34,9 @@ const PlayersPicker = (props: PlayersPickerProps) => {
             return player.name;
           })
           .join(', ')}
+        icon={() => (
+          <Entypo name="chevron-right" size={24} color={Colors.DEEP_TEAL} />
+        )}
         onPress={() => setModalVisible(true)}
       />
       <PlayersSelectionModal
