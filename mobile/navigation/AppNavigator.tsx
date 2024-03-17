@@ -5,11 +5,12 @@ import Welcome from '../screens/Welcome';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 import BottomTabNavigator from './BottomTabNavigator';
 import SubHeader from '../headers/SubHeader';
+import OppositeTeamMatches from '../screens/OppositeTeamMatches';
+import Scorecard from '../screens/Scorecard';
 import CreateMatch from '../screens/CreateMatch';
 import CreatePlayer from '../screens/CreatePlayer';
 import OverviewPlayer from '../screens/OverviewPlayer';
 import CreatePayments from '../screens/CreatePayments';
-import OppositeTeamMatches from '../screens/OppositeTeamMatches';
 
 const Stack = createStackNavigator();
 
@@ -34,6 +35,11 @@ const AppNavigator = () => (
       name={NavigationRoutes.OPPOSITE_TEAM_MATCHES}
       component={OppositeTeamMatches}
       options={{ header: () => <SubHeader title="Matches List" /> }}
+    />
+    <Stack.Screen
+      name={NavigationRoutes.SCORECARD}
+      component={Scorecard}
+      options={{ header: () => <SubHeader title="Scorecard" /> }}
     />
     <Stack.Screen
       name={NavigationRoutes.CREATE_MATCH}

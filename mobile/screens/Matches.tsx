@@ -35,16 +35,19 @@ const Matches = ({ navigation }) => {
       winningPercentage: 25,
       matches: [
         {
+          id: 1,
           date: '27th January 2023',
           location: 'Australia',
           result: 'won',
         },
         {
+          id: 2,
           date: '27th March 2023',
           location: 'England',
           result: 'lost',
         },
         {
+          id: 3,
           date: '01th January 2024',
           location: 'France',
           result: 'draw',
@@ -420,7 +423,12 @@ const Matches = ({ navigation }) => {
             key={item.id}
             {...item}
             onPress={() =>
-              navigation.navigate(NavigationRoutes.OPPOSITE_TEAM_MATCHES, item)
+              navigation.navigate(
+                selectedTabItem === 'outdoor'
+                  ? NavigationRoutes.OPPOSITE_TEAM_MATCHES
+                  : NavigationRoutes.SCORECARD,
+                item
+              )
             }
           />
         )}

@@ -3,8 +3,9 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import SectionTitle from '../components/base/SectionTitle';
 import TabBar from '../components/base/TabBar';
 import OppositeMatchItem from '../components/OppositeMatchItem';
+import { NavigationRoutes } from '../constants/NavigationRoutes';
 
-const OppositeTeamMatches = ({ route }) => {
+const OppositeTeamMatches = ({ route, navigation }) => {
   const matchesDetails = route.params;
 
   const [selectedTabItem, setSelectedTabItem] = useState('all');
@@ -32,8 +33,11 @@ const OppositeTeamMatches = ({ route }) => {
           data={matchesDetails.matches}
           renderItem={({ item }) => (
             <OppositeMatchItem
+              key={item.id}
               {...item}
-              onPress={() => console.log('pressed')}
+              onPress={() =>
+                navigation.navigate(NavigationRoutes.SCORECARD, item)
+              }
             />
           )}
         />

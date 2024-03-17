@@ -8,6 +8,7 @@ export enum NavigationRoutes {
   PAYMENTS = 'PaymentsScreen',
 
   OPPOSITE_TEAM_MATCHES = 'OppositeTeamMatchesScreen',
+  SCORECARD = 'ScorecardScreen',
   CREATE_MATCH = 'CreateMatchScreen',
 
   CREATE_PLAYER = 'CreatePlayerScreen',
