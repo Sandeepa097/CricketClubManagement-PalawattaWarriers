@@ -20,7 +20,7 @@ const OppositeMatchItem = (props: OppositeMatchItemProps) => {
       color: Colors.DEEP_ORANGE,
     },
     lost: {
-      name: 'sad-tear',
+      name: 'sad-cry',
       color: Colors.MEDIUM_TEAL,
     },
     draw: {

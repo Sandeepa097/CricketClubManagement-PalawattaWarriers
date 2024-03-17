@@ -24,7 +24,7 @@ interface ResultsPickerProps {
 interface BasicResultType {
   text: string;
   value: ValueType;
-  icon: 'smile-wink' | 'sad-tear' | 'meh';
+  icon: 'smile-wink' | 'sad-cry' | 'meh';
 }
 
 interface ResultItemProps extends BasicResultType {
@@ -34,7 +34,7 @@ interface ResultItemProps extends BasicResultType {
 
 const results: BasicResultType[] = [
   { text: 'Won', value: 'won', icon: 'smile-wink' },
-  { text: 'Lost', value: 'lost', icon: 'sad-tear' },
+  { text: 'Lost', value: 'lost', icon: 'sad-cry' },
   { text: 'Draw', value: 'draw', icon: 'meh' },
 ];
 
