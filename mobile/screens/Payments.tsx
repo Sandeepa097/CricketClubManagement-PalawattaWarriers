@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
@@ -9,6 +9,7 @@ import SectionTitle from '../components/base/SectionTitle';
 import PaymentPlan from '../components/PaymentPlan';
 import PaymentItem from '../components/PaymentItem';
 import MonthlyPaymentSummery from '../components/MonthlyPaymentSummary';
+import ConfirmBox from '../components/base/ConfirmBox';
 
 const samplePayments = [
   { id: 1, name: 'Adonis Ross', payment: 50, pending: true },
@@ -30,6 +31,9 @@ const sampleCollectionData = {
 };
 
 const Payments = ({ navigation }) => {
+  const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
+    useState(false);
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -54,9 +58,26 @@ const Payments = ({ navigation }) => {
 
         <SectionTitle title="Previous Payments" />
         {samplePayments.map((item) => (
-          <PaymentItem key={item.id} {...item} pending={false} />
+          <PaymentItem
+            key={item.id}
+            {...item}
+            pending={false}
+            onRequestDelete={() => setDeleteConfirmationVisible(true)}
+            onRequestEdit={() =>
+              navigation.navigate(NavigationRoutes.CREATE_PAYMENTS)
+            }
+          />
         ))}
       </ScrollView>
+      <ConfirmBox
+        visible={deleteConfirmationVisible}
+        title="Are you sure you want to delete this payment?"
+        ok={{ text: 'Delete', onPress: () => console.log('delete') }}
+        cancel={{
+          text: 'Cancel',
+          onPress: () => setDeleteConfirmationVisible(false),
+        }}
+      />
       <Button
         sticky={true}
         position={{ bottom: 10, right: 10 }}

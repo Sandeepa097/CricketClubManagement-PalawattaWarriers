@@ -4,11 +4,14 @@ import SectionTitle from '../components/base/SectionTitle';
 import TabBar from '../components/base/TabBar';
 import OppositeMatchItem from '../components/OppositeMatchItem';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
+import ConfirmBox from '../components/base/ConfirmBox';
 
 const OppositeTeamMatches = ({ route, navigation }) => {
   const matchesDetails = route.params;
 
   const [selectedTabItem, setSelectedTabItem] = useState('all');
+  const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
+    useState(false);
 
   const getTabName = (id: 'all' | 'won' | 'lost' | 'draw', name: string) => {
     const count = matchesDetails.counts[id] || 0;
@@ -38,10 +41,23 @@ const OppositeTeamMatches = ({ route, navigation }) => {
               onPress={() =>
                 navigation.navigate(NavigationRoutes.SCORECARD, item)
               }
+              onRequestDelete={() => setDeleteConfirmationVisible(true)}
+              onRequestEdit={() =>
+                navigation.navigate(NavigationRoutes.CREATE_MATCH)
+              }
             />
           )}
         />
       </View>
+      <ConfirmBox
+        visible={deleteConfirmationVisible}
+        title="Are you sure you want to delete this match?"
+        ok={{ text: 'Delete', onPress: () => console.log('delete') }}
+        cancel={{
+          text: 'Cancel',
+          onPress: () => setDeleteConfirmationVisible(false),
+        }}
+      />
     </View>
   );
 };

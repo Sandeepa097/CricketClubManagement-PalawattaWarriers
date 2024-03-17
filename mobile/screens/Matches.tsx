@@ -7,10 +7,13 @@ import SearchField from '../components/base/SearchField';
 import TabBar from '../components/base/TabBar';
 import CompactMatchItem from '../components/CompactMatchItem';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
+import ConfirmBox from '../components/base/ConfirmBox';
 
 const Matches = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [selectedTabItem, setSelectedTabItem] = useState('outdoor');
+  const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
+    useState(false);
 
   const sampleOutdoorMatchesList = [
     {
@@ -432,13 +435,22 @@ const Matches = ({ navigation }) => {
             }
             {...(selectedTabItem === 'ppl'
               ? {
-                  onRequestDelete: () => console.log('edit'),
+                  onRequestDelete: () => setDeleteConfirmationVisible(true),
                   onRequestEdit: () =>
                     navigation.navigate(NavigationRoutes.CREATE_MATCH),
                 }
               : {})}
           />
         )}
+      />
+      <ConfirmBox
+        visible={deleteConfirmationVisible}
+        title="Are you sure you want to delete this match?"
+        ok={{ text: 'Delete', onPress: () => console.log('delete') }}
+        cancel={{
+          text: 'Cancel',
+          onPress: () => setDeleteConfirmationVisible(false),
+        }}
       />
       <Button
         sticky={true}

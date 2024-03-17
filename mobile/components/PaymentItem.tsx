@@ -3,6 +3,7 @@ import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import Logo from '../assets/Logo';
 import { Colors } from '../constants/Colors';
 import StrokedText from './base/StrokedText';
+import SwipeAction from './SwipeAction';
 
 interface PaymentProps {
   id: string | number;
@@ -10,12 +11,28 @@ interface PaymentProps {
   avatar?: string;
   payment: number;
   pending?: boolean;
+  onRequestDelete?: () => void;
+  onRequestEdit?: () => void;
 }
 
 const width: number = Dimensions.get('window').width;
 
-const ClickablePaymentItem = ({ children }) => {
-  return <Pressable style={styles.shadowContainer}>{children}</Pressable>;
+const SwipeablePaymentItem = ({
+  children,
+  onRequestDelete,
+  onRequestEdit,
+}: {
+  children: React.ReactNode;
+  onRequestDelete: () => void;
+  onRequestEdit: () => void;
+}) => {
+  return (
+    <SwipeAction
+      onRequestDelete={onRequestDelete}
+      onRequestEdit={onRequestEdit}>
+      <View style={styles.shadowContainer}>{children}</View>
+    </SwipeAction>
+  );
 };
 
 const ChildPaymentItem = (props: PaymentProps) => {
@@ -53,9 +70,11 @@ const ChildPaymentItem = (props: PaymentProps) => {
 const PaymentItem = (props: PaymentProps) => {
   if (props.pending) return <ChildPaymentItem {...props} />;
   return (
-    <ClickablePaymentItem>
+    <SwipeablePaymentItem
+      onRequestDelete={props.onRequestDelete}
+      onRequestEdit={props.onRequestEdit}>
       <ChildPaymentItem {...props} />
-    </ClickablePaymentItem>
+    </SwipeablePaymentItem>
   );
 };
 

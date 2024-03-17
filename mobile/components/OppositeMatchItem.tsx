@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { FontAwesome5 } from '@expo/vector-icons';
+import SwipeAction from './SwipeAction';
 
 const width: number = Dimensions.get('window').width;
 
@@ -10,9 +11,24 @@ interface OppositeMatchItemProps {
   location: string;
   result: 'won' | 'lost' | 'draw';
   onPress: () => void;
+  onRequestEdit?: () => void;
+  onRequestDelete?: () => void;
 }
 
 const OppositeMatchItem = (props: OppositeMatchItemProps) => {
+  if (props.onRequestDelete !== undefined && props.onRequestEdit !== undefined)
+    return (
+      <SwipeAction
+        onRequestDelete={props.onRequestDelete}
+        onRequestEdit={props.onRequestEdit}>
+        <PressableOppositeMatchItem {...props} />
+      </SwipeAction>
+    );
+
+  return <PressableOppositeMatchItem {...props} />;
+};
+
+const PressableOppositeMatchItem = (props: OppositeMatchItemProps) => {
   const [inPress, setInPress] = useState(false);
   const icons = {
     won: {
