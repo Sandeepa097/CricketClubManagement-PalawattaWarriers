@@ -16,7 +16,10 @@ const MainNavigationContainer = () => {
     const initialRouteName = userType
       ? NavigationRoutes.HOME
       : NavigationRoutes.WELCOME;
-    navigationRef.current.navigate(initialRouteName);
+    navigationRef.current.reset({
+      index: 0,
+      routes: [{ name: initialRouteName }],
+    });
   }, [userType]);
 
   return (
