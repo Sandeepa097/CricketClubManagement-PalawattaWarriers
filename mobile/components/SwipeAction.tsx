@@ -6,7 +6,7 @@ import { Colors } from '../constants/Colors';
 
 interface SwipeActionProps {
   onRequestEdit: () => void;
-  onRequestDelete: () => void;
+  onRequestDelete?: () => void;
   children: React.ReactNode;
 }
 
@@ -51,8 +51,10 @@ const SwipeAction = (props: SwipeActionProps) => {
   return (
     <Swipeable
       ref={swipeActionRef}
-      renderLeftActions={(progress, dragX) =>
-        renderActions(progress, dragX, 'left')
+      renderLeftActions={
+        props.onRequestDelete !== undefined
+          ? (progress, dragX) => renderActions(progress, dragX, 'left')
+          : undefined
       }
       renderRightActions={(progress, dragX) =>
         renderActions(progress, dragX, 'right')
