@@ -4,17 +4,20 @@ import { Colors } from '../constants/Colors';
 import LogoWithName from '../assets/LogoWithName';
 import Button from '../components/base/Button';
 import TextInput from '../components/base/TextInput';
-import { NavigationRoutes } from '../constants/NavigationRoutes';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../redux/store';
+import { login } from '../redux/slices/authSlice';
+import { UserTypes } from '../constants/UserTypes';
 
 const width: number = Dimensions.get('window').width;
 const height: number = Dimensions.get('window').height;
 
 const Login = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const login = () => navigation.navigate(NavigationRoutes.HOME);
+  const dispatch = useDispatch<AppDispatch>();
 
   const loginValidationSchema = Yup.object().shape({
     username: Yup.string().required('Username is required.'),
@@ -32,7 +35,9 @@ const Login = ({ navigation }) => {
       <Formik
         initialValues={{ username: '', password: '' }}
         validationSchema={loginValidationSchema}
-        onSubmit={(values) => console.log(values)}>
+        onSubmit={(values) =>
+          dispatch(login({ type: UserTypes.ADMIN, ...values }))
+        }>
         {({
           handleChange,
           handleBlur,

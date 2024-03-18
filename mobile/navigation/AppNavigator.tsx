@@ -15,8 +15,12 @@ import CreatePaymentPlan from '../screens/CreatePaymentPlan';
 
 const Stack = createStackNavigator();
 
-const AppNavigator = () => (
-  <Stack.Navigator initialRouteName={NavigationRoutes.WELCOME}>
+const AppNavigator = ({
+  initialRouteName,
+}: {
+  initialRouteName: NavigationRoutes;
+}) => (
+  <Stack.Navigator initialRouteName={initialRouteName}>
     <Stack.Screen
       name={NavigationRoutes.WELCOME}
       component={Welcome}

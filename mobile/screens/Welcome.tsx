@@ -4,14 +4,16 @@ import LogoWithName from '../assets/LogoWithName';
 import { Colors } from '../constants/Colors';
 import Button from '../components/base/Button';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../redux/store';
+import { login } from '../redux/slices/authSlice';
+import { UserTypes } from '../constants/UserTypes';
 
 const width: number = Dimensions.get('window').width;
 const height: number = Dimensions.get('window').height;
 
 const Welcome = ({ navigation }) => {
-  const continueAsGuest = () => navigation.navigate(NavigationRoutes.HOME);
-
-  const adminPortal = () => navigation.navigate(NavigationRoutes.LOGIN);
+  const dispatch = useDispatch<AppDispatch>();
 
   return (
     <View style={styles.container}>
@@ -22,14 +24,14 @@ const Welcome = ({ navigation }) => {
         style="filled"
         color={Colors.DEEP_TEAL}
         text="Continue as Guest"
-        onPress={continueAsGuest}
+        onPress={() => dispatch(login({ type: UserTypes.GUEST }))}
       />
       <Button
         length="short"
         style="outlined"
         color={Colors.DEEP_TEAL}
         text="Admin Portal"
-        onPress={adminPortal}
+        onPress={() => navigation.navigate(NavigationRoutes.LOGIN)}
       />
     </View>
   );

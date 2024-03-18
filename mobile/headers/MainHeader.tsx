@@ -5,12 +5,14 @@ import Logo from '../assets/Logo';
 import Button from '../components/base/Button';
 import { MaterialIcons } from '@expo/vector-icons';
 import ConfirmBox from '../components/base/ConfirmBox';
-import navigation from '../navigation/rootNavigation';
-import { NavigationRoutes } from '../constants/NavigationRoutes';
+import { useDispatch } from 'react-redux';
+import { logout } from '../redux/slices/authSlice';
+import { AppDispatch } from '../redux/store';
 
 const width: number = Dimensions.get('window').width;
 
 const MainHeader = (props: { title: string }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [optionsVisible, setOptionsVisible] = useState(false);
   const onPress = () => setOptionsVisible(!optionsVisible);
   return (
@@ -38,7 +40,7 @@ const MainHeader = (props: { title: string }) => {
           text: 'Logout',
           onPress: () => {
             setOptionsVisible(false);
-            navigation.navigate(NavigationRoutes.WELCOME);
+            dispatch(logout());
           },
         }}
         cancel={{ text: 'Cancel', onPress: () => setOptionsVisible(false) }}

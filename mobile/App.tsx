@@ -7,20 +7,24 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BackgroundImage from './assets/BackgroundImage';
 import MainNavigationContainer from './navigation/MainNavigationContainer';
 import { Colors } from './constants/Colors';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from './redux/store';
+import { restoreAuth } from './redux/slices/authSlice';
 
-SplashScreen.preventAutoHideAsync();
-export default function App() {
+const App = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const [appLoading, setAppLoading] = useState(true);
 
   useEffect(() => {
-    const loadFont = async () => {
+    const prepare = async () => {
       await Font.loadAsync({
         'Anybody-Regular': require('./assets/fonts/Anybody-Regular.ttf'),
       });
+      await dispatch(restoreAuth()).unwrap();
       setAppLoading(false);
     };
 
-    loadFont();
+    prepare();
   });
 
   const onLayoutRender = useCallback(async () => {
@@ -40,4 +44,6 @@ export default function App() {
       </SafeAreaProvider>
     </>
   );
-}
+};
+
+export default App;
