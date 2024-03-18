@@ -1,62 +1,86 @@
-import React, { useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  KeyboardAvoidingView,
-} from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { Colors } from '../constants/Colors';
 import LogoWithName from '../assets/LogoWithName';
 import Button from '../components/base/Button';
 import TextInput from '../components/base/TextInput';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const width: number = Dimensions.get('window').width;
 const height: number = Dimensions.get('window').height;
 
 const Login = ({ navigation }) => {
-  const [username, setUserName] = useState('');
-  const [password, setPassword] = useState('');
-
+  const insets = useSafeAreaInsets();
   const login = () => navigation.navigate(NavigationRoutes.HOME);
-  const goBack = () => navigation.goBack();
+
+  const loginValidationSchema = Yup.object().shape({
+    username: Yup.string().required('Username is required.'),
+    password: Yup.string().required('Password is required.'),
+  });
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <LogoWithName width={0.419 * width} height={0.194 * height} />
-        <View style={styles.divider}></View>
-        <View style={styles.form}>
-          <TextInput
-            length="short"
-            placeholder="Username"
-            value={username}
-            onChangeText={setUserName}
-          />
-          <TextInput
-            type="password"
-            length="short"
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-          />
-        </View>
-        <Button
-          length="short"
-          style="filled"
-          color={Colors.DEEP_TEAL}
-          text="Sign in"
-          onPress={login}
-        />
-        <Button
-          length="short"
-          style="outlined"
-          color={Colors.DEEP_TEAL}
-          text="Cancel"
-          onPress={goBack}
-        />
-      </View>
-    </KeyboardAvoidingView>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}>
+      <LogoWithName width={0.419 * width} height={0.194 * height} />
+      <View style={styles.divider}></View>
+      <Formik
+        initialValues={{ username: '', password: '' }}
+        validationSchema={loginValidationSchema}
+        onSubmit={(values) => console.log(values)}>
+        {({
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          values,
+          errors,
+          touched,
+        }) => (
+          <>
+            <View style={styles.form}>
+              <TextInput
+                name="username"
+                length="short"
+                placeholder="Username"
+                value={values.username}
+                error={touched.username && errors.username}
+                onChangeText={handleChange('username')}
+                onBlur={handleBlur('username')}
+              />
+              <TextInput
+                name="password"
+                type="password"
+                length="short"
+                placeholder="Password"
+                value={values.password}
+                error={touched.password && errors.password}
+                onChangeText={handleChange('password')}
+                onBlur={handleBlur('password')}
+              />
+            </View>
+            <Button
+              length="short"
+              style="filled"
+              color={Colors.DEEP_TEAL}
+              text="Sign in"
+              onPress={handleSubmit}
+            />
+          </>
+        )}
+      </Formik>
+      <Button
+        length="short"
+        style="outlined"
+        color={Colors.DEEP_TEAL}
+        text="Cancel"
+        onPress={() => navigation.goBack()}
+      />
+    </View>
   );
 };
 
