@@ -28,7 +28,7 @@
       }
     },
     "owner": "sandeepa097",
-    "plugins": ["expo-font"],
+    "plugins": ["expo-font", "expo-secure-store"],
     "runtimeVersion": {
       "policy": "appVersion"
     },
