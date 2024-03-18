@@ -11,6 +11,7 @@ import CreateMatch from '../screens/CreateMatch';
 import CreatePlayer from '../screens/CreatePlayer';
 import OverviewPlayer from '../screens/OverviewPlayer';
 import CreatePayments from '../screens/CreatePayments';
+import CreatePaymentPlan from '../screens/CreatePaymentPlan';
 
 const Stack = createStackNavigator();
 
@@ -60,6 +61,11 @@ const AppNavigator = () => (
       name={NavigationRoutes.CREATE_PAYMENTS}
       component={CreatePayments}
       options={{ header: () => <SubHeader title="New Payments" /> }}
+    />
+    <Stack.Screen
+      name={NavigationRoutes.CREATE_PAYMENT_PLAN}
+      component={CreatePaymentPlan}
+      options={{ header: () => <SubHeader title="New Future Plan" /> }}
     />
   </Stack.Navigator>
 );

@@ -14,33 +14,104 @@ interface MonthYearPickerProps {
   placeholder: string;
   title: string;
   value: DateType | null;
+  max?: DateType;
+  min?: DateType;
   onSelect: (selectedDate: DateType) => void;
 }
 
 const MonthYearPicker = (props: MonthYearPickerProps) => {
   const [date, setDate] = useState(new Date());
+  const [disablePrevYear, setDisablePrevYear] = useState(false);
+  const [disableNextYear, setDisableNextYear] = useState(false);
+  const [disablePrevMonth, setDisablePrevMonth] = useState(false);
+  const [disableNextMonth, setDisableNextMonth] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    if (props.value) {
-      const currentDate = new Date();
+    const currentDate = new Date();
+    if (!props.value && props.min) {
+      currentDate.setFullYear(props.min.year);
+      currentDate.setMonth(props.min.month);
+    } else if (!props.value && props.max) {
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth();
+      if (
+        currentYear > props.max.year ||
+        (currentYear === props.max.year && currentMonth < props.max.month)
+      ) {
+        currentDate.setFullYear(props.max.year);
+        currentDate.setMonth(props.max.month);
+      }
+    } else if (props.value) {
       currentDate.setFullYear(props.value.year);
       currentDate.setMonth(props.value.month);
-      setDate(currentDate);
     }
+
+    checkForDisable(currentDate, props.min, 'min');
+    checkForDisable(currentDate, props.max, 'max');
+    setDate(currentDate);
   }, [props]);
+
+  const checkForDisable = (
+    consider: Date,
+    compare: DateType | undefined | null,
+    type: 'min' | 'max'
+  ) => {
+    if (!compare) {
+      if (type === 'min') {
+        setDisablePrevMonth(false);
+        setDisablePrevYear(false);
+      } else {
+        setDisableNextMonth(false);
+        setDisableNextYear(false);
+      }
+      return;
+    }
+
+    const month = consider.getMonth();
+    const year = consider.getFullYear();
+    if (type === 'min') {
+      if (
+        year <= compare.year ||
+        (month < compare.month && compare.year + 1 === year)
+      )
+        setDisablePrevYear(true);
+      else setDisablePrevYear(false);
+
+      if (year <= compare.year && month <= compare.month)
+        setDisablePrevMonth(true);
+      else setDisablePrevMonth(false);
+    } else {
+      if (
+        year >= compare.year ||
+        (month > compare.month && compare.year - 1 === year)
+      )
+        setDisableNextYear(true);
+      else setDisableNextYear(false);
+
+      if (year >= compare.year && month >= compare.month)
+        setDisableNextMonth(true);
+      else setDisableNextMonth(false);
+    }
+    return;
+  };
 
   const onChangeDate = (direction: 'next' | 'back', type: 'month' | 'year') => {
     const manipulator = date;
 
-    if (type === 'month')
+    if (type === 'month') {
+      if (direction === 'back' && disablePrevMonth) return;
+      if (direction === 'next' && disableNextMonth) return;
       manipulator.setMonth(
         manipulator.getMonth() + (direction === 'next' ? 1 : -1)
       );
-    else
+    } else {
+      if (direction === 'back' && disablePrevYear) return;
+      if (direction === 'next' && disableNextYear) return;
       manipulator.setFullYear(
         manipulator.getFullYear() + (direction === 'next' ? 1 : -1)
       );
+    }
 
     props.onSelect({
       month: manipulator.getMonth(),
@@ -81,11 +152,15 @@ const MonthYearPicker = (props: MonthYearPickerProps) => {
           <Text style={styles.title}>{props.title}</Text>
           <View style={styles.selectionContainer}>
             <View style={[styles.selection, { marginRight: 5 }]}>
-              <TouchableOpacity onPress={() => onChangeDate('back', 'month')}>
+              <TouchableOpacity
+                activeOpacity={disablePrevMonth ? 1 : 0.5}
+                onPress={() => onChangeDate('back', 'month')}>
                 <AntDesign
                   name="caretleft"
                   size={18}
-                  color={Colors.DEEP_TEAL}
+                  color={
+                    disablePrevMonth ? Colors.LIGHT_SHADOW : Colors.DEEP_TEAL
+                  }
                 />
               </TouchableOpacity>
               <Text style={styles.text}>
@@ -93,28 +168,40 @@ const MonthYearPicker = (props: MonthYearPickerProps) => {
                   date
                 )}
               </Text>
-              <TouchableOpacity onPress={() => onChangeDate('next', 'month')}>
+              <TouchableOpacity
+                activeOpacity={disableNextMonth ? 1 : 0.5}
+                onPress={() => onChangeDate('next', 'month')}>
                 <AntDesign
                   name="caretright"
                   size={18}
-                  color={Colors.DEEP_TEAL}
+                  color={
+                    disableNextMonth ? Colors.LIGHT_SHADOW : Colors.DEEP_TEAL
+                  }
                 />
               </TouchableOpacity>
             </View>
             <View style={[styles.selection, { marginLeft: 5 }]}>
-              <TouchableOpacity onPress={() => onChangeDate('back', 'year')}>
+              <TouchableOpacity
+                activeOpacity={disablePrevYear ? 1 : 0.5}
+                onPress={() => onChangeDate('back', 'year')}>
                 <AntDesign
                   name="caretleft"
                   size={18}
-                  color={Colors.DEEP_TEAL}
+                  color={
+                    disablePrevYear ? Colors.LIGHT_SHADOW : Colors.DEEP_TEAL
+                  }
                 />
               </TouchableOpacity>
               <Text style={styles.text}>{date.getFullYear()}</Text>
-              <TouchableOpacity onPress={() => onChangeDate('next', 'year')}>
+              <TouchableOpacity
+                activeOpacity={disableNextYear ? 1 : 0.5}
+                onPress={() => onChangeDate('next', 'year')}>
                 <AntDesign
                   name="caretright"
                   size={18}
-                  color={Colors.DEEP_TEAL}
+                  color={
+                    disableNextYear ? Colors.LIGHT_SHADOW : Colors.DEEP_TEAL
+                  }
                 />
               </TouchableOpacity>
             </View>

@@ -10,6 +10,7 @@ import PaymentPlan from '../components/PaymentPlan';
 import PaymentItem from '../components/PaymentItem';
 import MonthlyPaymentSummery from '../components/MonthlyPaymentSummary';
 import ConfirmBox from '../components/base/ConfirmBox';
+import SwipeAction from '../components/SwipeAction';
 
 const samplePayments = [
   { id: 1, name: 'Adonis Ross', payment: 50, pending: true },
@@ -31,18 +32,37 @@ const sampleCollectionData = {
 };
 
 const Payments = ({ navigation }) => {
-  const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
+  const [deletePlanConfirmationVisible, setDeletePlanConfirmationVisible] =
     useState(false);
+  const [
+    deletePaymentConfirmationVisible,
+    setDeletePaymentConfirmationVisible,
+  ] = useState(false);
 
   return (
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{ display: 'flex', alignItems: 'center' }}>
         <SectionTitle title="Ongoing Plan" marginTop={10} />
-        <PaymentPlan fee={50} effective="January 2024" />
+        <SwipeAction
+          onRequestEdit={() =>
+            navigation.navigate(NavigationRoutes.CREATE_PAYMENT_PLAN, {
+              type: 'ongoing',
+            })
+          }>
+          <PaymentPlan fee={50} effective="January 2024" />
+        </SwipeAction>
 
         <SectionTitle title="Future Plan" />
-        <PaymentPlan fee={100} effective="November 2024" />
+        <SwipeAction
+          onRequestEdit={() =>
+            navigation.navigate(NavigationRoutes.CREATE_PAYMENT_PLAN, {
+              type: 'future',
+            })
+          }
+          onRequestDelete={() => setDeletePlanConfirmationVisible(true)}>
+          <PaymentPlan fee={100} effective="November 2024" />
+        </SwipeAction>
 
         <SectionTitle title="Collection Details" />
         <MonthlyPaymentSummery
@@ -62,7 +82,7 @@ const Payments = ({ navigation }) => {
             key={item.id}
             {...item}
             pending={false}
-            onRequestDelete={() => setDeleteConfirmationVisible(true)}
+            onRequestDelete={() => setDeletePaymentConfirmationVisible(true)}
             onRequestEdit={() =>
               navigation.navigate(NavigationRoutes.CREATE_PAYMENTS)
             }
@@ -70,12 +90,21 @@ const Payments = ({ navigation }) => {
         ))}
       </ScrollView>
       <ConfirmBox
-        visible={deleteConfirmationVisible}
+        visible={deletePlanConfirmationVisible}
+        title="Are you sure you want to delete this plan?"
+        ok={{ text: 'Delete', onPress: () => console.log('delete') }}
+        cancel={{
+          text: 'Cancel',
+          onPress: () => setDeletePlanConfirmationVisible(false),
+        }}
+      />
+      <ConfirmBox
+        visible={deletePaymentConfirmationVisible}
         title="Are you sure you want to delete this payment?"
         ok={{ text: 'Delete', onPress: () => console.log('delete') }}
         cancel={{
           text: 'Cancel',
-          onPress: () => setDeleteConfirmationVisible(false),
+          onPress: () => setDeletePaymentConfirmationVisible(false),
         }}
       />
       <Button
