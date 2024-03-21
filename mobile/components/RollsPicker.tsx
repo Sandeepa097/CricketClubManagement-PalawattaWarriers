@@ -4,6 +4,7 @@ import ClickableInput from './base/ClickableInput';
 import { Entypo } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import Modal from 'react-native-modal';
+import { FormikErrors } from 'formik';
 
 interface Selection {
   mainRoll: 'batsman' | 'bowler' | 'allRounder' | null;
@@ -13,6 +14,7 @@ interface Selection {
 
 interface RollsPickerProps {
   value: null | Selection;
+  error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
   onChangeValue: (selection: Selection) => void;
 }
 
@@ -49,6 +51,7 @@ const SelectionOption = ({
 
 const RollsPicker = (props: RollsPickerProps) => {
   const [modalVisible, setModalVisible] = useState(false);
+  console.log('err', props.error);
 
   const setMainRoll = (value: 'batsman' | 'bowler' | 'allRounder') => {
     props.onChangeValue({
@@ -71,8 +74,9 @@ const RollsPicker = (props: RollsPickerProps) => {
   };
 
   return (
-    <View>
+    <View style={{ marginBottom: 10 }}>
       <ClickableInput
+        containerStyle={{ marginBottom: 0 }}
         placeholder="Rolls"
         value={props.value ? getValueAsString(props.value) : ''}
         icon={() => (
@@ -80,6 +84,9 @@ const RollsPicker = (props: RollsPickerProps) => {
         )}
         onPress={() => setModalVisible(true)}
       />
+      {props.error && true && (
+        <Text style={styles.error}>{props.error.toString()}</Text>
+      )}
       <Modal
         isVisible={modalVisible}
         onBackdropPress={() => setModalVisible(false)}>
@@ -147,6 +154,11 @@ const styles = StyleSheet.create({
     color: Colors.DEEP_TEAL,
     fontSize: 20,
     fontFamily: 'Anybody-Regular',
+  },
+  error: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 15,
+    color: Colors.DEEP_ORANGE,
   },
 });
 

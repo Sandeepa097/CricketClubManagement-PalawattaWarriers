@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as ExpoImagePicker from 'expo-image-picker';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../constants/Colors';
@@ -10,27 +10,31 @@ import {
 } from '@expo/vector-icons';
 import Modal from 'react-native-modal';
 
-const ImagePicker = () => {
+interface ImagePickerProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+const ImagePicker = (props: ImagePickerProps) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState('');
 
   const pickImageAsync = async () => {
     setModalVisible(false);
     const image = await ExpoImagePicker.launchImageLibraryAsync();
 
-    if (!image.canceled) setSelectedImage(image.assets[0].uri);
+    if (!image.canceled) props.onChange(image.assets[0].uri);
   };
 
   const takePhotoAsync = async () => {
     setModalVisible(false);
     const image = await ExpoImagePicker.launchCameraAsync();
 
-    if (!image.canceled) setSelectedImage(image.assets[0].uri);
+    if (!image.canceled) props.onChange(image.assets[0].uri);
   };
 
   const removeImage = () => {
     setModalVisible(false);
-    setSelectedImage('');
+    props.onChange('');
   };
 
   return (
@@ -39,9 +43,10 @@ const ImagePicker = () => {
         marginVertical: 20,
       }}>
       <View style={styles.container}>
-        {!selectedImage && <Logo height={100} />}
-        {selectedImage !== '' && (
-          <Image source={{ uri: selectedImage }} style={styles.container} />
+        {!props.value ? (
+          <Logo height={100} />
+        ) : (
+          <Image source={{ uri: props.value }} style={styles.container} />
         )}
       </View>
       <TouchableOpacity
@@ -72,7 +77,7 @@ const ImagePicker = () => {
             />
             <Text style={styles.optionText}>Upload photo</Text>
           </TouchableOpacity>
-          {selectedImage !== '' && (
+          {props.value ? (
             <TouchableOpacity
               style={styles.modalOption}
               activeOpacity={0.5}
@@ -86,6 +91,8 @@ const ImagePicker = () => {
                 Remove photo
               </Text>
             </TouchableOpacity>
+          ) : (
+            <></>
           )}
         </View>
       </Modal>

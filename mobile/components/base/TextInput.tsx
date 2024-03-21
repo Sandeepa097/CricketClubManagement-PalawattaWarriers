@@ -16,7 +16,7 @@ interface TextInputProps {
   maxLength?: number;
   error?: string;
   onChangeText: (text: string) => void;
-  onBlur: (event: any) => void;
+  onBlur?: (event: any) => void;
 }
 
 const TextInput = (props: TextInputProps) => {

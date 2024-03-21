@@ -22,7 +22,7 @@ export const login = createAsyncThunk(
   async (payload: GuestLogin | AdminLogin, { dispatch }) => {
     const data = JSON.stringify({ userType: payload.type, token: '' });
     await SecureStore.setItemAsync('auth', data);
-    dispatch(setUser({ userType: payload.type, token: '' }));
+    dispatch(authSlice.actions.setUser({ userType: payload.type, token: '' }));
   }
 );
 
@@ -30,7 +30,7 @@ export const logout = createAsyncThunk(
   'auth/logout',
   async (params, { dispatch }) => {
     await SecureStore.deleteItemAsync('auth');
-    dispatch(setUser({ userType: null, token: '' }));
+    dispatch(authSlice.actions.setUser({ userType: null, token: '' }));
   }
 );
 
@@ -71,7 +71,5 @@ export const authSlice = createSlice({
     );
   },
 });
-
-export const { setUser } = authSlice.actions;
 
 export default authSlice.reducer;

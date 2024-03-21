@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, Text, ToastAndroid } from 'react-native';
 import Button from '../components/base/Button';
 import { AntDesign } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
@@ -7,90 +7,17 @@ import SearchField from '../components/base/SearchField';
 import PlayerItem from '../components/PlayerItem';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 import ConfirmBox from '../components/base/ConfirmBox';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import { deletePlayer } from '../redux/slices/playerSlice';
 
 const Players = ({ navigation }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [searchText, setSearchText] = useState('');
   const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
     useState(false);
-
-  const samplePlayersList: {
-    id: number;
-    name: string;
-    mainRoll: 'batsman' | 'bowler' | 'allRounder';
-    isWicketKeeper: boolean;
-    isCaptain: boolean;
-  }[] = [
-    {
-      id: 1,
-      name: 'Adonis Ross',
-      mainRoll: 'batsman',
-      isWicketKeeper: true,
-      isCaptain: true,
-    },
-    {
-      id: 2,
-      name: 'Robert Robinson',
-      mainRoll: 'bowler',
-      isWicketKeeper: true,
-      isCaptain: false,
-    },
-    {
-      id: 3,
-      name: 'Adonis Ross',
-      mainRoll: 'allRounder',
-      isWicketKeeper: false,
-      isCaptain: true,
-    },
-    {
-      id: 4,
-      name: 'Adonis Ross',
-      mainRoll: 'batsman',
-      isWicketKeeper: false,
-      isCaptain: false,
-    },
-    {
-      id: 5,
-      name: 'Adonis Ross',
-      mainRoll: 'batsman',
-      isWicketKeeper: true,
-      isCaptain: true,
-    },
-    {
-      id: 6,
-      name: 'Adonis Ross',
-      mainRoll: 'batsman',
-      isWicketKeeper: true,
-      isCaptain: true,
-    },
-    {
-      id: 7,
-      name: 'Adonis Ross',
-      mainRoll: 'batsman',
-      isWicketKeeper: true,
-      isCaptain: true,
-    },
-    {
-      id: 8,
-      name: 'Adonis Ross',
-      mainRoll: 'batsman',
-      isWicketKeeper: true,
-      isCaptain: true,
-    },
-    {
-      id: 9,
-      name: 'Adonis Ross',
-      mainRoll: 'batsman',
-      isWicketKeeper: true,
-      isCaptain: true,
-    },
-    {
-      id: 10,
-      name: 'Adonis Ross',
-      mainRoll: 'batsman',
-      isWicketKeeper: true,
-      isCaptain: true,
-    },
-  ];
+  const [deleteRequestedId, setDeleteRequestedId] = useState(null);
+  const players = useSelector((state: RootState) => state.player.players);
 
   return (
     <View style={styles.container}>
@@ -99,25 +26,45 @@ const Players = ({ navigation }) => {
         onChangeText={(text) => setSearchText(text)}
       />
       <FlatList
-        data={samplePlayersList}
+        style={{ height: '100%' }}
+        data={players}
         renderItem={({ item }) => (
           <PlayerItem
             key={item.id}
             {...item}
-            onPress={(id) =>
+            onPress={() =>
               navigation.navigate(NavigationRoutes.OVERVIEW_PLAYER, item)
             }
             onRequestEdit={() =>
               navigation.navigate(NavigationRoutes.CREATE_PLAYER)
             }
-            onRequestDelete={() => setDeleteConfirmationVisible(true)}
+            onRequestDelete={() => {
+              setDeleteRequestedId(item.id);
+              setDeleteConfirmationVisible(true);
+            }}
           />
+        )}
+        ListEmptyComponent={() => (
+          <Text style={{ textAlignVertical: 'center' }}>No players found</Text>
         )}
       />
       <ConfirmBox
         visible={deleteConfirmationVisible}
         title="Are you sure you want to delete this player?"
-        ok={{ text: 'Delete', onPress: () => console.log() }}
+        ok={{
+          text: 'Delete',
+          onPress: () => {
+            dispatch(deletePlayer(deleteRequestedId))
+              .unwrap()
+              .then(() => {
+                ToastAndroid.showWithGravity(
+                  'Player deleted successfully.',
+                  ToastAndroid.SHORT,
+                  ToastAndroid.BOTTOM
+                );
+              });
+          },
+        }}
         cancel={{
           text: 'Cancel',
           onPress: () => setDeleteConfirmationVisible(false),

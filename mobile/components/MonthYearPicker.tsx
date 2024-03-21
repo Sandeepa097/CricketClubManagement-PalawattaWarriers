@@ -4,6 +4,7 @@ import ClickableInput from './base/ClickableInput';
 import { AntDesign, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import Modal from 'react-native-modal';
+import { FormikErrors } from 'formik';
 
 interface DateType {
   month: number;
@@ -16,6 +17,7 @@ interface MonthYearPickerProps {
   value: DateType | null;
   max?: DateType;
   min?: DateType;
+  error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
   onSelect: (selectedDate: DateType) => void;
 }
 
@@ -130,6 +132,7 @@ const MonthYearPicker = (props: MonthYearPickerProps) => {
   return (
     <View>
       <ClickableInput
+        containerStyle={{ marginBottom: props.error ? 0 : 10 }}
         placeholder={props.placeholder}
         value={
           props.value
@@ -147,6 +150,9 @@ const MonthYearPicker = (props: MonthYearPickerProps) => {
         )}
         onPress={() => setModalVisible(true)}
       />
+      {props.error && true && (
+        <Text style={styles.error}>{props.error.toString()}</Text>
+      )}
       <Modal isVisible={modalVisible} onBackdropPress={() => onCancel()}>
         <View style={styles.container}>
           <Text style={styles.title}>{props.title}</Text>
@@ -252,6 +258,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Anybody-Regular',
     textAlign: 'center',
+  },
+  error: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 15,
+    color: Colors.DEEP_ORANGE,
   },
 });
 
