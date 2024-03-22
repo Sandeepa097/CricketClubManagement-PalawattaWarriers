@@ -27,7 +27,7 @@ const initialState: PlayerState = {
 
 export const createPlayer = createAsyncThunk(
   'player/create',
-  async (payload: NewPlayerType, { dispatch, getState }) => {
+  async (payload: NewPlayerType, { getState }) => {
     const id = (getState() as RootState).player.players.length + 1;
     return { ...payload, id };
   }

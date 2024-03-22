@@ -1,10 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { useDispatch } from 'react-redux';
+import statusReducer from './slices/statusSlice';
 import authReducer from './slices/authSlice';
 import playerReducer from './slices/playerSlice';
 
 const store = configureStore({
   reducer: {
+    status: statusReducer,
     auth: authReducer,
     player: playerReducer,
   },
