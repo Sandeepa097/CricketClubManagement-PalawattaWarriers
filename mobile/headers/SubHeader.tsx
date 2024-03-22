@@ -4,10 +4,16 @@ import { Colors } from '../constants/Colors';
 import Button from '../components/base/Button';
 import { AntDesign } from '@expo/vector-icons';
 import { navigationRef } from '../navigation/rootNavigation';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import { setEditing } from '../redux/slices/statusSlice';
 
 const width: number = Dimensions.get('window').width;
 
-const SubHeader = (props: { title: string }) => {
+const SubHeader = (props: { title: string; onEditTitle?: string }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const isEditing = useSelector((state: RootState) => state.status.isEditing);
+
   return (
     <View style={styles.container}>
       <Button
@@ -18,10 +24,15 @@ const SubHeader = (props: { title: string }) => {
         )}
         style="filled"
         color={Colors.DEEP_TEAL}
-        onPress={() => navigationRef.current.goBack()}
+        onPress={() => {
+          navigationRef.current.goBack();
+          dispatch(setEditing(false));
+        }}
       />
       <View style={{ marginLeft: 10 }}>
-        <Text style={styles.textStyle}>{props.title}</Text>
+        <Text style={styles.textStyle}>
+          {isEditing && props.onEditTitle ? props.onEditTitle : props.title}
+        </Text>
       </View>
     </View>
   );

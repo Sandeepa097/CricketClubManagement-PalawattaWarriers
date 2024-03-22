@@ -51,7 +51,6 @@ const SelectionOption = ({
 
 const RollsPicker = (props: RollsPickerProps) => {
   const [modalVisible, setModalVisible] = useState(false);
-  console.log('err', props.error);
 
   const setMainRoll = (value: 'batsman' | 'bowler' | 'allRounder') => {
     props.onChangeValue({

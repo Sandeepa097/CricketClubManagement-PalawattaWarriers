@@ -49,12 +49,18 @@ const AppNavigator = ({
     <Stack.Screen
       name={NavigationRoutes.CREATE_MATCH}
       component={CreateMatch}
-      options={{ header: () => <SubHeader title="New Match" /> }}
+      options={{
+        header: () => <SubHeader title="New Match" onEditTitle="Edit Match" />,
+      }}
     />
     <Stack.Screen
       name={NavigationRoutes.CREATE_PLAYER}
       component={CreatePlayer}
-      options={{ header: () => <SubHeader title="New Player" /> }}
+      options={{
+        header: () => (
+          <SubHeader title="New Player" onEditTitle="Edit Player" />
+        ),
+      }}
     />
     <Stack.Screen
       name={NavigationRoutes.OVERVIEW_PLAYER}
@@ -64,12 +70,20 @@ const AppNavigator = ({
     <Stack.Screen
       name={NavigationRoutes.CREATE_PAYMENTS}
       component={CreatePayments}
-      options={{ header: () => <SubHeader title="New Payments" /> }}
+      options={{
+        header: () => (
+          <SubHeader title="New Payments" onEditTitle="Edit Payment" />
+        ),
+      }}
     />
     <Stack.Screen
       name={NavigationRoutes.CREATE_PAYMENT_PLAN}
       component={CreatePaymentPlan}
-      options={{ header: () => <SubHeader title="New Future Plan" /> }}
+      options={{
+        header: () => (
+          <SubHeader title="New Future Plan" onEditTitle="Edit Payment Plan" />
+        ),
+      }}
     />
   </Stack.Navigator>
 );

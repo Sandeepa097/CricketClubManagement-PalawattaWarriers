@@ -10,6 +10,8 @@ import ConfirmBox from '../components/base/ConfirmBox';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import { deletePlayer } from '../redux/slices/playerSlice';
+import EmptyListMessage from '../components/base/EmptyListMessage';
+import { setEditing } from '../redux/slices/statusSlice';
 
 const Players = ({ navigation }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -25,8 +27,11 @@ const Players = ({ navigation }) => {
         value={searchText}
         onChangeText={(text) => setSearchText(text)}
       />
+      <EmptyListMessage
+        visible={players.length === 0}
+        message="No players found."
+      />
       <FlatList
-        style={{ height: '100%' }}
         data={players}
         renderItem={({ item }) => (
           <PlayerItem
@@ -35,17 +40,15 @@ const Players = ({ navigation }) => {
             onPress={() =>
               navigation.navigate(NavigationRoutes.OVERVIEW_PLAYER, item)
             }
-            onRequestEdit={() =>
-              navigation.navigate(NavigationRoutes.CREATE_PLAYER)
-            }
+            onRequestEdit={() => {
+              dispatch(setEditing(true));
+              navigation.navigate(NavigationRoutes.CREATE_PLAYER, { ...item });
+            }}
             onRequestDelete={() => {
               setDeleteRequestedId(item.id);
               setDeleteConfirmationVisible(true);
             }}
           />
-        )}
-        ListEmptyComponent={() => (
-          <Text style={{ textAlignVertical: 'center' }}>No players found</Text>
         )}
       />
       <ConfirmBox
@@ -57,6 +60,8 @@ const Players = ({ navigation }) => {
             dispatch(deletePlayer(deleteRequestedId))
               .unwrap()
               .then(() => {
+                setDeleteRequestedId(null);
+                setDeleteConfirmationVisible(false);
                 ToastAndroid.showWithGravity(
                   'Player deleted successfully.',
                   ToastAndroid.SHORT,

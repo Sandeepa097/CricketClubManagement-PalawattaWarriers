@@ -10,10 +10,46 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
-import { createPlayer } from '../redux/slices/playerSlice';
+import { createPlayer, updatePlayer } from '../redux/slices/playerSlice';
+import { setEditing } from '../redux/slices/statusSlice';
+import { AsyncThunk } from '@reduxjs/toolkit';
 
-const CreatePlayer = ({ navigation }) => {
+interface PlayerForm {
+  id?: string | number;
+  avatar: string;
+  name: string;
+  rolls: {
+    mainRoll: 'batsman' | 'bowler' | 'allRounder';
+    isCaptain: boolean;
+    isWicketKeeper: boolean;
+  };
+  feesPayingSince: {
+    month: number;
+    year: number;
+  };
+}
+
+const CreatePlayer = ({ navigation, route }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const editPlayer = route.params;
+
+  const submit = (
+    values: PlayerForm,
+    alertText: string,
+    reducer: AsyncThunk<any, any, any>
+  ) => {
+    dispatch(reducer(values))
+      .unwrap()
+      .then(() => {
+        ToastAndroid.showWithGravity(
+          alertText,
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM
+        );
+        navigation.goBack();
+        dispatch(setEditing(false));
+      });
+  };
 
   const playerValidationSchema = Yup.object().shape({
     avatar: Yup.string().nullable(),
@@ -47,34 +83,48 @@ const CreatePlayer = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={{ display: 'flex', alignItems: 'center' }}>
         <Formik
-          initialValues={{
-            avatar: '',
-            name: '',
-            rolls: null,
-            feesPayingSince: null,
-          }}
+          initialValues={
+            !editPlayer
+              ? {
+                  avatar: '',
+                  name: '',
+                  rolls: null,
+                  feesPayingSince: null,
+                }
+              : {
+                  ...editPlayer,
+                  rolls: {
+                    mainRoll: editPlayer.mainRoll,
+                    isCaptain: editPlayer.isCaptain,
+                    isWicketKeeper: editPlayer.isWicketKeeper,
+                  },
+                }
+          }
           validateOnBlur={false}
           validateOnChange={false}
           validationSchema={playerValidationSchema}
-          onSubmit={(values) =>
-            dispatch(
-              createPlayer({
-                ...values,
-                mainRoll: values.rolls.mainRoll,
-                isCaptain: values.rolls.isCaptain,
-                isWicketKeeper: values.rolls.isWicketKeeper,
-              })
-            )
-              .unwrap()
-              .then(() => {
-                ToastAndroid.showWithGravity(
-                  'Player created successfully.',
-                  ToastAndroid.SHORT,
-                  ToastAndroid.BOTTOM
-                );
-                navigation.goBack();
-              })
-          }>
+          onSubmit={(values) => {
+            const formattedValues = {
+              ...values,
+              mainRoll: values.rolls.mainRoll,
+              isCaptain: values.rolls.isCaptain,
+              isWicketKeeper: values.rolls.isWicketKeeper,
+            };
+
+            if (editPlayer) {
+              submit(
+                { ...formattedValues, id: editPlayer.id },
+                'Player updated successfully.',
+                updatePlayer
+              );
+            } else {
+              submit(
+                formattedValues,
+                'Player created successfully.',
+                createPlayer
+              );
+            }
+          }}>
           {({ handleSubmit, setFieldValue, values, errors }) => (
             <>
               <ImagePicker
@@ -86,7 +136,7 @@ const CreatePlayer = ({ navigation }) => {
                 placeholder="Name"
                 onChangeText={(text) => setFieldValue('name', text)}
                 value={values.name}
-                error={errors.name}
+                error={errors.name as string}
               />
               <RollsPicker
                 value={values.rolls}
@@ -109,7 +159,7 @@ const CreatePlayer = ({ navigation }) => {
                   length="long"
                   style="filled"
                   color={Colors.DEEP_TEAL}
-                  text="Create"
+                  text={editPlayer ? 'Save' : 'Create'}
                   onPress={handleSubmit}
                 />
               </View>
@@ -121,7 +171,10 @@ const CreatePlayer = ({ navigation }) => {
           style="outlined"
           color={Colors.DEEP_TEAL}
           text="Cancel"
-          onPress={() => navigation.goBack()}
+          onPress={() => {
+            navigation.goBack();
+            dispatch(setEditing(false));
+          }}
         />
       </ScrollView>
     </View>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Animated,
   Dimensions,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -9,7 +10,6 @@ import {
 } from 'react-native';
 import { Colors } from '../constants/Colors';
 import Logo from '../assets/Logo';
-import { RectButton, Swipeable } from 'react-native-gesture-handler';
 import SwipeAction from './SwipeAction';
 
 interface PlayerItemProps {
@@ -63,7 +63,22 @@ const BasicPlayerItem = (props: PlayerItemProps) => {
               borderRadius: props.avatarSize ? props.avatarSize / 2 : 20,
             },
           ]}>
-          <Logo height={props.avatarSize ? props.avatarSize - 10 : 40} />
+          {!props.avatar ? (
+            <Logo height={props.avatarSize ? props.avatarSize - 10 : 40} />
+          ) : (
+            <Image
+              source={{ uri: props.avatar }}
+              style={
+                props.avatarSize
+                  ? {
+                      height: props.avatarSize,
+                      width: props.avatarSize,
+                      borderRadius: props.avatarSize / 2,
+                    }
+                  : { height: 40, width: 40, borderRadius: 20 }
+              }
+            />
+          )}
         </View>
         <View>
           <Text
