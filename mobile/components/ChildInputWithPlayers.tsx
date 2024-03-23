@@ -4,6 +4,12 @@ import ClickableChildrenInput from './base/ClickableChildrenInput';
 import { Entypo } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import PlayersSelectionModal from './PlayersSelectionModal';
+import {
+  ChildItemValues,
+  ChildPropertySwitch,
+  ChildPropertyText,
+  PlayerType,
+} from '../types';
 
 interface ChildInputWithPlayersProps {
   players: PlayerType[];

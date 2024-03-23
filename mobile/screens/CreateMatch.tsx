@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import SectionTitle from '../components/base/SectionTitle';
 import TextInput from '../components/base/TextInput';
 import PlayersPicker from '../components/PlayersPicker';
@@ -10,217 +10,242 @@ import SwitchInput from '../components/base/SwitchInput';
 import ResultsPicker from '../components/ResultsPicker';
 import DatePicker from '../components/DatePicker';
 import OppositeTeamPicker from '../components/OppositeTeamPicker';
-
-const samplePlayersList: PlayerType[] = [
-  {
-    id: 1,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 2,
-    name: 'Robert Robinson',
-    mainRoll: 'bowler',
-    isWicketKeeper: true,
-    isCaptain: false,
-  },
-  {
-    id: 3,
-    name: 'Adonis Ross',
-    mainRoll: 'allRounder',
-    isWicketKeeper: false,
-    isCaptain: true,
-  },
-  {
-    id: 4,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: false,
-    isCaptain: false,
-  },
-  {
-    id: 5,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 6,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 7,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 8,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 9,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 10,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-];
+import * as Yup from 'yup';
+import { Formik } from 'formik';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 const CreateMatch = ({ navigation }) => {
   const emptyPlayersMessage = 'No players found in the team';
+  const players = useSelector((state: RootState) => state.player.players);
 
-  const [isPPL, setIsPPL] = useState(false);
-  const [oppositeTeam, setOppositeTeam] = useState(null);
-  const [date, setDate] = useState('');
-  const [location, setLocation] = useState('');
-  const [result, setResult] = useState(null);
-  const [officialPlayers, setOfficialPlayers] = useState([]);
-  const [battingDetails, setBattingDetails] = useState([]);
-  const [bowlingDetails, setBowlingDetails] = useState([]);
-  const [fieldingDetails, setFieldingDetails] = useState([]);
-
-  const onChangeOfficialPlayers = (values: (string | number)[]) => {
-    setBattingDetails(
-      battingDetails.filter((batsman) => values.includes(batsman.id))
-    );
-    setBowlingDetails(
-      bowlingDetails.filter((bowler) => values.includes(bowler.id))
-    );
-    setFieldingDetails(
-      fieldingDetails.filter((fielder) => values.includes(fielder.id))
-    );
-    setOfficialPlayers(values);
-  };
+  const matchValidationSchema = Yup.object().shape({
+    isPPL: Yup.boolean(),
+    oppositeTeam: Yup.number().when('isPPL', (isPPL, schema) => {
+      if (!isPPL) return schema.required('Opposite Team is required.');
+      return schema;
+    }),
+    date: Yup.string().required('Date is required.'),
+    location: Yup.string().required('Location is required.'),
+    result: Yup.string().when('isPPL', (isPPL, schema) => {
+      if (!isPPL) return schema.required('Result is required.');
+      return schema;
+    }),
+    officialPlayers: Yup.array()
+      .of(Yup.number())
+      .required('Team should have at least one player.'),
+    battingDetails: Yup.array().of(
+      Yup.object().shape({
+        values: Yup.object().shape({
+          balls: Yup.number()
+            .positive()
+            .integer()
+            .required('Number of balls are required.'),
+          score: Yup.number().positive().integer(),
+          fours: Yup.number().positive().integer(),
+          sixes: Yup.number().positive().integer(),
+          isOut: Yup.boolean(),
+        }),
+      })
+    ),
+    bowlingDetails: Yup.array().of(
+      Yup.object().shape({
+        values: Yup.object().shape({
+          wickets: Yup.number().positive().integer(),
+          overs: Yup.number()
+            .positive()
+            .test('is-decimal', 'Number of overs is invalid.', (val: any) => {
+              if (val) return /^(0|[1-9]\d*)(\.[012345])?$/.test(val);
+              return true;
+            })
+            .required('Number of overs are required.'),
+          conceded: Yup.number().positive().integer(),
+          maidens: Yup.number().positive().integer(),
+        }),
+      })
+    ),
+    fieldingDetails: Yup.array().of(
+      Yup.object().shape({
+        values: Yup.object().shape({
+          catches: Yup.number(),
+          stumps: Yup.number(),
+          directHits: Yup.number(),
+          indirectHits: Yup.number(),
+        }),
+      })
+    ),
+  });
 
   return (
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{ display: 'flex', alignItems: 'center' }}>
-        <SectionTitle title="Match Details" marginTop={10} />
-        <SwitchInput
-          placeholder="Mark as PPL"
-          value={isPPL}
-          onChangeValue={() => setIsPPL(!isPPL)}
-        />
-        {!isPPL && (
-          <OppositeTeamPicker
-            placeholder="Opposite Team"
-            value={oppositeTeam}
-            onChange={setOppositeTeam}
-          />
-        )}
-        <DatePicker placeholder="Date" value={date} onChange={setDate} />
-        <TextInput
-          value={location}
-          onChangeText={setLocation}
-          length="long"
-          placeholder="Location"
-        />
-        {!isPPL && (
-          <ResultsPicker
-            title="Select result"
-            placeholder="Results"
-            value={result}
-            onChangeValue={setResult}
-          />
-        )}
-        <PlayersPicker
-          placeholder="Players of Your Team"
-          players={samplePlayersList}
-          selected={officialPlayers}
-          onChangeSelection={onChangeOfficialPlayers}
-        />
-        <SectionTitle title="Batting Details" />
-        <ChildInputWithPlayers
-          placeholder="Select Batsmen"
-          emptyMessage={emptyPlayersMessage}
-          players={samplePlayersList.filter((player) =>
-            officialPlayers.includes(player.id)
+        <Formik
+          initialValues={{
+            isPPL: false,
+            oppositeTeam: null,
+            date: '',
+            location: '',
+            result: null,
+            officialPlayers: [],
+            battingDetails: [],
+            bowlingDetails: [],
+            fieldingDetails: [],
+          }}
+          validationSchema={matchValidationSchema}
+          onSubmit={(values) => console.log(values)}>
+          {({ handleSubmit, setFieldValue, values, errors }) => (
+            <>
+              <SectionTitle title="Match Details" marginTop={10} />
+              <SwitchInput
+                placeholder="Mark as PPL"
+                value={values.isPPL}
+                onChangeValue={() => setFieldValue('isPPL', !values.isPPL)}
+              />
+              {!values.isPPL && (
+                <OppositeTeamPicker
+                  placeholder="Opposite Team"
+                  value={values.oppositeTeam}
+                  onChange={(value) => setFieldValue('oppositeTeam', value)}
+                />
+              )}
+              <DatePicker
+                placeholder="Date"
+                value={values.date}
+                onChange={(value) => setFieldValue('date', value)}
+              />
+              <TextInput
+                value={values.location}
+                onChangeText={(value) => setFieldValue('location', value)}
+                length="long"
+                placeholder="Location"
+              />
+              {!values.isPPL && (
+                <ResultsPicker
+                  title="Select result"
+                  placeholder="Results"
+                  value={values.result}
+                  onChangeValue={(value) => setFieldValue('result', value)}
+                />
+              )}
+              <PlayersPicker
+                placeholder="Players of Your Team"
+                players={players}
+                emptyMessage="No players found."
+                selected={values.officialPlayers}
+                onChangeSelection={(officialPlayers) => {
+                  setFieldValue(
+                    'battingDetails',
+                    values.battingDetails.filter((batsman) =>
+                      officialPlayers.includes(batsman.id)
+                    )
+                  );
+                  setFieldValue(
+                    'bowlingDetails',
+                    values.bowlingDetails.filter((bowler) =>
+                      officialPlayers.includes(bowler.id)
+                    )
+                  );
+                  setFieldValue(
+                    'fieldingDetails',
+                    values.fieldingDetails.filter((fielder) =>
+                      officialPlayers.includes(fielder.id)
+                    )
+                  );
+                  setFieldValue('officialPlayers', officialPlayers);
+                }}
+              />
+              <SectionTitle title="Batting Details" />
+              <ChildInputWithPlayers
+                placeholder="Select Batsmen"
+                emptyMessage={emptyPlayersMessage}
+                players={players.filter((player) =>
+                  values.officialPlayers.includes(player.id)
+                )}
+                values={values.battingDetails}
+                onChangeValues={(battingDetails) =>
+                  setFieldValue('battingDetails', battingDetails)
+                }
+                itemProperties={[
+                  {
+                    type: 'text',
+                    name: 'score',
+                    placeholder: 'Score',
+                    keyboardType: 'number-pad',
+                  },
+                  { type: 'text', name: 'balls', placeholder: 'Balls' },
+                  { type: 'text', name: 'fours', placeholder: '4s' },
+                  { type: 'text', name: 'sixes', placeholder: '6s' },
+                  {
+                    type: 'switch',
+                    name: 'out',
+                    text: 'Out',
+                  },
+                ]}
+              />
+              <SectionTitle title="Bowling Details" />
+              <ChildInputWithPlayers
+                placeholder="Select Bowlers"
+                emptyMessage={emptyPlayersMessage}
+                players={players.filter((player) =>
+                  values.officialPlayers.includes(player.id)
+                )}
+                values={values.bowlingDetails}
+                onChangeValues={(bowlingDetails) =>
+                  setFieldValue('bowlingDetails', bowlingDetails)
+                }
+                itemProperties={[
+                  { type: 'text', name: 'wickets', placeholder: 'Wickets' },
+                  { type: 'text', name: 'overs', placeholder: 'Overs' },
+                  { type: 'text', name: 'conceded', placeholder: 'Conceded' },
+                  { type: 'text', name: 'maidens', placeholder: 'Maidens' },
+                ]}
+              />
+              <SectionTitle title="Fielding Details" />
+              <ChildInputWithPlayers
+                placeholder="Select Fielders"
+                emptyMessage={emptyPlayersMessage}
+                players={players.filter((player) =>
+                  values.officialPlayers.includes(player.id)
+                )}
+                values={values.fieldingDetails}
+                onChangeValues={(fieldingDetails) =>
+                  setFieldValue('fieldingDetails', fieldingDetails)
+                }
+                itemProperties={[
+                  { type: 'text', name: 'catches', placeholder: 'Catches' },
+                  { type: 'text', name: 'stumps', placeholder: 'Stumps' },
+                  {
+                    type: 'text',
+                    name: 'directHits',
+                    placeholder: 'Direct Hits',
+                  },
+                  {
+                    type: 'text',
+                    name: 'indirectHits',
+                    placeholder: 'Indirect Hits',
+                  },
+                ]}
+              />
+              <View style={{ marginTop: 40 }}>
+                <Button
+                  length="long"
+                  style="filled"
+                  color={Colors.DEEP_TEAL}
+                  text="Create"
+                  onPress={handleSubmit}
+                />
+                <Button
+                  length="long"
+                  style="outlined"
+                  color={Colors.DEEP_TEAL}
+                  text="Cancel"
+                  onPress={() => navigation.goBack()}
+                />
+              </View>
+            </>
           )}
-          values={battingDetails}
-          onChangeValues={setBattingDetails}
-          itemProperties={[
-            { type: 'text', name: 'score', placeholder: 'Score' },
-            { type: 'text', name: 'balls', placeholder: 'Balls' },
-            { type: 'text', name: '6s', placeholder: '6s' },
-            { type: 'text', name: '4s', placeholder: '4s' },
-            {
-              type: 'switch',
-              name: 'out',
-              text: 'Out',
-            },
-          ]}
-        />
-        <SectionTitle title="Bowling Details" />
-        <ChildInputWithPlayers
-          placeholder="Select Bowlers"
-          emptyMessage={emptyPlayersMessage}
-          players={samplePlayersList.filter((player) =>
-            officialPlayers.includes(player.id)
-          )}
-          values={bowlingDetails}
-          onChangeValues={setBowlingDetails}
-          itemProperties={[
-            { type: 'text', name: 'wickets', placeholder: 'Wickets' },
-            { type: 'text', name: 'overs', placeholder: 'Overs' },
-            { type: 'text', name: 'conceded', placeholder: 'Conceded' },
-            { type: 'text', name: 'maidens', placeholder: 'Maidens' },
-          ]}
-        />
-        <SectionTitle title="Fielding Details" />
-        <ChildInputWithPlayers
-          placeholder="Select Fielders"
-          emptyMessage={emptyPlayersMessage}
-          players={samplePlayersList.filter((player) =>
-            officialPlayers.includes(player.id)
-          )}
-          values={fieldingDetails}
-          onChangeValues={setFieldingDetails}
-          itemProperties={[
-            { type: 'text', name: 'catches', placeholder: 'Catches' },
-            { type: 'text', name: 'stumps', placeholder: 'Stumps' },
-            { type: 'text', name: 'directHits', placeholder: 'Direct Hits' },
-            {
-              type: 'text',
-              name: 'indirectHits',
-              placeholder: 'Indirect Hits',
-            },
-          ]}
-        />
-        <View style={{ marginTop: 40 }}>
-          <Button
-            length="long"
-            style="filled"
-            color={Colors.DEEP_TEAL}
-            text="Create"
-            onPress={() => console.log('create')}
-          />
-          <Button
-            length="long"
-            style="outlined"
-            color={Colors.DEEP_TEAL}
-            text="Cancel"
-            onPress={() => navigation.goBack()}
-          />
-        </View>
+        </Formik>
       </ScrollView>
     </View>
   );

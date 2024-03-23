@@ -7,9 +7,17 @@ import {
   TextInput,
   Switch,
   TouchableOpacity,
+  KeyboardType,
 } from 'react-native';
 import ClickableInput from './ClickableInput';
 import { Colors } from '../../constants/Colors';
+import {
+  ChildItemValues,
+  ChildPropertySwitch,
+  ChildPropertyText,
+  InputSwitch,
+  InputText,
+} from '../../types';
 
 const width: number = Dimensions.get('window').width;
 
@@ -32,6 +40,7 @@ interface ClickableChildrenInputProps {
 interface TextItemInputProps extends InputText {
   width: number;
   value: string;
+  keyboardType?: KeyboardType;
   onChange: (text: string | number) => void;
 }
 
@@ -50,6 +59,7 @@ const ItemInputText = (props: TextItemInputProps) => {
         onChangeText={(text) => props.onChange(text)}
         value={props.value}
         placeholder={props.placeholder}
+        keyboardType={props.keyboardType || 'default'}
       />
     </View>
   );
@@ -137,6 +147,7 @@ const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
                         key={`${item.id}-${itemProperty.name}`}
                         width={inputPropertyWidth}
                         placeholder={itemProperty.placeholder}
+                        keyboardType={itemProperty.keyboardType}
                         value={
                           props.itemValues.find(
                             (itemValue) => itemValue.id === item.id

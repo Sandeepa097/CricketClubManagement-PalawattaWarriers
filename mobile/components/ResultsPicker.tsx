@@ -18,6 +18,7 @@ interface ResultsPickerProps {
   title: string;
   placeholder: string;
   value: ValueType | null;
+  error?: string;
   onChangeValue: (value: ValueType) => void;
 }
 
@@ -79,14 +80,18 @@ const ResultsPicker = (props: ResultsPickerProps) => {
   const [modalVisible, setModalVisible] = useState(false);
   return (
     <View>
-      <ClickableInput
-        placeholder="Result"
-        value={results.find((result) => result.value === props.value)?.text}
-        icon={() => (
-          <Entypo name="chevron-right" size={24} color={Colors.DEEP_TEAL} />
-        )}
-        onPress={() => setModalVisible(true)}
-      />
+      <View style={{ marginBottom: 10 }}>
+        <ClickableInput
+          containerStyle={{ marginBottom: 0 }}
+          placeholder="Result"
+          value={results.find((result) => result.value === props.value)?.text}
+          icon={() => (
+            <Entypo name="chevron-right" size={24} color={Colors.DEEP_TEAL} />
+          )}
+          onPress={() => setModalVisible(true)}
+        />
+        {props.error && true && <Text style={styles.error}>{props.error}</Text>}
+      </View>
       <Modal
         isVisible={modalVisible}
         onBackdropPress={() => setModalVisible(false)}>
@@ -145,6 +150,11 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 20,
     fontFamily: 'Anybody-Regular',
+  },
+  error: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 15,
+    color: Colors.DEEP_ORANGE,
   },
 });
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import ClickableInput from './base/ClickableInput';
 import { Entypo } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
@@ -11,6 +11,7 @@ import {
 interface DatePickerProps {
   placeholder: string;
   value: string;
+  error?: string;
   onChange: (value: string) => void;
 }
 
@@ -28,8 +29,9 @@ const DatePicker = (props: DatePickerProps) => {
   };
 
   return (
-    <View>
+    <View style={{ marginBottom: 10 }}>
       <ClickableInput
+        containerStyle={{ marginBottom: 0 }}
         placeholder={props.placeholder}
         value={props.value}
         icon={() => (
@@ -42,8 +44,17 @@ const DatePicker = (props: DatePickerProps) => {
         )}
         onPress={() => openDatePicker()}
       />
+      {props.error && true && <Text style={styles.error}>{props.error}</Text>}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  error: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 15,
+    color: Colors.DEEP_ORANGE,
+  },
+});
 
 export default DatePicker;

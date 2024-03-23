@@ -1,4 +1,6 @@
-interface PlayerType {
+import { KeyboardType } from 'react-native';
+
+export interface PlayerType {
   id: string | number;
   name: string;
   mainRoll: 'batsman' | 'bowler' | 'allRounder';
@@ -6,25 +8,26 @@ interface PlayerType {
   isCaptain: boolean;
 }
 
-interface InputText {
+export interface InputText {
   placeholder: string;
 }
 
-interface InputSwitch {
+export interface InputSwitch {
   text: string;
 }
 
-interface ChildPropertyText extends InputText {
+export interface ChildPropertyText extends InputText {
   type: 'text';
   name: string;
+  keyboardType?: KeyboardType;
 }
 
-interface ChildPropertySwitch extends InputSwitch {
+export interface ChildPropertySwitch extends InputSwitch {
   type: 'switch';
   name: string;
 }
 
-interface ChildItemValues {
+export interface ChildItemValues {
   id: string | number;
   values: object;
 }

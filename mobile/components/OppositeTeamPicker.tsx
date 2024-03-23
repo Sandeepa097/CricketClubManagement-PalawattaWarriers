@@ -17,6 +17,7 @@ import TextInput from './base/TextInput';
 interface OppositeTeamPickerProps {
   placeholder: string;
   emptyMessage?: string;
+  error?: string;
   value: string | number | null;
   onChange: (value: string | number) => void;
 }
@@ -81,18 +82,22 @@ const OppositeTeamPicker = (props: OppositeTeamPickerProps) => {
 
   return (
     <View>
-      <ClickableInput
-        placeholder={props.placeholder}
-        value={
-          props.value
-            ? sampleTeams.find((team) => team.id === props.value).name
-            : ''
-        }
-        icon={() => (
-          <Entypo name="chevron-right" size={24} color={Colors.DEEP_TEAL} />
-        )}
-        onPress={() => setSelectionModalVisible(true)}
-      />
+      <View style={{ marginBottom: 10 }}>
+        <ClickableInput
+          containerStyle={{ marginBottom: 0 }}
+          placeholder={props.placeholder}
+          value={
+            props.value
+              ? sampleTeams.find((team) => team.id === props.value).name
+              : ''
+          }
+          icon={() => (
+            <Entypo name="chevron-right" size={24} color={Colors.DEEP_TEAL} />
+          )}
+          onPress={() => setSelectionModalVisible(true)}
+        />
+        {props.error && true && <Text style={styles.error}>{props.error}</Text>}
+      </View>
       <Modal
         isVisible={selectionModalVisible}
         style={styles.selectionModal}
@@ -235,6 +240,11 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 20,
     fontFamily: 'Anybody-Regular',
+  },
+  error: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 15,
+    color: Colors.DEEP_ORANGE,
   },
 });
 
