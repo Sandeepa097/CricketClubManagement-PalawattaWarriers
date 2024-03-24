@@ -11,6 +11,9 @@
 */dist/
 */web-build/
 
+# Node
+*/.env
+
 # Native
 */*.orig.*
 */*.jks
