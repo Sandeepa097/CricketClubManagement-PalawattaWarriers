@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Dimensions, StyleSheet, View, Text, Pressable } from 'react-native';
+import {
+  Dimensions,
+  StyleSheet,
+  View,
+  Text,
+  Pressable,
+  Image,
+} from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Logo from '../assets/Logo';
@@ -62,15 +69,15 @@ const PressableCompactItem = (props: CompactMatchItemProps) => {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>{props.title}</Text>
-          {props.winningPercentage !== null && (
+          {props.winningPercentage && true && (
             <Text style={styles.title}>{props.winningPercentage}%</Text>
           )}
         </View>
         <View style={styles.bestPlayersContainer}>
-          {props.bestBatsman !== null && (
+          {props.bestBatsman && true && (
             <BestPlayerContainer {...props.bestBatsman} roll="batsman" />
           )}
-          {props.bestBowler !== null && (
+          {props.bestBowler && true && (
             <BestPlayerContainer {...props.bestBowler} roll="bowler" />
           )}
         </View>
@@ -100,7 +107,14 @@ const BestPlayerContainer = (props: BestPlayerContainerProps) => {
         </Text>
       </View>
       <View style={styles.avatarContainer}>
-        <Logo height={30} />
+        {!props.avatar ? (
+          <Logo height={30} />
+        ) : (
+          <Image
+            source={{ uri: props.avatar }}
+            style={{ height: 30, width: 10, borderRadius: 15 }}
+          />
+        )}
       </View>
     </View>
   );

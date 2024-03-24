@@ -12,16 +12,18 @@ import DatePicker from '../components/DatePicker';
 import OppositeTeamPicker from '../components/OppositeTeamPicker';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import { createMatch } from '../redux/slices/matchSlice';
 
 const CreateMatch = ({ navigation }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const emptyPlayersMessage = 'No players found in the team';
   const players = useSelector((state: RootState) => state.player.players);
 
   const yupPositiveIntegerSchema = (filedName: string) => {
     const message = `${filedName} should be a positive integer.`;
-    return Yup.number().typeError(message).positive(message).integer(message);
+    return Yup.number().typeError(message).min(0, message).integer(message);
   };
 
   const matchValidationSchema = Yup.object().shape({
@@ -98,7 +100,7 @@ const CreateMatch = ({ navigation }) => {
             fieldingDetails: [],
           }}
           validationSchema={matchValidationSchema}
-          onSubmit={(values) => console.log(values)}>
+          onSubmit={(values) => dispatch(createMatch(values))}>
           {({ handleSubmit, setFieldValue, values, errors }) => (
             <>
               <SectionTitle title="Match Details" marginTop={10} />
