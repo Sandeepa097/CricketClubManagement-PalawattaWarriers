@@ -25,6 +25,11 @@ const initialState: PlayerState = {
   players: [],
 };
 
+export const retrievePlayers = createAsyncThunk('player/retrieve', async () => {
+  const players = [];
+  return players;
+});
+
 export const createPlayer = createAsyncThunk(
   'player/create',
   async (payload: NewPlayerType, { getState }) => {
@@ -53,6 +58,12 @@ export const playerSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(
+        retrievePlayers.fulfilled,
+        (state, action: PayloadAction<PlayerType[]>) => {
+          state.players = [...state.players, ...action.payload];
+        }
+      )
       .addCase(
         createPlayer.fulfilled,
         (state, action: PayloadAction<PlayerType>) => {

@@ -17,6 +17,7 @@ interface ChildInputWithPlayersProps {
   placeholder: string;
   itemProperties: (ChildPropertyText | ChildPropertySwitch)[];
   values: ChildItemValues[];
+  errors?: Array<{ values: object }>;
   onChangeValues: (values: ChildItemValues[]) => void;
 }
 
@@ -53,6 +54,7 @@ const ChildInputWithPlayers = (props: ChildInputWithPlayersProps) => {
         icon={() => (
           <Entypo name="chevron-right" size={24} color={Colors.DEEP_TEAL} />
         )}
+        errors={props.errors}
         items={selectedPlayerIds
           .map((id) => {
             const player = props.players.find((player) => player.id === id);

@@ -13,6 +13,11 @@ import Modal from 'react-native-modal';
 import { Colors } from '../constants/Colors';
 import { Entypo } from '@expo/vector-icons';
 import TextInput from './base/TextInput';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import { createTeam } from '../redux/slices/teamSlice';
 
 interface OppositeTeamPickerProps {
   placeholder: string;
@@ -30,12 +35,6 @@ interface BasicTeamItemProps {
 interface TeamItemProps extends BasicTeamItemProps {
   onPress: () => void;
 }
-
-const sampleTeams = [
-  { id: 1, name: 'Green Lions' },
-  { id: 2, name: 'Little Dragons' },
-  { id: 3, name: 'Danger Squad' },
-];
 
 const width: number = Dimensions.get('window').width;
 const height: number = Dimensions.get('window').height;
@@ -71,9 +70,10 @@ const TeamItem = (props: TeamItemProps) => {
 };
 
 const OppositeTeamPicker = (props: OppositeTeamPickerProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const teams = useSelector((state: RootState) => state.team.teams);
   const [selectionModalVisible, setSelectionModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [newTeamName, setNewTeamName] = useState('');
 
   const openNewModal = () => {
     setSelectionModalVisible(false);
@@ -88,7 +88,7 @@ const OppositeTeamPicker = (props: OppositeTeamPickerProps) => {
           placeholder={props.placeholder}
           value={
             props.value
-              ? sampleTeams.find((team) => team.id === props.value).name
+              ? teams.find((team) => team.id === props.value).name
               : ''
           }
           icon={() => (
@@ -111,7 +111,7 @@ const OppositeTeamPicker = (props: OppositeTeamPickerProps) => {
           </TouchableOpacity>
           <View style={{ width: width - 50, marginTop: 30 }}>
             <FlatList
-              data={sampleTeams}
+              data={teams}
               renderItem={({ item }) => (
                 <TeamItem
                   text={item.name}
@@ -139,18 +139,41 @@ const OppositeTeamPicker = (props: OppositeTeamPickerProps) => {
         onBackdropPress={() => setCreateModalVisible(false)}>
         <View style={styles.creationContainer}>
           <Text style={styles.title}>Create new team</Text>
-          <TextInput
-            length={width - 60}
-            placeholder="Name"
-            value={newTeamName}
-            onChangeText={setNewTeamName}
-          />
-          <TouchableOpacity
-            style={[styles.button, { marginTop: 30 }]}
-            activeOpacity={0.5}
-            onPress={() => setCreateModalVisible(false)}>
-            <Text style={styles.buttonText}>Save & select</Text>
-          </TouchableOpacity>
+          <Formik
+            initialValues={{
+              name: '',
+            }}
+            validationSchema={Yup.object().shape({
+              name: Yup.string().required('Name is required.'),
+            })}
+            onSubmit={(values) => {
+              dispatch(createTeam({ name: values.name }))
+                .unwrap()
+                .then((team) => {
+                  setCreateModalVisible(false);
+                  props.onChange(team.id);
+                });
+            }}>
+            {({ handleSubmit, handleBlur, handleChange, values, errors }) => (
+              <>
+                <TextInput
+                  name="name"
+                  length={width - 60}
+                  placeholder="Name"
+                  value={values.name}
+                  error={errors.name}
+                  onChangeText={handleChange('name')}
+                  onBlur={handleBlur('name')}
+                />
+                <TouchableOpacity
+                  style={[styles.button, { marginTop: 30 }]}
+                  activeOpacity={0.5}
+                  onPress={() => handleSubmit()}>
+                  <Text style={styles.buttonText}>Save & select</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </Formik>
         </View>
       </Modal>
     </View>

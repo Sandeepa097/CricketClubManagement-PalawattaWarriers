@@ -31,6 +31,7 @@ interface ClickableChildrenInputProps {
   value: string;
   icon?: React.FC;
   items: ChildItem[];
+  errors?: Array<{ values: object }>;
   itemProperties: (ChildPropertyText | ChildPropertySwitch)[];
   itemValues: ChildItemValues[];
   onPress: () => void;
@@ -178,6 +179,11 @@ const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
           ))}
         </View>
       )}
+      {props.errors && props.errors.length && true && (
+        <Text style={styles.error}>
+          {Object.values(props.errors[0].values)[0]}
+        </Text>
+      )}
     </View>
   );
 };
@@ -241,6 +247,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.DEEP_TEAL,
     textAlignVertical: 'center',
+  },
+  error: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 15,
+    color: Colors.DEEP_ORANGE,
   },
 });
 

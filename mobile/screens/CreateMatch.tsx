@@ -19,31 +19,35 @@ const CreateMatch = ({ navigation }) => {
   const emptyPlayersMessage = 'No players found in the team';
   const players = useSelector((state: RootState) => state.player.players);
 
+  const yupPositiveIntegerSchema = (filedName: string) => {
+    const message = `${filedName} should be a positive integer.`;
+    return Yup.number().typeError(message).positive(message).integer(message);
+  };
+
   const matchValidationSchema = Yup.object().shape({
     isPPL: Yup.boolean(),
     oppositeTeam: Yup.number().when('isPPL', (isPPL, schema) => {
-      if (!isPPL) return schema.required('Opposite Team is required.');
-      return schema;
+      if (!isPPL[0]) return schema.required('Opposite Team is required.');
+      return schema.notRequired();
     }),
     date: Yup.string().required('Date is required.'),
     location: Yup.string().required('Location is required.'),
     result: Yup.string().when('isPPL', (isPPL, schema) => {
-      if (!isPPL) return schema.required('Result is required.');
-      return schema;
+      if (!isPPL[0]) return schema.required('Result is required.');
+      return schema.notRequired();
     }),
     officialPlayers: Yup.array()
       .of(Yup.number())
-      .required('Team should have at least one player.'),
+      .min(1, 'Team should have at least one player.'),
     battingDetails: Yup.array().of(
       Yup.object().shape({
         values: Yup.object().shape({
-          balls: Yup.number()
-            .positive()
-            .integer()
-            .required('Number of balls are required.'),
-          score: Yup.number().positive().integer(),
-          fours: Yup.number().positive().integer(),
-          sixes: Yup.number().positive().integer(),
+          balls: yupPositiveIntegerSchema('Number of balls').required(
+            'Number of balls is required.'
+          ),
+          score: yupPositiveIntegerSchema('Score'),
+          fours: yupPositiveIntegerSchema('Number of fours'),
+          sixes: yupPositiveIntegerSchema('Number of sixes'),
           isOut: Yup.boolean(),
         }),
       })
@@ -51,26 +55,27 @@ const CreateMatch = ({ navigation }) => {
     bowlingDetails: Yup.array().of(
       Yup.object().shape({
         values: Yup.object().shape({
-          wickets: Yup.number().positive().integer(),
+          wickets: yupPositiveIntegerSchema('Number of wickets'),
           overs: Yup.number()
-            .positive()
+            .typeError('Number of overs should be a positive number.')
+            .positive('Number of overs should be a positive number.')
             .test('is-decimal', 'Number of overs is invalid.', (val: any) => {
               if (val) return /^(0|[1-9]\d*)(\.[012345])?$/.test(val);
               return true;
             })
             .required('Number of overs are required.'),
-          conceded: Yup.number().positive().integer(),
-          maidens: Yup.number().positive().integer(),
+          conceded: yupPositiveIntegerSchema('Number of runs conceded'),
+          maidens: yupPositiveIntegerSchema('Number of maidens'),
         }),
       })
     ),
     fieldingDetails: Yup.array().of(
       Yup.object().shape({
         values: Yup.object().shape({
-          catches: Yup.number(),
-          stumps: Yup.number(),
-          directHits: Yup.number(),
-          indirectHits: Yup.number(),
+          catches: yupPositiveIntegerSchema('Number of catches'),
+          stumps: yupPositiveIntegerSchema('Number of stumps'),
+          directHits: yupPositiveIntegerSchema('Number of direct hits'),
+          indirectHits: yupPositiveIntegerSchema('Number of indirect hits'),
         }),
       })
     ),
@@ -107,18 +112,21 @@ const CreateMatch = ({ navigation }) => {
                   placeholder="Opposite Team"
                   value={values.oppositeTeam}
                   onChange={(value) => setFieldValue('oppositeTeam', value)}
+                  error={errors.oppositeTeam as string}
                 />
               )}
               <DatePicker
                 placeholder="Date"
                 value={values.date}
                 onChange={(value) => setFieldValue('date', value)}
+                error={errors.date}
               />
               <TextInput
                 value={values.location}
                 onChangeText={(value) => setFieldValue('location', value)}
                 length="long"
                 placeholder="Location"
+                error={errors.location}
               />
               {!values.isPPL && (
                 <ResultsPicker
@@ -126,6 +134,7 @@ const CreateMatch = ({ navigation }) => {
                   placeholder="Results"
                   value={values.result}
                   onChangeValue={(value) => setFieldValue('result', value)}
+                  error={errors.result as string}
                 />
               )}
               <PlayersPicker
@@ -133,6 +142,7 @@ const CreateMatch = ({ navigation }) => {
                 players={players}
                 emptyMessage="No players found."
                 selected={values.officialPlayers}
+                error={errors.officialPlayers as string}
                 onChangeSelection={(officialPlayers) => {
                   setFieldValue(
                     'battingDetails',
@@ -163,6 +173,7 @@ const CreateMatch = ({ navigation }) => {
                   values.officialPlayers.includes(player.id)
                 )}
                 values={values.battingDetails}
+                errors={errors.battingDetails as { values: object }[]}
                 onChangeValues={(battingDetails) =>
                   setFieldValue('battingDetails', battingDetails)
                 }
@@ -191,6 +202,7 @@ const CreateMatch = ({ navigation }) => {
                   values.officialPlayers.includes(player.id)
                 )}
                 values={values.bowlingDetails}
+                errors={errors.bowlingDetails as { values: object }[]}
                 onChangeValues={(bowlingDetails) =>
                   setFieldValue('bowlingDetails', bowlingDetails)
                 }
@@ -209,6 +221,7 @@ const CreateMatch = ({ navigation }) => {
                   values.officialPlayers.includes(player.id)
                 )}
                 values={values.fieldingDetails}
+                errors={errors.fieldingDetails as { values: object }[]}
                 onChangeValues={(fieldingDetails) =>
                   setFieldValue('fieldingDetails', fieldingDetails)
                 }
