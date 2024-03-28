@@ -1,9 +1,9 @@
-import express from 'express';
+import { Router } from 'express';
 import { body } from 'express-validator';
 import { validateRequest } from './validator';
 import { login } from '../controllers/authController';
 
-const authRouter = express.Router();
+const authRouter = Router();
 
 authRouter.post(
   '/login',

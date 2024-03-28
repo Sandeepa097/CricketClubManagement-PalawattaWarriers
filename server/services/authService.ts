@@ -17,3 +17,7 @@ export const generateToken = (authTokenAttributes: AuthTokenAttributes) => {
 export const hashPassword = async (password: string) => {
   return await bcrypt.hash(password, SALT_ROUNDS);
 };
+
+export const decodeToken = (token: string): AuthTokenAttributes => {
+  return jwt.verify(token, TOKEN_SECRET as string) as AuthTokenAttributes;
+};
