@@ -24,10 +24,12 @@ export = {
       isCaptain: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
+        defaultValue: false,
       },
       isWicketKeeper: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
+        defaultValue: false,
       },
       feesPayingMonth: {
         allowNull: false,

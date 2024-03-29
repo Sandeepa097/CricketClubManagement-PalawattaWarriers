@@ -4,7 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import bcrypt from 'bcrypt';
 import { generateToken } from '../services/authService';
 
-export const login = async (req: Request, res: Response) => {
+const login = async (req: Request, res: Response) => {
   const authUser = await findUser({
     username: req.body.username,
     scope: 'withPasswordHash',
@@ -41,3 +41,5 @@ export const login = async (req: Request, res: Response) => {
     },
   });
 };
+
+export default { login };

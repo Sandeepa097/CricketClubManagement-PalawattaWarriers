@@ -27,16 +27,23 @@ export const validateRequest =
       .json({ message: 'Bad request', errors: errors.array() });
   };
 
-export const validatePermissions = (
-  authHeader: string | null,
-  authorizedUserType: string | string[]
-): boolean => {
-  if (!authHeader || !authHeader.toLowerCase().startsWith('bearer '))
-    return false;
+export const validatePermissions =
+  (authorizedUserType: string | string[]) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.get('authorization');
+    if (!authHeader || !authHeader.toLowerCase().startsWith('bearer '))
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: 'Not authenticated.' });
 
-  const authUser = decodeToken(authHeader.substring(7));
-  if (Array.isArray(authorizedUserType))
-    return authorizedUserType.includes(authUser.userType);
+    const authUser = decodeToken(authHeader.substring(7));
+    const isArray = Array.isArray(authorizedUserType);
+    if (isArray && authorizedUserType.includes(authUser.userType))
+      return next();
 
-  return authUser.userType === authorizedUserType;
-};
+    if (!isArray && authUser.userType === authorizedUserType) return next();
+
+    return res
+      .status(StatusCodes.FORBIDDEN)
+      .json({ message: 'No permissions.' });
+  };

@@ -46,6 +46,12 @@ Player.init(
         };
       },
     },
+    setterMethods: {
+      feesPayingSince: function (feesPaying) {
+        this.setDataValue('fessPayingMonth', feesPaying.month);
+        this.setDataValue('feesPayingYear', feesPaying.year);
+      },
+    },
   }
 );
 
