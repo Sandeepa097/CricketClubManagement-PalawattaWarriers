@@ -2,7 +2,7 @@ import { PlayerMainRolls } from '../constants/PlayerMainRolls';
 import { Player } from '../models';
 
 interface CreatePlayerAttributes {
-  avatar: string;
+  avatar: string | null;
   name: string;
   mainRoll: PlayerMainRolls;
   isCaptain?: boolean;
