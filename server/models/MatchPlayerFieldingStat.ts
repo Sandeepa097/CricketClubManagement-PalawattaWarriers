@@ -36,7 +36,7 @@ MatchPlayerFieldingStat.init(
     stumps: DataTypes.INTEGER.UNSIGNED,
     directHits: DataTypes.INTEGER.UNSIGNED,
     indirectHits: DataTypes.INTEGER.UNSIGNED,
-    points: DataTypes.INTEGER.UNSIGNED,
+    points: DataTypes.INTEGER,
   },
   {
     sequelize: sequelizeConnection,

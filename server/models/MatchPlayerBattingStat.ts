@@ -39,7 +39,7 @@ MatchPlayerBattingStat.init(
     sixes: DataTypes.INTEGER.UNSIGNED,
     fours: DataTypes.INTEGER.UNSIGNED,
     isOut: DataTypes.BOOLEAN,
-    points: DataTypes.INTEGER.UNSIGNED,
+    points: DataTypes.INTEGER,
   },
   {
     sequelize: sequelizeConnection,

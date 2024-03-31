@@ -53,7 +53,7 @@ export = {
       },
       points: {
         allowNull: false,
-        type: Sequelize.INTEGER.UNSIGNED,
+        type: Sequelize.INTEGER,
         defaultValue: 0,
       },
       createdAt: {

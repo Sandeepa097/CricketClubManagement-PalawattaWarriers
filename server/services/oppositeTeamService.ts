@@ -9,3 +9,7 @@ export const createOppositeTeam = async (
 ) => {
   return await OppositeTeam.create({ ...oppositeTeam });
 };
+
+export const findOppositeTeam = async (id: number) => {
+  return await OppositeTeam.findOne({ where: { id } });
+};

@@ -10,6 +10,30 @@ import playerController from '../controllers/playerController';
 import { isBase64, isUrl } from '../services/fileService';
 import { findPlayer } from '../services/playerService';
 
+const playerValidations = [
+  body('name').notEmpty().withMessage('Name is required.'),
+  body('mainRoll')
+    .notEmpty()
+    .withMessage('Main roll is required.')
+    .custom((value) => {
+      return [
+        PlayerMainRolls.BATSMAN,
+        PlayerMainRolls.BOWLER,
+        PlayerMainRolls.ALL_ROUNDER,
+      ].includes(value);
+    }),
+  body('isCaptain').isBoolean().withMessage('Captain must be a boolean value.'),
+  body('isWicketKeeper')
+    .isBoolean()
+    .withMessage('Wicket keeper must be a boolean value.'),
+  body('feesPayingSince.month')
+    .isInt({ max: 11, min: 0 })
+    .withMessage('Fees paying month must be an integer between 0 and 11.'),
+  body('feesPayingSince.year')
+    .isInt({ min: 1 })
+    .withMessage('Fees paying year must be positive integer.'),
+];
+
 const playerRouter = Router();
 
 playerRouter.post(
@@ -40,29 +64,7 @@ playerRouter.post(
 
         return true;
       }),
-    body('name').notEmpty().withMessage('Name is required.'),
-    body('mainRoll')
-      .notEmpty()
-      .withMessage('Main roll is required.')
-      .custom((value) => {
-        return [
-          PlayerMainRolls.BATSMAN,
-          PlayerMainRolls.BOWLER,
-          PlayerMainRolls.ALL_ROUNDER,
-        ].includes(value);
-      }),
-    body('isCaptain')
-      .isBoolean()
-      .withMessage('Captain must be a boolean value.'),
-    body('isWicketKeeper')
-      .isBoolean()
-      .withMessage('Wicket keeper must be a boolean value.'),
-    body('feesPayingSince.month')
-      .isInt({ max: 11, min: 0 })
-      .withMessage('Fees paying month must be an integer between 0 and 11.'),
-    body('feesPayingSince.year')
-      .isInt({ min: 1 })
-      .withMessage('Fees paying year must be positive integer.'),
+    ...playerValidations,
   ]),
   playerController.create
 );
@@ -77,8 +79,8 @@ playerRouter.put(
       .exists()
       .toInt()
       .custom(async (value) => {
-        const item = await findPlayer(value);
-        if (!item) throw Error('Player id is invalid.');
+        const player = await findPlayer(value);
+        if (!player) throw Error('Player id is invalid.');
         return true;
       }),
     body('avatar').custom(async (value) => {
@@ -108,29 +110,7 @@ playerRouter.put(
 
       throw Error('Avatar must be an URL or base64 string.');
     }),
-    body('name').notEmpty().withMessage('Name is required.'),
-    body('mainRoll')
-      .notEmpty()
-      .withMessage('Main roll is required.')
-      .custom((value) => {
-        return [
-          PlayerMainRolls.BATSMAN,
-          PlayerMainRolls.BOWLER,
-          PlayerMainRolls.ALL_ROUNDER,
-        ].includes(value);
-      }),
-    body('isCaptain')
-      .isBoolean()
-      .withMessage('Captain must be a boolean value.'),
-    body('isWicketKeeper')
-      .isBoolean()
-      .withMessage('Wicket keeper must be a boolean value.'),
-    body('feesPayingSince.month')
-      .isInt({ max: 11, min: 0 })
-      .withMessage('Fees paying month must be an integer between 0 and 11.'),
-    body('feesPayingSince.year')
-      .isInt({ min: 1 })
-      .withMessage('Fees paying year must be positive integer.'),
+    ...playerValidations,
   ]),
   playerController.update
 );
@@ -143,8 +123,8 @@ playerRouter.delete(
       .exists()
       .toInt()
       .custom(async (value) => {
-        const item = await findPlayer(value);
-        if (!item) throw Error('Player id is invalid.');
+        const player = await findPlayer(value);
+        if (!player) throw Error('Player id is invalid.');
         return true;
       }),
   ]),

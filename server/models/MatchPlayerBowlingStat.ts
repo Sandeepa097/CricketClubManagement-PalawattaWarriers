@@ -36,7 +36,7 @@ MatchPlayerBowlingStat.init(
     overs: DataTypes.DECIMAL(undefined, 1).UNSIGNED,
     conceded: DataTypes.INTEGER.UNSIGNED,
     maidens: DataTypes.INTEGER.UNSIGNED,
-    points: DataTypes.INTEGER.UNSIGNED,
+    points: DataTypes.INTEGER,
   },
   {
     sequelize: sequelizeConnection,

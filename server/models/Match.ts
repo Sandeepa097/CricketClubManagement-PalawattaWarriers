@@ -8,6 +8,7 @@ interface MatchInstance extends Model {
   date: string;
   location: string;
   result?: string | null;
+  numberOfDeliveriesPerOver?: number;
 }
 
 class Match extends Model implements MatchInstance {
@@ -15,8 +16,18 @@ class Match extends Model implements MatchInstance {
   public date!: string;
   public location!: string;
   public result?: string | null | undefined;
+  public numberOfDeliveriesPerOver?: number | undefined;
 
   public setMatchPlayers!: (players: Player[]) => Promise<void>;
+  public setMatchPlayersBattingStats!: (
+    players: { id: number; through: { points: number } }[]
+  ) => Promise<void>;
+  public setMatchPlayersBowlingStats!: (
+    players: { id: number; through: { points: number } }[]
+  ) => Promise<void>;
+  public setMatchPlayersFieldingStats!: (
+    players: { id: number; through: { points: number } }[]
+  ) => Promise<void>;
 
   static associate(models: any) {
     Match.belongsToMany(Player, {
@@ -28,10 +39,11 @@ class Match extends Model implements MatchInstance {
 
 Match.init(
   {
-    oppositeTeamId: DataTypes.INTEGER,
+    oppositeTeamId: DataTypes.INTEGER.UNSIGNED,
     date: DataTypes.STRING,
     location: DataTypes.STRING,
     result: DataTypes.STRING,
+    numberOfDeliveriesPerOver: DataTypes.DECIMAL(undefined, 1).UNSIGNED,
   },
   {
     sequelize: sequelizeConnection,
