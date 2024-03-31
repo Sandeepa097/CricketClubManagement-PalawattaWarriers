@@ -43,7 +43,7 @@ Match.init(
     date: DataTypes.STRING,
     location: DataTypes.STRING,
     result: DataTypes.STRING,
-    numberOfDeliveriesPerOver: DataTypes.DECIMAL(undefined, 1).UNSIGNED,
+    numberOfDeliveriesPerOver: DataTypes.INTEGER.UNSIGNED,
   },
   {
     sequelize: sequelizeConnection,

@@ -58,6 +58,7 @@ const create = async (req: Request, res: Response) => {
     battingStats,
     bowlingStats,
     fieldingStats,
+    numberOfDeliveriesPerOver,
   } = req.body;
 
   const createdMatch = await createMatch({

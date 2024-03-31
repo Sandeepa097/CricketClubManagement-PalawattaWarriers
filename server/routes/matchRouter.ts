@@ -24,6 +24,11 @@ const MatchValidations = [
       throw Error('Result is invalid.');
     return true;
   }),
+  body('numberOfDeliveriesPerOver')
+    .isInt({ min: 1, max: 10 })
+    .withMessage(
+      'Number of deliveries for an over should be between 1 and 10.'
+    ),
   body('officialPlayers')
     .isArray()
     .withMessage('Official players must be an array.'),

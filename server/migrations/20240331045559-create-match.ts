@@ -32,6 +32,11 @@ export = {
         defaultValue: null,
         type: Sequelize.STRING,
       },
+      numberOfDeliveriesPerOver: {
+        allowNull: false,
+        defaultValue: 6,
+        type: Sequelize.INTEGER.UNSIGNED,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -34,7 +34,7 @@ export = {
       },
       overs: {
         allowNull: false,
-        type: Sequelize.DECIMAL(undefined, 1).UNSIGNED,
+        type: Sequelize.DECIMAL(3, 1).UNSIGNED,
       },
       conceded: {
         allowNull: false,

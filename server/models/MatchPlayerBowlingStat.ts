@@ -33,7 +33,7 @@ MatchPlayerBowlingStat.init(
     matchId: DataTypes.INTEGER.UNSIGNED,
     playerId: DataTypes.INTEGER.UNSIGNED,
     wickets: DataTypes.INTEGER.UNSIGNED,
-    overs: DataTypes.DECIMAL(undefined, 1).UNSIGNED,
+    overs: DataTypes.DECIMAL(3, 1).UNSIGNED,
     conceded: DataTypes.INTEGER.UNSIGNED,
     maidens: DataTypes.INTEGER.UNSIGNED,
     points: DataTypes.INTEGER,
