@@ -13,7 +13,7 @@ export = {
         allowNull: true,
         defaultValue: null,
         references: {
-          model: 'OppositeTeam',
+          model: 'OppositeTeams',
           key: 'id',
         },
         onDelete: 'CASCADE',

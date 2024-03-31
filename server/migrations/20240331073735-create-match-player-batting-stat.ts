@@ -12,7 +12,7 @@ export = {
       matchId: {
         allowNull: false,
         references: {
-          model: 'Match',
+          model: 'Matches',
           key: 'id',
         },
         onDelete: 'CASCADE',
@@ -21,7 +21,7 @@ export = {
       playerId: {
         allowNull: false,
         references: {
-          model: 'Player',
+          model: 'Players',
           key: 'id',
         },
         onDelete: 'CASCADE',
