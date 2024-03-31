@@ -2,42 +2,55 @@ import { QueryInterface, DataTypes } from 'sequelize';
 
 export = {
   async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.createTable('Players', {
+    await queryInterface.createTable('MatchPlayerFieldingStats', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER.UNSIGNED,
       },
-      avatar: {
-        allowNull: true,
-        type: Sequelize.STRING,
-      },
-      name: {
+      matchId: {
         allowNull: false,
-        type: Sequelize.STRING,
-      },
-      mainRoll: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
-      isCaptain: {
-        allowNull: false,
-        type: Sequelize.BOOLEAN,
-        defaultValue: false,
-      },
-      isWicketKeeper: {
-        allowNull: false,
-        type: Sequelize.BOOLEAN,
-        defaultValue: false,
-      },
-      feesPayingMonth: {
-        allowNull: false,
+        references: {
+          model: 'Match',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
         type: Sequelize.INTEGER.UNSIGNED,
       },
-      feesPayingYear: {
+      playerId: {
+        allowNull: false,
+        references: {
+          model: 'Player',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        type: Sequelize.INTEGER.UNSIGNED,
+      },
+      catches: {
         allowNull: false,
         type: Sequelize.INTEGER.UNSIGNED,
+        defaultValue: 0,
+      },
+      stumps: {
+        allowNull: false,
+        type: Sequelize.INTEGER.UNSIGNED,
+        defaultValue: 0,
+      },
+      directHits: {
+        allowNull: false,
+        type: Sequelize.INTEGER.UNSIGNED,
+        defaultValue: 0,
+      },
+      indirectHits: {
+        allowNull: false,
+        type: Sequelize.INTEGER.UNSIGNED,
+        defaultValue: 0,
+      },
+      points: {
+        allowNull: false,
+        type: Sequelize.INTEGER.UNSIGNED,
+        defaultValue: 0,
       },
       createdAt: {
         allowNull: false,
@@ -50,6 +63,6 @@ export = {
     });
   },
   async down(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.dropTable('Players');
+    await queryInterface.dropTable('MatchPlayerFieldingStats');
   },
 };

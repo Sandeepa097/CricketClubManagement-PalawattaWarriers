@@ -2,42 +2,35 @@ import { QueryInterface, DataTypes } from 'sequelize';
 
 export = {
   async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.createTable('Players', {
+    await queryInterface.createTable('Matches', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER.UNSIGNED,
       },
-      avatar: {
+      oppositeTeamId: {
         allowNull: true,
-        type: Sequelize.STRING,
-      },
-      name: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
-      mainRoll: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
-      isCaptain: {
-        allowNull: false,
-        type: Sequelize.BOOLEAN,
-        defaultValue: false,
-      },
-      isWicketKeeper: {
-        allowNull: false,
-        type: Sequelize.BOOLEAN,
-        defaultValue: false,
-      },
-      feesPayingMonth: {
-        allowNull: false,
+        defaultValue: null,
+        references: {
+          model: 'OppositeTeam',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
         type: Sequelize.INTEGER.UNSIGNED,
       },
-      feesPayingYear: {
+      date: {
         allowNull: false,
-        type: Sequelize.INTEGER.UNSIGNED,
+        type: Sequelize.STRING,
+      },
+      location: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
+      result: {
+        allowNull: true,
+        defaultValue: null,
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
@@ -50,6 +43,6 @@ export = {
     });
   },
   async down(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.dropTable('Players');
+    await queryInterface.dropTable('Matches');
   },
 };

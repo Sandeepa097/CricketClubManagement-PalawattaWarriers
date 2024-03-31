@@ -2,24 +2,16 @@ import { QueryInterface, DataTypes } from 'sequelize';
 
 export = {
   async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.createTable('Users', {
+    await queryInterface.createTable('OppositeTeams', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER.UNSIGNED,
       },
-      username: {
+      name: {
         allowNull: false,
         unique: true,
-        type: Sequelize.STRING,
-      },
-      userType: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
-      passwordHash: {
-        allowNull: false,
         type: Sequelize.STRING,
       },
       createdAt: {
@@ -33,6 +25,6 @@ export = {
     });
   },
   async down(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.dropTable('Users');
+    await queryInterface.dropTable('OppositeTeams');
   },
 };
