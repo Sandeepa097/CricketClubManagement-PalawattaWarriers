@@ -15,3 +15,20 @@ export const uploadFile = async (base64: string) => {
 
   return uploadResponse.url;
 };
+
+export const isBase64 = (str: string) => {
+  try {
+    return Buffer.from(str, 'base64').toString('base64') === str;
+  } catch (err) {
+    return false;
+  }
+};
+
+export const isUrl = (str: string) => {
+  try {
+    new URL(str);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
