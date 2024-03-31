@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
-import { validateRequest } from './validator';
+import { validateRefreshToken, validateRequest } from './validator';
 import authController from '../controllers/authController';
 
 const authRouter = Router();
@@ -12,6 +12,12 @@ authRouter.post(
     body('password').notEmpty().withMessage('Password is required.'),
   ]),
   authController.login
+);
+
+authRouter.post(
+  '/access_token',
+  validateRefreshToken(),
+  authController.newAccessToken
 );
 
 export default authRouter;

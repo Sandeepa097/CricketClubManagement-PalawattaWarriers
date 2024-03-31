@@ -2,7 +2,10 @@ import { Request, Response } from 'express';
 import { findUser } from '../services/userService';
 import { StatusCodes } from 'http-status-codes';
 import bcrypt from 'bcrypt';
-import { generateToken } from '../services/authService';
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from '../services/authService';
 
 const login = async (req: Request, res: Response) => {
   const authUser = await findUser({
@@ -31,15 +34,40 @@ const login = async (req: Request, res: Response) => {
     username: authUser.dataValues.username,
   };
 
-  const token = generateToken(userForToken);
+  const accessToken = generateAccessToken(userForToken);
+  const refreshToken = generateRefreshToken(userForToken);
 
   return res.status(StatusCodes.OK).json({
     user: {
       id: userForToken.id,
       userType: userForToken.userType,
-      token,
+      accessToken,
+      refreshToken,
     },
   });
 };
 
-export default { login };
+const newAccessToken = async (req: Request, res: Response) => {
+  const authUser = await findUser({
+    id: req.body.username,
+  });
+
+  if (!authUser)
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: 'User not found.' });
+
+  const userForToken = {
+    id: authUser.dataValues.id,
+    userType: authUser.dataValues.userType,
+    username: authUser.dataValues.username,
+  };
+
+  const accessToken = generateAccessToken(userForToken);
+
+  return res.status(StatusCodes.CREATED).json({
+    accessToken,
+  });
+};
+
+export default { login, newAccessToken };
