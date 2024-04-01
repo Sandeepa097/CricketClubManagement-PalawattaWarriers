@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserTypes } from '../../constants/UserTypes';
 import * as SecureStore from 'expo-secure-store';
+import { create } from 'apisauce';
+import { API_URL } from '../../config/config';
 import { StatusCodes } from 'http-status-codes';
-import api from '../../api';
 
 interface AuthState {
   userType: UserTypes | null;
@@ -19,6 +20,10 @@ interface AdminLogin {
   password: string;
 }
 
+const authApi = create({
+  baseURL: API_URL + '/auth',
+});
+
 export const login = createAsyncThunk(
   'auth/login',
   async (payload: GuestLogin | AdminLogin, { dispatch, rejectWithValue }) => {
@@ -28,7 +33,7 @@ export const login = createAsyncThunk(
       refreshToken: '',
     };
     if (payload.type !== UserTypes.GUEST) {
-      const response: any = await api.post('/login', {
+      const response: any = await authApi.post('/login', {
         username: payload.username,
         password: payload.password,
       });
@@ -58,24 +63,21 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk(
   'auth/logout',
-  async (params, { dispatch }) => {
+  async (_, { dispatch }) => {
     await SecureStore.deleteItemAsync('auth');
     dispatch(authSlice.actions.setUser({ userType: null, token: '' }));
   }
 );
 
-export const restoreAuth = createAsyncThunk(
-  'auth/restoreAuth',
-  async (params, { dispatch }) => {
-    const value = await SecureStore.getItemAsync('auth');
-    if (value) {
-      const data = JSON.parse(value);
-      return { userType: data.userType, token: data.token };
-    }
-
-    return { userType: null, token: '' };
+export const restoreAuth = createAsyncThunk('auth/restoreAuth', async (_) => {
+  const value = await SecureStore.getItemAsync('auth');
+  if (value) {
+    const data = JSON.parse(value);
+    return { userType: data.userType, token: data.token };
   }
-);
+
+  return { userType: null, token: '' };
+});
 
 const initialState: AuthState = {
   userType: null,
