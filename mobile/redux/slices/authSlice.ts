@@ -3,6 +3,7 @@ import { UserTypes } from '../../constants/UserTypes';
 import * as SecureStore from 'expo-secure-store';
 import { create } from 'apisauce';
 import { API_URL } from '../../config/config';
+import { StatusCodes } from 'http-status-codes';
 
 interface AuthState {
   userType: UserTypes | null;
@@ -36,8 +37,13 @@ export const login = createAsyncThunk(
         username: payload.username,
         password: payload.password,
       });
+
       if (!response.ok) {
-        return rejectWithValue(response);
+        return rejectWithValue(
+          (response.status === StatusCodes.UNAUTHORIZED &&
+            response.data?.message) ||
+            'Something went wrong. Please try again later.'
+        );
       } else {
         data = {
           ...data,

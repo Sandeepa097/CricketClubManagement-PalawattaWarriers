@@ -38,8 +38,9 @@ const createUserOnDB = async (user: UserDetails) => {
     userType: user.userType,
     passwordHash: hashedPassword,
   });
+
+  console.log('User is created successfully.');
 };
 
 const user = getUser();
 createUserOnDB(user);
-console.log('User is created successfully.');

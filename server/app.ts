@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 const cors = require('cors');
 import * as bodyParser from 'body-parser';
 import { StatusCodes } from 'http-status-codes';
@@ -33,6 +33,12 @@ cloudinary.config({
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log('Method: ', req.method);
+  console.log('Path: ', req.path);
+  console.log('Body: ', req.body);
+  next();
+});
 
 app.get('/', (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ message: 'Palawatta Warriers Server' });

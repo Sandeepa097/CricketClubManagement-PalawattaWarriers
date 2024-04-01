@@ -25,19 +25,8 @@ export const findUser = async (
   payload: FindUserByIdAttributes | FindUserByUsernameAttributes
 ) => {
   return await User.scope(payload.scope).findOne({
-    where: {
-      $or: [
-        {
-          id: {
-            $eq: (payload as FindUserByIdAttributes).id,
-          },
-        },
-        {
-          username: {
-            $eq: (payload as FindUserByUsernameAttributes).username,
-          },
-        },
-      ],
-    },
+    where: (payload as FindUserByIdAttributes).id
+      ? { id: (payload as FindUserByIdAttributes).id }
+      : { username: (payload as FindUserByUsernameAttributes).username },
   });
 };

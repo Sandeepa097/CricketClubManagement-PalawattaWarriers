@@ -41,9 +41,7 @@ const Login = ({ navigation }) => {
             .unwrap()
             .catch((error) => {
               ToastAndroid.showWithGravity(
-                error.status === StatusCodes.UNAUTHORIZED
-                  ? error.data.message
-                  : 'Something went wrong. Please try again later.',
+                error,
                 ToastAndroid.SHORT,
                 ToastAndroid.BOTTOM
               );
