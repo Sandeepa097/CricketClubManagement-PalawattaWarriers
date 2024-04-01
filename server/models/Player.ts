@@ -34,24 +34,23 @@ Player.init(
     isWicketKeeper: DataTypes.BOOLEAN,
     feesPayingMonth: DataTypes.INTEGER,
     feesPayingYear: DataTypes.INTEGER,
-  },
-  {
-    sequelize: sequelizeConnection,
-    modelName: 'Player',
-    getterMethods: {
-      feesPayingSince: function () {
+    feesPayingSince: {
+      type: DataTypes.VIRTUAL,
+      get: function () {
         return {
           month: this.getDataValue('feesPayingMonth'),
           year: this.getDataValue('feesPayingYear'),
         };
       },
-    },
-    setterMethods: {
-      feesPayingSince: function (feesPaying) {
-        this.setDataValue('fessPayingMonth', feesPaying.month);
+      set: function (feesPaying: { month: number; year: number }) {
+        this.setDataValue('feesPayingMonth', feesPaying.month);
         this.setDataValue('feesPayingYear', feesPaying.year);
       },
     },
+  },
+  {
+    sequelize: sequelizeConnection,
+    modelName: 'Player',
   }
 );
 

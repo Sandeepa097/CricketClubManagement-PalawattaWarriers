@@ -1,9 +1,8 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserTypes } from '../../constants/UserTypes';
 import * as SecureStore from 'expo-secure-store';
-import { create } from 'apisauce';
-import { API_URL } from '../../config/config';
 import { StatusCodes } from 'http-status-codes';
+import api from '../../api';
 
 interface AuthState {
   userType: UserTypes | null;
@@ -20,10 +19,6 @@ interface AdminLogin {
   password: string;
 }
 
-const authApi = create({
-  baseURL: API_URL + '/auth',
-});
-
 export const login = createAsyncThunk(
   'auth/login',
   async (payload: GuestLogin | AdminLogin, { dispatch, rejectWithValue }) => {
@@ -33,7 +28,7 @@ export const login = createAsyncThunk(
       refreshToken: '',
     };
     if (payload.type !== UserTypes.GUEST) {
-      const response: any = await authApi.post('/login', {
+      const response: any = await api.post('/login', {
         username: payload.username,
         password: payload.password,
       });

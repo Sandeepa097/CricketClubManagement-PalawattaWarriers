@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { RootState } from '../store';
+import api from '../../api';
 
 interface NewPlayerType {
   avatar: string;
@@ -26,15 +26,20 @@ const initialState: PlayerState = {
 };
 
 export const retrievePlayers = createAsyncThunk('player/retrieve', async () => {
-  const players = [];
-  return players;
+  const response: any = await api.get('/players');
+  if (response.ok) return response.data.players;
+  return [];
 });
 
 export const createPlayer = createAsyncThunk(
   'player/create',
-  async (payload: NewPlayerType, { getState }) => {
-    const id = (getState() as RootState).player.players.length + 1;
-    return { ...payload, id };
+  async (payload: NewPlayerType, { rejectWithValue }) => {
+    const response: any = await api.post('/players', payload);
+    if (response.ok) {
+      return { ...response.data.player };
+    } else {
+      rejectWithValue('Create player failed.');
+    }
   }
 );
 
@@ -61,7 +66,7 @@ export const playerSlice = createSlice({
       .addCase(
         retrievePlayers.fulfilled,
         (state, action: PayloadAction<PlayerType[]>) => {
-          state.players = [...state.players, ...action.payload];
+          state.players = action.payload;
         }
       )
       .addCase(

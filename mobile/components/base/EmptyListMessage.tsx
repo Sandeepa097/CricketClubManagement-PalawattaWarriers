@@ -13,8 +13,10 @@ const EmptyListMessage = (props: EmptyListMessageProps) => {
 
   return (
     <View style={styles.container}>
-      <Fontisto name="dropbox" size={80} color={Colors.LIGHT_TEAL} />
-      <Text style={styles.text}>{props.message}</Text>
+      <View style={styles.subContainer}>
+        <Fontisto name="dropbox" size={80} color={Colors.LIGHT_TEAL} />
+        <Text style={styles.text}>{props.message}</Text>
+      </View>
     </View>
   );
 };
@@ -23,6 +25,13 @@ const styles = StyleSheet.create({
   container: {
     height: '100%',
     width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 100,
+  },
+  subContainer: {
+    paddingBottom: 100,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',

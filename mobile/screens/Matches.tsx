@@ -10,10 +10,12 @@ import { NavigationRoutes } from '../constants/NavigationRoutes';
 import ConfirmBox from '../components/base/ConfirmBox';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { OutdoorMatch, PPLMatch } from '../types';
+import { PPLMatch } from '../types';
 import EmptyListMessage from '../components/base/EmptyListMessage';
+import { UserTypes } from '../constants/UserTypes';
 
 const Matches = ({ navigation }) => {
+  const userType = useSelector((state: RootState) => state.auth.userType);
   const outdoors = useSelector((state: RootState) => state.match.outdoors);
   const ppls = useSelector((state: RootState) => state.match.ppls);
   const [searchText, setSearchText] = useState('');
@@ -76,18 +78,20 @@ const Matches = ({ navigation }) => {
           onPress: () => setDeleteConfirmationVisible(false),
         }}
       />
-      <Button
-        sticky={true}
-        position={{ bottom: 10, right: 10 }}
-        shape="square"
-        size={52}
-        color={Colors.DEEP_TEAL}
-        style="filled"
-        icon={() => (
-          <MaterialIcons name="post-add" size={24} color={Colors.OFF_WHITE} />
-        )}
-        onPress={() => navigation.navigate(NavigationRoutes.CREATE_MATCH)}
-      />
+      {userType === UserTypes.ADMIN && (
+        <Button
+          sticky={true}
+          position={{ bottom: 10, right: 10 }}
+          shape="square"
+          size={52}
+          color={Colors.DEEP_TEAL}
+          style="filled"
+          icon={() => (
+            <MaterialIcons name="post-add" size={24} color={Colors.OFF_WHITE} />
+          )}
+          onPress={() => navigation.navigate(NavigationRoutes.CREATE_MATCH)}
+        />
+      )}
     </View>
   );
 };

@@ -48,6 +48,13 @@ const CreatePlayer = ({ navigation, route }) => {
         );
         navigation.goBack();
         dispatch(setEditing(false));
+      })
+      .catch((error) => {
+        ToastAndroid.showWithGravity(
+          error,
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM
+        );
       });
   };
 

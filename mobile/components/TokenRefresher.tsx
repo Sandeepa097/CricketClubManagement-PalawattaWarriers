@@ -18,8 +18,7 @@ const TokenRefresher = () => {
     if (storedValues) {
       const parsedValues = JSON.parse(storedValues);
       api.addRequestTransform(async (req) => {
-        req.headers.Accept = 'application/json';
-        req.headers.Authorization = 'Bearer ' + parsedValues?.refreshToken;
+        req.headers['Authorization'] = 'Bearer ' + parsedValues?.refreshToken;
       });
 
       const response: any = await api.post('/auth/access_token');

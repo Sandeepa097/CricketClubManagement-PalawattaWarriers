@@ -8,7 +8,7 @@ import { PlayerMainRolls } from '../constants/PlayerMainRolls';
 import playerController from '../controllers/playerController';
 import { isBase64, isUrl } from '../services/fileService';
 import { findPlayer } from '../services/playerService';
-const fileTypeFromBuffer = require('file-type').fileTypeFromBuffer;
+import fileType = require('file-type');
 
 const playerValidations = [
   body('name').notEmpty().withMessage('Name is required.'),
@@ -44,8 +44,10 @@ playerRouter.post(
       .isBase64()
       .withMessage('Avatar must be a base64 string.')
       .custom(async (value) => {
+        if (!value) return true;
+
         const buffer = Buffer.from(value, 'base64');
-        const detectedType = await fileTypeFromBuffer(buffer);
+        const detectedType = await fileType.fromBuffer(buffer);
 
         if (
           !detectedType ||
@@ -88,7 +90,7 @@ playerRouter.put(
 
       if (isBase64(value)) {
         const buffer = Buffer.from(value, 'base64');
-        const detectedType = await fileTypeFromBuffer(buffer);
+        const detectedType = await fileType.fromBuffer(buffer);
 
         if (
           !detectedType ||

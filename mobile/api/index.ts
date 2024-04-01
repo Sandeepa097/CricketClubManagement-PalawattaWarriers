@@ -1,8 +1,13 @@
 import { create } from 'apisauce';
 import { API_URL } from '../config/config';
-import store from '../redux/store';
 import { StatusCodes } from 'http-status-codes';
 import { logout } from '../redux/slices/authSlice';
+
+let store: any;
+
+export const injectStore = (injectingStore: any) => {
+  store = injectingStore;
+};
 
 const api = create({
   baseURL: API_URL,

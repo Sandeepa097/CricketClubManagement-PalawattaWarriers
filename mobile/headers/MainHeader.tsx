@@ -5,16 +5,22 @@ import Logo from '../assets/Logo';
 import Button from '../components/base/Button';
 import { MaterialIcons } from '@expo/vector-icons';
 import ConfirmBox from '../components/base/ConfirmBox';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/slices/authSlice';
-import { AppDispatch } from '../redux/store';
+import { AppDispatch, RootState } from '../redux/store';
+import { UserTypes } from '../constants/UserTypes';
 
 const width: number = Dimensions.get('window').width;
 
 const MainHeader = (props: { title: string }) => {
+  const userType = useSelector((state: RootState) => state.auth.userType);
   const dispatch = useDispatch<AppDispatch>();
   const [optionsVisible, setOptionsVisible] = useState(false);
-  const onPress = () => setOptionsVisible(!optionsVisible);
+  const onPress = () => {
+    if (userType === UserTypes.GUEST) dispatch(logout());
+    else setOptionsVisible(!optionsVisible);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.leftContainer}>

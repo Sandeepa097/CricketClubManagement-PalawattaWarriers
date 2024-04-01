@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, Text, ToastAndroid } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, FlatList, ToastAndroid } from 'react-native';
 import Button from '../components/base/Button';
 import { AntDesign } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
@@ -9,17 +9,25 @@ import { NavigationRoutes } from '../constants/NavigationRoutes';
 import ConfirmBox from '../components/base/ConfirmBox';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
-import { deletePlayer } from '../redux/slices/playerSlice';
+import { deletePlayer, retrievePlayers } from '../redux/slices/playerSlice';
 import EmptyListMessage from '../components/base/EmptyListMessage';
 import { setEditing } from '../redux/slices/statusSlice';
+import { useIsFocused } from '@react-navigation/native';
 
 const Players = ({ navigation }) => {
+  const focused = useIsFocused();
   const dispatch = useDispatch<AppDispatch>();
   const [searchText, setSearchText] = useState('');
   const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
     useState(false);
   const [deleteRequestedId, setDeleteRequestedId] = useState(null);
   const players = useSelector((state: RootState) => state.player.players);
+
+  useEffect(() => {
+    if (focused) {
+      dispatch(retrievePlayers());
+    }
+  }, [focused]);
 
   return (
     <View style={styles.container}>
