@@ -7,6 +7,7 @@ import { navigationRef } from './rootNavigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
+import TokenRefresher from '../components/TokenRefresher';
 
 const MainNavigationContainer = () => {
   const insets = useSafeAreaInsets();
@@ -30,6 +31,7 @@ const MainNavigationContainer = () => {
         paddingBottom: insets.bottom,
         justifyContent: 'center',
       }}>
+      <TokenRefresher />
       <NavigationContainer
         ref={navigationRef}
         theme={{

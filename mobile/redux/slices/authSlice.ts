@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserTypes } from '../../constants/UserTypes';
 import * as SecureStore from 'expo-secure-store';
+import { create } from 'apisauce';
+import { API_URL } from '../../config/config';
 
 interface AuthState {
   userType: UserTypes | null;
@@ -17,12 +19,39 @@ interface AdminLogin {
   password: string;
 }
 
+const authApi = create({
+  baseURL: API_URL + '/auth',
+});
+
 export const login = createAsyncThunk(
   'auth/login',
-  async (payload: GuestLogin | AdminLogin, { dispatch }) => {
-    const data = JSON.stringify({ userType: payload.type, token: '' });
-    await SecureStore.setItemAsync('auth', data);
-    dispatch(authSlice.actions.setUser({ userType: payload.type, token: '' }));
+  async (payload: GuestLogin | AdminLogin, { dispatch, rejectWithValue }) => {
+    let data = {
+      userType: payload.type,
+      token: '',
+      refreshToken: '',
+    };
+    if (payload.type !== UserTypes.GUEST) {
+      const response: any = await authApi.post('/login', {
+        username: payload.username,
+        password: payload.password,
+      });
+      if (!response.ok) {
+        return rejectWithValue(response);
+      } else {
+        data = {
+          ...data,
+          userType: response.data.user.userType,
+          token: response.data.user.accessToken,
+          refreshToken: response.data.user.refreshToken,
+        };
+      }
+    }
+
+    await SecureStore.setItemAsync('auth', JSON.stringify(data));
+    dispatch(
+      authSlice.actions.setUser({ userType: data.userType, token: data.token })
+    );
   }
 );
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, ToastAndroid } from 'react-native';
 import { Colors } from '../constants/Colors';
 import LogoWithName from '../assets/LogoWithName';
 import Button from '../components/base/Button';
@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
 import { login } from '../redux/slices/authSlice';
 import { UserTypes } from '../constants/UserTypes';
+import { StatusCodes } from 'http-status-codes';
 
 const width: number = Dimensions.get('window').width;
 const height: number = Dimensions.get('window').height;
@@ -37,6 +38,16 @@ const Login = ({ navigation }) => {
         validationSchema={loginValidationSchema}
         onSubmit={(values) =>
           dispatch(login({ type: UserTypes.ADMIN, ...values }))
+            .unwrap()
+            .catch((error) => {
+              ToastAndroid.showWithGravity(
+                error.status === StatusCodes.UNAUTHORIZED
+                  ? error.data.message
+                  : 'Something went wrong. Please try again later.',
+                ToastAndroid.SHORT,
+                ToastAndroid.BOTTOM
+              );
+            })
         }>
         {({
           handleChange,

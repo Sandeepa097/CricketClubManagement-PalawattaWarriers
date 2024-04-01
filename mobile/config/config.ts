@@ -1,0 +1,6 @@
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const TOKEN_REFRESH_INTERVAL = Number(
+  process.env.EXPO_PUBLIC_TOKEN_REFRESH_INTERVAL
+);
+
+export { API_URL, TOKEN_REFRESH_INTERVAL };
