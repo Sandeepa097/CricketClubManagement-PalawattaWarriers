@@ -2,13 +2,13 @@ import { Router } from 'express';
 import { validatePermissions, validateRequest } from './validator';
 import { UserTypes } from '../constants/UserTypes';
 import { body, param } from 'express-validator';
-import { fileTypeFromBuffer } from 'file-type';
 import { AllowedFileMimeTypes } from '../constants/AllowedFileMimeTypes';
 import { AllowedFileByteSizes } from '../constants/AllowedFileByteSizes';
 import { PlayerMainRolls } from '../constants/PlayerMainRolls';
 import playerController from '../controllers/playerController';
 import { isBase64, isUrl } from '../services/fileService';
 import { findPlayer } from '../services/playerService';
+const fileTypeFromBuffer = require('file-type').fileTypeFromBuffer;
 
 const playerValidations = [
   body('name').notEmpty().withMessage('Name is required.'),
