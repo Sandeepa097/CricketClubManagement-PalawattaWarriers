@@ -9,13 +9,13 @@ import {
   NODE_ENV,
 } from './config/config';
 import router from './routes';
+import sequelizeConnection from './config/sequelizeConnection';
 
-const sequelize = require('./models').sequelize;
 const cloudinary = require('cloudinary').v2;
 
 const app: Application = express();
 
-sequelize
+sequelizeConnection
   .authenticate()
   .then(() => {
     if (NODE_ENV !== 'test')
