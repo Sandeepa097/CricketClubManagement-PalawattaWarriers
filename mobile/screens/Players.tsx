@@ -13,6 +13,7 @@ import { deletePlayer, retrievePlayers } from '../redux/slices/playerSlice';
 import EmptyListMessage from '../components/base/EmptyListMessage';
 import { setEditing } from '../redux/slices/statusSlice';
 import { useIsFocused } from '@react-navigation/native';
+import { UserTypes } from '../constants/UserTypes';
 
 const Players = ({ navigation }) => {
   const focused = useIsFocused();
@@ -21,6 +22,7 @@ const Players = ({ navigation }) => {
   const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
     useState(false);
   const [deleteRequestedId, setDeleteRequestedId] = useState(null);
+  const userType = useSelector((state: RootState) => state.auth.userType);
   const players = useSelector((state: RootState) => state.player.players);
 
   useEffect(() => {
@@ -75,6 +77,15 @@ const Players = ({ navigation }) => {
                   ToastAndroid.SHORT,
                   ToastAndroid.BOTTOM
                 );
+              })
+              .catch((error) => {
+                setDeleteRequestedId(null);
+                setDeleteConfirmationVisible(false);
+                ToastAndroid.showWithGravity(
+                  error,
+                  ToastAndroid.SHORT,
+                  ToastAndroid.BOTTOM
+                );
               });
           },
         }}
@@ -83,18 +94,20 @@ const Players = ({ navigation }) => {
           onPress: () => setDeleteConfirmationVisible(false),
         }}
       />
-      <Button
-        sticky={true}
-        position={{ bottom: 10, right: 10 }}
-        shape="square"
-        size={52}
-        color={Colors.DEEP_TEAL}
-        style="filled"
-        icon={() => (
-          <AntDesign name="adduser" size={24} color={Colors.OFF_WHITE} />
-        )}
-        onPress={() => navigation.navigate(NavigationRoutes.CREATE_PLAYER)}
-      />
+      {userType === UserTypes.ADMIN && (
+        <Button
+          sticky={true}
+          position={{ bottom: 10, right: 10 }}
+          shape="square"
+          size={52}
+          color={Colors.DEEP_TEAL}
+          style="filled"
+          icon={() => (
+            <AntDesign name="adduser" size={24} color={Colors.OFF_WHITE} />
+          )}
+          onPress={() => navigation.navigate(NavigationRoutes.CREATE_PLAYER)}
+        />
+      )}
     </View>
   );
 };

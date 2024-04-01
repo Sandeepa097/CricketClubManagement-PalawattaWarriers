@@ -37,23 +37,30 @@ export const createPlayer = createAsyncThunk(
     const response: any = await api.post('/players', payload);
     if (response.ok) {
       return { ...response.data.player };
-    } else {
-      rejectWithValue('Create player failed.');
     }
+    return rejectWithValue('Something went wrong.');
   }
 );
 
 export const updatePlayer = createAsyncThunk(
   'player/update',
-  async (payload: PlayerType) => {
-    return payload;
+  async (payload: PlayerType, { rejectWithValue }) => {
+    const response: any = await api.put(`/players/${payload.id}`, payload);
+    if (response.ok) {
+      return payload;
+    }
+    return rejectWithValue('Something went wrong.');
   }
 );
 
 export const deletePlayer = createAsyncThunk(
   'player/delete',
-  async (payload: number | string) => {
-    return payload;
+  async (payload: number | string, { rejectWithValue }) => {
+    const response: any = await api.delete(`/players/${payload}`);
+    if (response.ok) {
+      return payload;
+    }
+    return rejectWithValue('Something went wrong.');
   }
 );
 
