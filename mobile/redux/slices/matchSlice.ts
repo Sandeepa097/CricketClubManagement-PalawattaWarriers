@@ -40,14 +40,15 @@ interface FieldingStat {
 
 interface NewMatch {
   isPPL: boolean;
-  oppositeTeam: string | number | null | undefined;
+  oppositeTeamId: string | number | null | undefined;
   date: string;
   location: string;
   result: 'won' | 'lost' | 'draw' | null | undefined;
+  numberOfDeliveriesPerOver: number;
   officialPlayers: number[] | string[];
-  battingDetails: BattingStat[];
-  bowlingDetails: BowlingStat[];
-  fieldingDetails: FieldingStat[];
+  battingStats: BattingStat[];
+  bowlingStats: BowlingStat[];
+  fieldingStats: FieldingStat[];
 }
 
 const initialState: MatchState = {
@@ -58,30 +59,33 @@ const initialState: MatchState = {
 export const createMatch = createAsyncThunk(
   'match/create',
   async (payload: NewMatch, { getState }) => {
-    const bestBatsman = payload.battingDetails.length
+    console.log('bat ', payload.battingStats[0].values);
+    console.log('bowl ', payload.bowlingStats[0].values);
+    console.log('field ', payload.fieldingStats[0].values);
+    const bestBatsman = payload.battingStats.length
       ? {
-          id: payload.battingDetails[0].id,
+          id: payload.battingStats[0].id,
           name: (getState() as RootState).player.players.find(
-            (player) => player.id === payload.battingDetails[0].id
+            (player) => player.id === payload.battingStats[0].id
           ).name,
           avatar: (getState() as RootState).player.players.find(
-            (player) => player.id === payload.battingDetails[0].id
+            (player) => player.id === payload.battingStats[0].id
           ).avatar,
-          score: `${payload.battingDetails[0].values.score}/${payload.battingDetails[0].values.balls}`,
+          score: `${payload.battingStats[0].values.score}/${payload.battingStats[0].values.balls}`,
         }
       : null;
-    const bestBowler = payload.bowlingDetails.length
+    const bestBowler = payload.bowlingStats.length
       ? {
-          id: payload.bowlingDetails[0].id,
+          id: payload.bowlingStats[0].id,
           name: (getState() as RootState).player.players.find(
-            (player) => player.id === payload.bowlingDetails[0].id
+            (player) => player.id === payload.bowlingStats[0].id
           ).name,
           avatar: (getState() as RootState).player.players.find(
-            (player) => player.id === payload.battingDetails[0].id
+            (player) => player.id === payload.battingStats[0].id
           ).avatar,
-          score: `${payload.bowlingDetails[0].values.wickets}/${
-            Math.floor(Number(payload.bowlingDetails[0].values.overs)) * 6 +
-            ((Math.floor(Number(payload.bowlingDetails[0].values.overs)) * 10) %
+          score: `${payload.bowlingStats[0].values.wickets}/${
+            Math.floor(Number(payload.bowlingStats[0].values.overs)) * 6 +
+            ((Math.floor(Number(payload.bowlingStats[0].values.overs)) * 10) %
               10)
           }`,
         }
@@ -92,7 +96,7 @@ export const createMatch = createAsyncThunk(
       return { ...payload, id, bestBatsman, bestBowler, title: payload.date };
     } else {
       const compactMatch = (getState() as RootState).match.outdoors.find(
-        (outdoor) => outdoor.oppositeTeam.id === payload.oppositeTeam
+        (outdoor) => outdoor.oppositeTeam.id === payload.oppositeTeamId
       );
       const id = compactMatch ? compactMatch.matches.length + 1 : 1;
       return compactMatch
@@ -106,7 +110,7 @@ export const createMatch = createAsyncThunk(
         : {
             id: (getState() as RootState).match.outdoors.length + 1,
             title: (getState() as RootState).team.teams.find(
-              (team) => team.id === payload.oppositeTeam
+              (team) => team.id === payload.oppositeTeamId
             ).name,
             bestBatsman,
             bestBowler,

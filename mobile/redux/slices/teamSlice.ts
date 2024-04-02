@@ -1,5 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../store';
+import api from '../../api';
 
 interface Team {
   id: number | string;
@@ -16,9 +17,9 @@ const initialState: TeamState = {
 
 export const createTeam = createAsyncThunk(
   'team/create',
-  async (payload: { name: string }, { getState }) => {
-    const id = (getState() as RootState).team.teams.length + 1;
-    return { ...payload, id };
+  async (payload: { name: string }) => {
+    const response: any = await api.post('/teams', payload);
+    if (response.ok) return response.data.oppositeTeam;
   }
 );
 

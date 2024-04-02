@@ -12,7 +12,7 @@ const MatchValidations = [
     .toInt()
     .custom(async (value) => {
       if (!value) return true;
-      const oppositeTeam = await findOppositeTeam(value);
+      const oppositeTeam = await findOppositeTeam({ id: value });
       if (!oppositeTeam) throw Error('Opposite team is invalid.');
       return true;
     }),
@@ -80,7 +80,7 @@ const MatchValidations = [
   body('bowlingStats.*.values.wickets')
     .isInt({ min: 0 })
     .withMessage('Number of wickets must be an unsigned integer.'),
-  body('battingStats.*.values.overs')
+  body('bowlingStats.*.values.overs')
     .notEmpty()
     .withMessage('Number of overs is required.')
     .isFloat({ min: 0.1 })

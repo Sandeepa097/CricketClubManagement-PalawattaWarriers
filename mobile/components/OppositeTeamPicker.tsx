@@ -144,7 +144,15 @@ const OppositeTeamPicker = (props: OppositeTeamPickerProps) => {
               name: '',
             }}
             validationSchema={Yup.object().shape({
-              name: Yup.string().required('Name is required.'),
+              name: Yup.string()
+                .test('is-unique', 'Name is already taken.', (val: any) => {
+                  if (val)
+                    return !teams.find(
+                      (team) => team.name.toLowerCase() === val.toLowerCase()
+                    );
+                  return true;
+                })
+                .required('Name is required.'),
             })}
             onSubmit={(values) => {
               dispatch(createTeam({ name: values.name }))

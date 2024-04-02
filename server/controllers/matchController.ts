@@ -80,7 +80,10 @@ const create = async (req: Request, res: Response) => {
     createdMatch.dataValues.id,
     (bowlingStats as BowlingStatsInterface[]).map((stat) => ({
       id: stat.id,
-      points: calculateBowlingPoints({ ...stat.values }),
+      points: calculateBowlingPoints({
+        ...stat.values,
+        numberOfDeliveriesPerOver,
+      }),
     }))
   );
   await setMatchPlayersFieldingStats(

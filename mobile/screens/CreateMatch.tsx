@@ -28,7 +28,7 @@ const CreateMatch = ({ navigation }) => {
 
   const matchValidationSchema = Yup.object().shape({
     isPPL: Yup.boolean(),
-    oppositeTeam: Yup.number().when('isPPL', (isPPL, schema) => {
+    oppositeTeamId: Yup.number().when('isPPL', (isPPL, schema) => {
       if (!isPPL[0]) return schema.required('Opposite Team is required.');
       return schema.notRequired();
     }),
@@ -38,10 +38,21 @@ const CreateMatch = ({ navigation }) => {
       if (!isPPL[0]) return schema.required('Result is required.');
       return schema.notRequired();
     }),
+    numberOfDeliveriesPerOver: Yup.number()
+      .integer('Number of deliveries per over should be an integer.')
+      .min(
+        1,
+        'Number of deliveries per over must be greater than or equal to 1.'
+      )
+      .max(
+        10,
+        'Number of deliveries per over must be less than or equal to 10.'
+      )
+      .required('Number of deliveries per over is required.'),
     officialPlayers: Yup.array()
       .of(Yup.number())
       .min(1, 'Team should have at least one player.'),
-    battingDetails: Yup.array().of(
+    battingStats: Yup.array().of(
       Yup.object().shape({
         values: Yup.object().shape({
           balls: yupPositiveIntegerSchema('Number of balls').required(
@@ -54,7 +65,7 @@ const CreateMatch = ({ navigation }) => {
         }),
       })
     ),
-    bowlingDetails: Yup.array().of(
+    bowlingStats: Yup.array().of(
       Yup.object().shape({
         values: Yup.object().shape({
           wickets: yupPositiveIntegerSchema('Number of wickets'),
@@ -71,7 +82,7 @@ const CreateMatch = ({ navigation }) => {
         }),
       })
     ),
-    fieldingDetails: Yup.array().of(
+    fieldingStats: Yup.array().of(
       Yup.object().shape({
         values: Yup.object().shape({
           catches: yupPositiveIntegerSchema('Number of catches'),
@@ -90,14 +101,15 @@ const CreateMatch = ({ navigation }) => {
         <Formik
           initialValues={{
             isPPL: false,
-            oppositeTeam: null,
+            oppositeTeamId: null,
             date: '',
             location: '',
             result: null,
+            numberOfDeliveriesPerOver: 6,
             officialPlayers: [],
-            battingDetails: [],
-            bowlingDetails: [],
-            fieldingDetails: [],
+            battingStats: [],
+            bowlingStats: [],
+            fieldingStats: [],
           }}
           validationSchema={matchValidationSchema}
           onSubmit={(values) => dispatch(createMatch(values))}>
@@ -112,9 +124,9 @@ const CreateMatch = ({ navigation }) => {
               {!values.isPPL && (
                 <OppositeTeamPicker
                   placeholder="Opposite Team"
-                  value={values.oppositeTeam}
-                  onChange={(value) => setFieldValue('oppositeTeam', value)}
-                  error={errors.oppositeTeam as string}
+                  value={values.oppositeTeamId}
+                  onChange={(value) => setFieldValue('oppositeTeamId', value)}
+                  error={errors.oppositeTeamId as string}
                 />
               )}
               <DatePicker
@@ -139,6 +151,15 @@ const CreateMatch = ({ navigation }) => {
                   error={errors.result as string}
                 />
               )}
+              <TextInput
+                value={values.numberOfDeliveriesPerOver.toString()}
+                onChangeText={(value) =>
+                  setFieldValue('numberOfDeliveriesPerOver', value)
+                }
+                length="long"
+                placeholder="Number of deliveries per over"
+                error={errors.numberOfDeliveriesPerOver}
+              />
               <PlayersPicker
                 placeholder="Players of Your Team"
                 players={players}
@@ -147,20 +168,20 @@ const CreateMatch = ({ navigation }) => {
                 error={errors.officialPlayers as string}
                 onChangeSelection={(officialPlayers) => {
                   setFieldValue(
-                    'battingDetails',
-                    values.battingDetails.filter((batsman) =>
+                    'battingStats',
+                    values.battingStats.filter((batsman) =>
                       officialPlayers.includes(batsman.id)
                     )
                   );
                   setFieldValue(
-                    'bowlingDetails',
-                    values.bowlingDetails.filter((bowler) =>
+                    'bowlingStats',
+                    values.bowlingStats.filter((bowler) =>
                       officialPlayers.includes(bowler.id)
                     )
                   );
                   setFieldValue(
-                    'fieldingDetails',
-                    values.fieldingDetails.filter((fielder) =>
+                    'fieldingStats',
+                    values.fieldingStats.filter((fielder) =>
                       officialPlayers.includes(fielder.id)
                     )
                   );
@@ -174,10 +195,10 @@ const CreateMatch = ({ navigation }) => {
                 players={players.filter((player) =>
                   values.officialPlayers.includes(player.id)
                 )}
-                values={values.battingDetails}
-                errors={errors.battingDetails as { values: object }[]}
-                onChangeValues={(battingDetails) =>
-                  setFieldValue('battingDetails', battingDetails)
+                values={values.battingStats}
+                errors={errors.battingStats as { values: object }[]}
+                onChangeValues={(battingStats) =>
+                  setFieldValue('battingStats', battingStats)
                 }
                 itemProperties={[
                   {
@@ -191,7 +212,7 @@ const CreateMatch = ({ navigation }) => {
                   { type: 'text', name: 'sixes', placeholder: '6s' },
                   {
                     type: 'switch',
-                    name: 'out',
+                    name: 'isOut',
                     text: 'Out',
                   },
                 ]}
@@ -203,10 +224,10 @@ const CreateMatch = ({ navigation }) => {
                 players={players.filter((player) =>
                   values.officialPlayers.includes(player.id)
                 )}
-                values={values.bowlingDetails}
-                errors={errors.bowlingDetails as { values: object }[]}
-                onChangeValues={(bowlingDetails) =>
-                  setFieldValue('bowlingDetails', bowlingDetails)
+                values={values.bowlingStats}
+                errors={errors.bowlingStats as { values: object }[]}
+                onChangeValues={(bowlingStats) =>
+                  setFieldValue('bowlingStats', bowlingStats)
                 }
                 itemProperties={[
                   { type: 'text', name: 'wickets', placeholder: 'Wickets' },
@@ -222,10 +243,10 @@ const CreateMatch = ({ navigation }) => {
                 players={players.filter((player) =>
                   values.officialPlayers.includes(player.id)
                 )}
-                values={values.fieldingDetails}
-                errors={errors.fieldingDetails as { values: object }[]}
-                onChangeValues={(fieldingDetails) =>
-                  setFieldValue('fieldingDetails', fieldingDetails)
+                values={values.fieldingStats}
+                errors={errors.fieldingStats as { values: object }[]}
+                onChangeValues={(fieldingStats) =>
+                  setFieldValue('fieldingStats', fieldingStats)
                 }
                 itemProperties={[
                   { type: 'text', name: 'catches', placeholder: 'Catches' },
