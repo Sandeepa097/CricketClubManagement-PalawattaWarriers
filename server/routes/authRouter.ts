@@ -16,7 +16,7 @@ authRouter.post(
 
 authRouter.post(
   '/access_token',
-  validateRefreshToken(),
+  validateRefreshToken,
   authController.newAccessToken
 );
 

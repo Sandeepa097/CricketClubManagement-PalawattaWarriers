@@ -34,16 +34,28 @@ export const hashPassword = async (password: string) => {
   return await bcrypt.hash(password, SALT_ROUNDS);
 };
 
-export const decodeAccessToken = (token: string): AuthTokenAttributes => {
-  return jwt.verify(
-    token,
-    ACCESS_TOKEN_SECRET as string
-  ) as AuthTokenAttributes;
+export const decodeAccessToken = (
+  token: string
+): AuthTokenAttributes | null => {
+  try {
+    return jwt.verify(
+      token,
+      ACCESS_TOKEN_SECRET as string
+    ) as AuthTokenAttributes;
+  } catch (error) {
+    return null;
+  }
 };
 
-export const decodeRefreshToken = (token: string): AuthTokenAttributes => {
-  return jwt.verify(
-    token,
-    REFRESH_TOKEN_SECRET as string
-  ) as AuthTokenAttributes;
+export const decodeRefreshToken = (
+  token: string
+): AuthTokenAttributes | null => {
+  try {
+    return jwt.verify(
+      token,
+      REFRESH_TOKEN_SECRET as string
+    ) as AuthTokenAttributes;
+  } catch (error) {
+    return null;
+  }
 };

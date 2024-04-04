@@ -36,13 +36,7 @@ User.init(
     },
     scopes: {
       withPasswordHash: {
-        attributes: [
-          'username',
-          'userType',
-          'passwordHash',
-          'createdAt',
-          'updatedAt',
-        ],
+        attributes: { exclude: [] },
       },
     },
   }

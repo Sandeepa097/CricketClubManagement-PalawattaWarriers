@@ -49,7 +49,7 @@ const login = async (req: Request, res: Response) => {
 
 const newAccessToken = async (req: Request, res: Response) => {
   const authUser = await findUser({
-    id: req.body.username,
+    id: req.body.id,
   });
 
   if (!authUser)

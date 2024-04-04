@@ -37,6 +37,12 @@ export const validatePermissions =
         .json({ message: 'Not authenticated.' });
 
     const authUser = decodeAccessToken(authHeader.substring(7));
+
+    if (!authUser)
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        message: 'Token expired or invalid.',
+      });
+
     const isArray = Array.isArray(authorizedUserType);
     if (isArray && authorizedUserType.includes(authUser.userType))
       return next();
@@ -48,22 +54,30 @@ export const validatePermissions =
       .json({ message: 'No permissions.' });
   };
 
-export const validateRefreshToken =
-  () => (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.get('authorization');
-    if (!authHeader || !authHeader.toLowerCase().startsWith('bearer '))
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .json({ message: 'Not authenticated.' });
-
-    const authUser = decodeRefreshToken(authHeader.substring(7));
-
-    if (authUser && authUser.id) {
-      req.body = { ...req.body, id: authUser.id };
-      return next();
-    }
-
+export const validateRefreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.get('authorization');
+  if (!authHeader || !authHeader.toLowerCase().startsWith('bearer '))
     return res
       .status(StatusCodes.UNAUTHORIZED)
       .json({ message: 'Not authenticated.' });
-  };
+
+  const authUser = decodeRefreshToken(authHeader.substring(7));
+
+  if (!authUser)
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: 'Token expired or invalid.',
+    });
+
+  if (authUser && authUser.id) {
+    req.body = { ...req.body, id: authUser.id };
+    return next();
+  }
+
+  return res
+    .status(StatusCodes.UNAUTHORIZED)
+    .json({ message: 'Not authenticated.' });
+};
