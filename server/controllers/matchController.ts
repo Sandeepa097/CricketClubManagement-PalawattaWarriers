@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import {
   createMatch,
+  findMatch,
   getOutdoorMatches,
   getPPLMatches,
   removeMatch,
@@ -68,16 +69,16 @@ const create = async (req: Request, res: Response) => {
     result,
   });
 
-  await setMatchPlayers(createdMatch.dataValues.id, officialPlayers);
+  await setMatchPlayers(createdMatch, officialPlayers);
   await setMatchPlayersBattingStats(
-    createdMatch.dataValues.id,
+    createdMatch,
     (battingStats as BattingStatsInterface[]).map((stat) => ({
       id: stat.id,
       points: calculateBattingPoints({ ...stat.values }),
     }))
   );
   await setMatchPlayersBowlingStats(
-    createdMatch.dataValues.id,
+    createdMatch,
     (bowlingStats as BowlingStatsInterface[]).map((stat) => ({
       id: stat.id,
       points: calculateBowlingPoints({
@@ -87,7 +88,7 @@ const create = async (req: Request, res: Response) => {
     }))
   );
   await setMatchPlayersFieldingStats(
-    createdMatch.dataValues.id,
+    createdMatch,
     (fieldingStats as FieldingStatsInterface[]).map((stat) => ({
       id: stat.id,
       points: calculateFieldingPoints({ ...stat.values }),
@@ -114,17 +115,24 @@ const update = async (req: Request, res: Response) => {
     numberOfDeliveriesPerOver,
   } = req.body;
 
-  const updatedMatch = await updateMatch(matchId, {
+  await updateMatch(matchId, {
     oppositeTeamId,
     date,
     location,
     result,
   });
 
-  await setMatchPlayers(matchId, officialPlayers);
+  const updatedMatch = await findMatch(matchId);
+
+  if (!updatedMatch)
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: 'Match not found.' });
+
+  await setMatchPlayers(updatedMatch, officialPlayers);
 
   await setMatchPlayersBattingStats(
-    matchId,
+    updatedMatch,
     (battingStats as BattingStatsInterface[]).map((stat) => ({
       id: stat.id,
       points: calculateBattingPoints({ ...stat.values }),
@@ -132,7 +140,7 @@ const update = async (req: Request, res: Response) => {
   );
 
   await setMatchPlayersBowlingStats(
-    matchId,
+    updatedMatch,
     (bowlingStats as BowlingStatsInterface[]).map((stat) => ({
       id: stat.id,
       points: calculateBowlingPoints({
@@ -143,7 +151,7 @@ const update = async (req: Request, res: Response) => {
   );
 
   await setMatchPlayersFieldingStats(
-    matchId,
+    updatedMatch,
     (fieldingStats as FieldingStatsInterface[]).map((stat) => ({
       id: stat.id,
       points: calculateFieldingPoints({ ...stat.values }),

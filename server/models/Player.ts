@@ -21,7 +21,7 @@ class Player extends Model implements PlayerInstance {
   public feesPayingYear!: number;
 
   static associate(models: any) {
-    // define association here
+    //
   }
 }
 

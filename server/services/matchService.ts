@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import { Match, Player } from '../models';
-import { findPlayers } from './playerService';
+import { findPlayer, findPlayers } from './playerService';
 
 interface CreateMatchAttributes {
   oppositeTeamId: number | null;
@@ -36,34 +36,31 @@ export const getOutdoorMatches = async () => {
   });
 };
 
-export const setMatchPlayers = async (id: number, players: number[]) => {
+export const setMatchPlayers = async (match: Match, players: number[]) => {
   const selectedPlayers = await findPlayers(players);
-  const match = await findMatch(id);
 
-  return match?.setMatchPlayers(selectedPlayers);
+  return match.setPlayers(selectedPlayers);
 };
 
 export const setMatchPlayersBattingStats = async (
-  id: number,
+  match: Match,
   players: { id: number; points: number }[]
 ) => {
-  const match = await findMatch(id);
-
-  return match?.setMatchPlayersBattingStats(
-    players.map((player) => ({
-      id: player.id,
-      through: { points: player.points },
-    }))
-  );
+  return players.map(async (player) => {
+    const selectedPlayer = await findPlayer(player.id);
+    return player
+      ? match.setMatchPlayerBattingStats(selectedPlayer as Player, {
+          points: player.points,
+        })
+      : null;
+  });
 };
 
 export const setMatchPlayersBowlingStats = async (
-  id: number,
+  match: Match,
   players: { id: number; points: number }[]
 ) => {
-  const match = await findMatch(id);
-
-  return match?.setMatchPlayersBowlingStats(
+  return match.setMatchPlayerBowlingStats(
     players.map((player) => ({
       id: player.id,
       through: { points: player.points },
@@ -72,12 +69,10 @@ export const setMatchPlayersBowlingStats = async (
 };
 
 export const setMatchPlayersFieldingStats = async (
-  id: number,
+  match: Match,
   players: { id: number; points: number }[]
 ) => {
-  const match = await findMatch(id);
-
-  return match?.setMatchPlayersFieldingStats(
+  return match.setMatchPlayerFieldingStats(
     players.map((player) => ({
       id: player.id,
       through: { points: player.points },

@@ -1,7 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelizeConnection from '../config/sequelizeConnection';
 import Player from './Player';
-import MatchPlayer from './MatchPlayer';
 
 interface MatchInstance extends Model {
   oppositeTeamId?: number | null;
@@ -18,22 +17,20 @@ class Match extends Model implements MatchInstance {
   public result?: string | null | undefined;
   public numberOfDeliveriesPerOver?: number | undefined;
 
-  public setMatchPlayers!: (players: Player[]) => Promise<void>;
-  public setMatchPlayersBattingStats!: (
+  public setPlayers!: (players: Player[]) => Promise<void>;
+  public setMatchPlayerBattingStats!: (
+    player: Player,
+    { points }: { points: number }
+  ) => Promise<void>;
+  public setMatchPlayerBowlingStats!: (
     players: { id: number; through: { points: number } }[]
   ) => Promise<void>;
-  public setMatchPlayersBowlingStats!: (
-    players: { id: number; through: { points: number } }[]
-  ) => Promise<void>;
-  public setMatchPlayersFieldingStats!: (
+  public setMatchPlayerFieldingStats!: (
     players: { id: number; through: { points: number } }[]
   ) => Promise<void>;
 
   static associate(models: any) {
-    Match.belongsToMany(Player, {
-      through: MatchPlayer,
-      as: 'OfficialPlayers',
-    });
+    //
   }
 }
 
