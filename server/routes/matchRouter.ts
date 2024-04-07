@@ -52,17 +52,21 @@ const MatchValidations = [
     }),
   body('battingStats.*.values.score')
     .isInt({ min: 0 })
+    .toInt()
     .withMessage('Score must be an unsigned integer.'),
   body('battingStats.*.values.balls')
     .notEmpty()
     .withMessage('Number of balls is required.')
     .isInt({ min: 1 })
+    .toInt()
     .withMessage('Must have faced at least one ball.'),
   body('battingStats.*.values.sixes')
     .isInt({ min: 0 })
+    .toInt()
     .withMessage('Number of sixes must be an unsigned integer.'),
   body('battingStats.*.values.fours')
     .isInt({ min: 0 })
+    .toInt()
     .withMessage('Number of fours must be an unsigned integer.'),
   body('battingStats.*.values.isOut')
     .isBoolean()
@@ -79,17 +83,21 @@ const MatchValidations = [
     }),
   body('bowlingStats.*.values.wickets')
     .isInt({ min: 0 })
+    .toInt()
     .withMessage('Number of wickets must be an unsigned integer.'),
   body('bowlingStats.*.values.overs')
     .notEmpty()
     .withMessage('Number of overs is required.')
     .isFloat({ min: 0.1 })
+    .toFloat()
     .withMessage('Number of overs must be an unsigned decimal.'),
   body('bowlingStats.*.values.conceded')
     .isInt({ min: 0 })
+    .toInt()
     .withMessage('Runs conceded must be an unsigned integer.'),
   body('bowlingStats.*.values.maidens')
     .isInt({ min: 0 })
+    .toInt()
     .withMessage('Number of maidens must be an unsigned integer.'),
   body('fieldingStats')
     .isArray()
@@ -105,15 +113,19 @@ const MatchValidations = [
     }),
   body('fieldingStats.*.values.catches')
     .isInt({ min: 0 })
+    .toInt()
     .withMessage('Number of catches must be an unsigned integer.'),
   body('fieldingStats.*.values.stumps')
     .isInt({ min: 0 })
+    .toInt()
     .withMessage('Number of stumps must be an unsigned integer.'),
   body('fieldingStats.*.values.directHits')
     .isInt({ min: 0 })
+    .toInt()
     .withMessage('Number of direct hits must be an unsigned integer.'),
   body('fieldingStats.*.values.indirectHits')
     .isInt({ min: 0 })
+    .toInt()
     .withMessage('Number of indirect hits must be an unsigned integer.'),
 ];
 
