@@ -32,13 +32,16 @@ export const removeMatch = async (id: number) => {
 };
 
 export const getPPLMatches = async () => {
-  return await Match.findAll({ where: { oppositeTeamId: { [Op.is]: null } } });
+  return await Match.findAll({
+    where: { oppositeTeamId: { [Op.is]: null } },
+    include: [{ all: true }],
+  });
 };
 
 export const getOutdoorMatches = async () => {
   return await Match.findAll({
     where: { oppositeTeamId: { [Op.not]: null } },
-    group: ['oppositeTeamId'],
+    include: [{ all: true }],
   });
 };
 
@@ -51,7 +54,7 @@ export const setMatchPlayers = async (match: Match, players: number[]) => {
   }
 
   const selectedPlayers = await findPlayers(players);
-  return match.setPlayers(selectedPlayers);
+  return match.setOfficialPlayers(selectedPlayers);
 };
 
 export const setMatchPlayersBattingStats = async (
@@ -66,7 +69,7 @@ export const setMatchPlayersBattingStats = async (
     points: number;
   }[]
 ) => {
-  const previousRecords = await match.getMatchPlayerBattingStats();
+  const previousRecords = await match.getBattingStats();
   for (let i = 0; i < previousRecords.length; i++) {
     await previousRecords[i].destroy();
   }
@@ -82,9 +85,7 @@ export const setMatchPlayersBattingStats = async (
   }));
   return await Promise.all(
     playersStats.map(async (stat) => {
-      return await match.createMatchPlayerBattingStat(
-        stat as MatchPlayerBattingStat
-      );
+      return await match.createBattingStat(stat as MatchPlayerBattingStat);
     })
   );
 };
@@ -100,7 +101,7 @@ export const setMatchPlayersBowlingStats = async (
     points: number;
   }[]
 ) => {
-  const previousRecords = await match.getMatchPlayerBowlingStats();
+  const previousRecords = await match.getBowlingStats();
   for (let i = 0; i < previousRecords.length; i++) {
     await previousRecords[i].destroy();
   }
@@ -115,9 +116,7 @@ export const setMatchPlayersBowlingStats = async (
   }));
   return await Promise.all(
     playersStats.map(async (stat) => {
-      return await match.createMatchPlayerBowlingStat(
-        stat as MatchPlayerBowlingStat
-      );
+      return await match.createBowlingStat(stat as MatchPlayerBowlingStat);
     })
   );
 };
@@ -133,7 +132,7 @@ export const setMatchPlayersFieldingStats = async (
     points: number;
   }[]
 ) => {
-  const previousRecords = await match.getMatchPlayerFieldingStats();
+  const previousRecords = await match.getFieldingStats();
   for (let i = 0; i < previousRecords.length; i++) {
     await previousRecords[i].destroy();
   }
@@ -148,9 +147,7 @@ export const setMatchPlayersFieldingStats = async (
   }));
   return await Promise.all(
     playersStats.map(async (stat) => {
-      return await match.createMatchPlayerFieldingStat(
-        stat as MatchPlayerFieldingStat
-      );
+      return await match.createFieldingStat(stat as MatchPlayerFieldingStat);
     })
   );
 };

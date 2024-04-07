@@ -177,7 +177,6 @@ const update = async (req: Request, res: Response) => {
 
   return res.status(StatusCodes.CREATED).json({
     message: 'Match updated successfully.',
-    match: updatedMatch,
   });
 };
 

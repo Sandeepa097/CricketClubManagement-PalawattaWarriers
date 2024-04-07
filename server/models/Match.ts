@@ -20,20 +20,20 @@ class Match extends Model implements MatchInstance {
   public result?: string | null | undefined;
   public numberOfDeliveriesPerOver?: number | undefined;
 
-  public setPlayers!: (players: Player[]) => Promise<void>;
+  public setOfficialPlayers!: (players: Player[]) => Promise<void>;
 
-  public getMatchPlayerBattingStats!: () => Promise<MatchPlayerBattingStat[]>;
-  public createMatchPlayerBattingStat!: (
+  public getBattingStats!: () => Promise<MatchPlayerBattingStat[]>;
+  public createBattingStat!: (
     battingStat: MatchPlayerBattingStat
   ) => Promise<void>;
 
-  public getMatchPlayerBowlingStats!: () => Promise<MatchPlayerBowlingStat[]>;
-  public createMatchPlayerBowlingStat!: (
+  public getBowlingStats!: () => Promise<MatchPlayerBowlingStat[]>;
+  public createBowlingStat!: (
     bowlingStat: MatchPlayerBowlingStat
   ) => Promise<void>;
 
-  public getMatchPlayerFieldingStats!: () => Promise<MatchPlayerFieldingStat[]>;
-  public createMatchPlayerFieldingStat!: (
+  public getFieldingStats!: () => Promise<MatchPlayerFieldingStat[]>;
+  public createFieldingStat!: (
     fieldingStat: MatchPlayerFieldingStat
   ) => Promise<void>;
 
@@ -53,6 +53,9 @@ Match.init(
   {
     sequelize: sequelizeConnection,
     modelName: 'Match',
+    defaultScope: {
+      attributes: { include: [] },
+    },
   }
 );
 

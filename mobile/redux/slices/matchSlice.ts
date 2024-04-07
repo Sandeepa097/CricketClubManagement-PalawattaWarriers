@@ -59,9 +59,6 @@ const initialState: MatchState = {
 export const createMatch = createAsyncThunk(
   'match/create',
   async (payload: NewMatch, { getState }) => {
-    console.log('bat ', payload.battingStats[0].values);
-    console.log('bowl ', payload.bowlingStats[0].values);
-    console.log('field ', payload.fieldingStats[0].values);
     const bestBatsman = payload.battingStats.length
       ? {
           id: payload.battingStats[0].id,

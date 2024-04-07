@@ -54,7 +54,6 @@ const update = async (req: Request, res: Response) => {
 
   return res.status(StatusCodes.OK).json({
     message: 'Player updated successfully.',
-    player: updatedPlayer,
   });
 };
 
