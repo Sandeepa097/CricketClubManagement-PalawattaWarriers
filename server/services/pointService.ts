@@ -90,7 +90,7 @@ export const calculateBowlingPoints = ({
     Math.floor(overs) * (numberOfDeliveriesPerOver || 6) +
     (overs - Math.floor(overs)) * 10;
   const oversIfSixDeliveriesPerOver =
-    Math.floor(totalNumberOfBalls / 6) + (totalNumberOfBalls % 6);
+    Math.floor(totalNumberOfBalls / 6) + (totalNumberOfBalls % 6) / 10;
 
   // Points for economy if bowled at least 2 overs
   if (oversIfSixDeliveriesPerOver < 2) return totalPoints;
