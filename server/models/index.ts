@@ -26,21 +26,30 @@ Match.hasMany(MatchPlayerBattingStat, {
   foreignKey: 'matchId',
   as: 'battingStats',
 });
-Player.hasMany(MatchPlayerBattingStat, { foreignKey: 'playerId' });
+Player.hasMany(MatchPlayerBattingStat, {
+  foreignKey: 'playerId',
+  as: 'battingStats',
+});
 
 // Bowling stats
 Match.hasMany(MatchPlayerBowlingStat, {
   foreignKey: 'matchId',
   as: 'bowlingStats',
 });
-Player.hasMany(MatchPlayerBowlingStat, { foreignKey: 'playerId' });
+Player.hasMany(MatchPlayerBowlingStat, {
+  foreignKey: 'playerId',
+  as: 'bowlingStats',
+});
 
 // Fielding stats
 Match.hasMany(MatchPlayerFieldingStat, {
   foreignKey: 'matchId',
   as: 'fieldingStats',
 });
-Player.hasMany(MatchPlayerFieldingStat, { foreignKey: 'playerId' });
+Player.hasMany(MatchPlayerFieldingStat, {
+  foreignKey: 'playerId',
+  as: 'fieldingStats',
+});
 
 export {
   User,

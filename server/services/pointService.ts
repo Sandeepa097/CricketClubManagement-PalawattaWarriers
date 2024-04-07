@@ -1,3 +1,11 @@
+import sequelizeConnection from '../config/sequelizeConnection';
+import {
+  MatchPlayerBattingStat,
+  MatchPlayerBowlingStat,
+  MatchPlayerFieldingStat,
+  Player,
+} from '../models';
+
 interface BattingStatsInterface {
   score?: number;
   balls: number;
@@ -121,4 +129,170 @@ export const calculateFieldingPoints = ({
   totalPoints += 10 * (indirectHits || 0);
 
   return totalPoints;
+};
+
+export const getBattingRankings = async () => {
+  const battingRankings = await Player.findAll({
+    attributes: ['id', 'name', 'avatar'],
+    group: ['Player.id'],
+    include: [
+      {
+        model: MatchPlayerBattingStat,
+        as: 'battingStats',
+        attributes: [
+          [sequelizeConnection.literal('sum(points)'), 'battingPoints'],
+        ],
+        required: true,
+      },
+    ],
+    raw: true,
+    order: sequelizeConnection.literal(
+      'IFNULL(SUM("battingStats.battingPoints"), 0) DESC'
+    ),
+    limit: 10,
+  });
+
+  const formattedBattingRankings = (battingRankings as any).map(
+    (ranking: any) => ({
+      ...ranking,
+      points: ranking['battingStats.battingPoints'],
+    })
+  );
+
+  formattedBattingRankings.forEach(
+    (ranking: any) => delete ranking['battingStats.battingPoints']
+  );
+
+  return formattedBattingRankings;
+};
+
+export const getBowlingRankings = async () => {
+  const bowlingRankings = await Player.findAll({
+    attributes: ['id', 'name', 'avatar'],
+    group: ['Player.id'],
+    include: [
+      {
+        model: MatchPlayerBowlingStat,
+        as: 'bowlingStats',
+        attributes: [
+          [sequelizeConnection.literal('sum(points)'), 'bowlingPoints'],
+        ],
+        required: true,
+      },
+    ],
+    raw: true,
+    order: sequelizeConnection.literal(
+      'IFNULL(SUM("bowlingStats.bowlingPoints"), 0) DESC'
+    ),
+    limit: 10,
+  });
+
+  const formattedBowlingRankings = (bowlingRankings as any).map(
+    (ranking: any) => ({
+      ...ranking,
+      points: ranking['bowlingStats.bowlingPoints'],
+    })
+  );
+
+  formattedBowlingRankings.forEach(
+    (ranking: any) => delete ranking['bowlingStats.bowlingPoints']
+  );
+
+  return formattedBowlingRankings;
+};
+
+export const getFieldingRankings = async () => {
+  const fieldingRankings = await Player.findAll({
+    attributes: ['id', 'name', 'avatar'],
+    group: ['Player.id'],
+    include: [
+      {
+        model: MatchPlayerFieldingStat,
+        as: 'fieldingStats',
+        attributes: [
+          [sequelizeConnection.literal('sum(points)'), 'fieldingPoints'],
+        ],
+      },
+    ],
+    raw: true,
+    order: sequelizeConnection.literal(
+      'IFNULL(SUM("fieldingStats.fieldingPoints"), 0) DESC'
+    ),
+    limit: 10,
+  });
+
+  const formattedFieldingRankings = (fieldingRankings as any).map(
+    (ranking: any) => ({
+      ...ranking,
+      points: ranking['fieldingStats.fieldingPoints'],
+    })
+  );
+
+  formattedFieldingRankings.forEach(
+    (ranking: any) => delete ranking['fieldingStats.fieldingPoints']
+  );
+
+  return formattedFieldingRankings;
+};
+
+export const getOverallRankings = async () => {
+  const overallRankings = await Player.findAll({
+    attributes: ['id', 'name', 'avatar'],
+    group: ['Player.id'],
+    include: [
+      {
+        model: MatchPlayerBattingStat,
+        as: 'battingStats',
+        attributes: [
+          [
+            sequelizeConnection.literal('sum(battingStats.points)'),
+            'battingPoints',
+          ],
+        ],
+      },
+      {
+        model: MatchPlayerBowlingStat,
+        as: 'bowlingStats',
+        attributes: [
+          [
+            sequelizeConnection.literal('sum(bowlingStats.points)'),
+            'bowlingPoints',
+          ],
+        ],
+      },
+      {
+        model: MatchPlayerFieldingStat,
+        as: 'fieldingStats',
+        attributes: [
+          [
+            sequelizeConnection.literal('sum(fieldingStats.points)'),
+            'fieldingPoints',
+          ],
+        ],
+      },
+    ],
+    raw: true,
+    order: sequelizeConnection.literal(
+      'IFNULL("battingStats.battingPoints", 0) + IFNULL("bowlingStats.bowlingPoints", 0) + IFNULL("fieldingStats.fieldingPoints", 0) DESC'
+    ),
+    limit: 10,
+  });
+
+  const formattedOverallRankings = (overallRankings as any).map(
+    (ranking: any) => ({
+      ...ranking,
+      points:
+        ranking['battingStats.battingPoints'] +
+        ranking['bowlingStats.bowlingPoints'] +
+        ranking['fieldingStats.fieldingPoints'],
+    })
+  );
+
+  formattedOverallRankings.forEach((ranking: any) => {
+    delete ranking['battingStats.battingPoints'];
+    delete ranking['bowlingStats.bowlingPoints'];
+    delete ranking['fieldingStats.fieldingPoints'];
+  });
+
+  return formattedOverallRankings;
 };
