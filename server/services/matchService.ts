@@ -1,5 +1,11 @@
 import { Op } from 'sequelize';
-import { Match, Player } from '../models';
+import {
+  Match,
+  MatchPlayerBattingStat,
+  MatchPlayerBowlingStat,
+  MatchPlayerFieldingStat,
+  Player,
+} from '../models';
 import { findPlayer, findPlayers } from './playerService';
 
 interface CreateMatchAttributes {
@@ -44,38 +50,89 @@ export const setMatchPlayers = async (match: Match, players: number[]) => {
 
 export const setMatchPlayersBattingStats = async (
   match: Match,
-  players: { id: number; points: number }[]
+  players: {
+    id: number;
+    score?: number;
+    balls: number;
+    sixes?: number;
+    fours?: number;
+    isOut?: boolean;
+    points: number;
+  }[]
 ) => {
-  return players.map(async (player) => {
-    const selectedPlayer = await findPlayer(player.id);
-    return player
-      ? match.setMatchPlayerBattingStats(selectedPlayer as Player, {
-          points: player.points,
-        })
-      : null;
-  });
+  match.setMatchPlayerBattingStats([]);
+  const playersStats = players.map((player) => ({
+    playerId: player.id,
+    score: player.score,
+    balls: player.balls,
+    sixes: player.sixes,
+    fours: player.fours,
+    isOut: player.isOut,
+    points: player.points,
+  }));
+  return await Promise.all(
+    playersStats.map(async (stat) => {
+      return await match.createMatchPlayerBattingStat(
+        stat as MatchPlayerBattingStat
+      );
+    })
+  );
 };
 
 export const setMatchPlayersBowlingStats = async (
   match: Match,
-  players: { id: number; points: number }[]
+  players: {
+    id: number;
+    wickets?: number;
+    overs: number;
+    conceded?: number;
+    maidens?: number;
+    points: number;
+  }[]
 ) => {
-  return match.setMatchPlayerBowlingStats(
-    players.map((player) => ({
-      id: player.id,
-      through: { points: player.points },
-    }))
+  match.setMatchPlayerBowlingStats([]);
+  const playersStats = players.map((player) => ({
+    playerId: player.id,
+    wickets: player.wickets,
+    overs: player.overs,
+    conceded: player.conceded,
+    maidens: player.maidens,
+    points: player.points,
+  }));
+  return await Promise.all(
+    playersStats.map(async (stat) => {
+      return await match.createMatchPlayerBowlingStat(
+        stat as MatchPlayerBowlingStat
+      );
+    })
   );
 };
 
 export const setMatchPlayersFieldingStats = async (
   match: Match,
-  players: { id: number; points: number }[]
+  players: {
+    id: number;
+    catches?: number;
+    stumps?: number;
+    directHits?: number;
+    indirectHits?: number;
+    points: number;
+  }[]
 ) => {
-  return match.setMatchPlayerFieldingStats(
-    players.map((player) => ({
-      id: player.id,
-      through: { points: player.points },
-    }))
+  match.setMatchPlayerFieldingStats([]);
+  const playersStats = players.map((player) => ({
+    playerId: player.id,
+    catches: player.catches,
+    stumps: player.stumps,
+    directHits: player.directHits,
+    indirectHits: player.indirectHits,
+    points: player.points,
+  }));
+  return await Promise.all(
+    playersStats.map(async (stat) => {
+      return await match.createMatchPlayerFieldingStat(
+        stat as MatchPlayerFieldingStat
+      );
+    })
   );
 };

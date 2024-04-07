@@ -74,6 +74,7 @@ const create = async (req: Request, res: Response) => {
     createdMatch,
     (battingStats as BattingStatsInterface[]).map((stat) => ({
       id: stat.id,
+      ...stat.values,
       points: calculateBattingPoints({ ...stat.values }),
     }))
   );
@@ -81,18 +82,26 @@ const create = async (req: Request, res: Response) => {
     createdMatch,
     (bowlingStats as BowlingStatsInterface[]).map((stat) => ({
       id: stat.id,
+      ...stat.values,
       points: calculateBowlingPoints({
         ...stat.values,
         numberOfDeliveriesPerOver,
       }),
     }))
   );
+
   await setMatchPlayersFieldingStats(
     createdMatch,
-    (fieldingStats as FieldingStatsInterface[]).map((stat) => ({
-      id: stat.id,
-      points: calculateFieldingPoints({ ...stat.values }),
-    }))
+    officialPlayers.map((playerId: number) => {
+      const fieldingStat = (fieldingStats as FieldingStatsInterface[]).find(
+        (stat) => stat.id === playerId
+      ) ?? { id: playerId, values: {} };
+      return {
+        id: fieldingStat.id,
+        ...fieldingStat.values,
+        points: calculateFieldingPoints({ ...fieldingStat.values }),
+      };
+    })
   );
 
   return res.status(StatusCodes.CREATED).json({
@@ -135,6 +144,7 @@ const update = async (req: Request, res: Response) => {
     updatedMatch,
     (battingStats as BattingStatsInterface[]).map((stat) => ({
       id: stat.id,
+      ...stat.values,
       points: calculateBattingPoints({ ...stat.values }),
     }))
   );
@@ -143,6 +153,7 @@ const update = async (req: Request, res: Response) => {
     updatedMatch,
     (bowlingStats as BowlingStatsInterface[]).map((stat) => ({
       id: stat.id,
+      ...stat.values,
       points: calculateBowlingPoints({
         ...stat.values,
         numberOfDeliveriesPerOver,
@@ -152,10 +163,16 @@ const update = async (req: Request, res: Response) => {
 
   await setMatchPlayersFieldingStats(
     updatedMatch,
-    (fieldingStats as FieldingStatsInterface[]).map((stat) => ({
-      id: stat.id,
-      points: calculateFieldingPoints({ ...stat.values }),
-    }))
+    officialPlayers.map((playerId: number) => {
+      const fieldingStat = (fieldingStats as FieldingStatsInterface[]).find(
+        (stat) => stat.id === playerId
+      ) ?? { id: playerId, values: {} };
+      return {
+        id: fieldingStat.id,
+        ...fieldingStat.values,
+        points: calculateFieldingPoints({ ...fieldingStat.values }),
+      };
+    })
   );
 
   return res.status(StatusCodes.CREATED).json({

@@ -1,6 +1,9 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelizeConnection from '../config/sequelizeConnection';
 import Player from './Player';
+import MatchPlayerBattingStat from './MatchPlayerBattingStat';
+import MatchPlayerBowlingStat from './MatchPlayerBowlingStat';
+import MatchPlayerFieldingStat from './MatchPlayerFieldingStat';
 
 interface MatchInstance extends Model {
   oppositeTeamId?: number | null;
@@ -19,14 +22,22 @@ class Match extends Model implements MatchInstance {
 
   public setPlayers!: (players: Player[]) => Promise<void>;
   public setMatchPlayerBattingStats!: (
-    player: Player,
-    { points }: { points: number }
+    players: MatchPlayerBattingStat[]
+  ) => Promise<void>;
+  public createMatchPlayerBattingStat!: (
+    battingStat: MatchPlayerBattingStat
   ) => Promise<void>;
   public setMatchPlayerBowlingStats!: (
-    players: { id: number; through: { points: number } }[]
+    players: MatchPlayerBowlingStat[]
+  ) => Promise<void>;
+  public createMatchPlayerBowlingStat!: (
+    bowlingStat: MatchPlayerBowlingStat
   ) => Promise<void>;
   public setMatchPlayerFieldingStats!: (
-    players: { id: number; through: { points: number } }[]
+    players: MatchPlayerFieldingStat[]
+  ) => Promise<void>;
+  public createMatchPlayerFieldingStat!: (
+    fieldingStat: MatchPlayerFieldingStat
   ) => Promise<void>;
 
   static associate(models: any) {
