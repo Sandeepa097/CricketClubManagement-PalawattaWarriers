@@ -21,21 +21,18 @@ class Match extends Model implements MatchInstance {
   public numberOfDeliveriesPerOver?: number | undefined;
 
   public setPlayers!: (players: Player[]) => Promise<void>;
-  public setMatchPlayerBattingStats!: (
-    players: MatchPlayerBattingStat[]
-  ) => Promise<void>;
+
+  public getMatchPlayerBattingStats!: () => Promise<MatchPlayerBattingStat[]>;
   public createMatchPlayerBattingStat!: (
     battingStat: MatchPlayerBattingStat
   ) => Promise<void>;
-  public setMatchPlayerBowlingStats!: (
-    players: MatchPlayerBowlingStat[]
-  ) => Promise<void>;
+
+  public getMatchPlayerBowlingStats!: () => Promise<MatchPlayerBowlingStat[]>;
   public createMatchPlayerBowlingStat!: (
     bowlingStat: MatchPlayerBowlingStat
   ) => Promise<void>;
-  public setMatchPlayerFieldingStats!: (
-    players: MatchPlayerFieldingStat[]
-  ) => Promise<void>;
+
+  public getMatchPlayerFieldingStats!: () => Promise<MatchPlayerFieldingStat[]>;
   public createMatchPlayerFieldingStat!: (
     fieldingStat: MatchPlayerFieldingStat
   ) => Promise<void>;

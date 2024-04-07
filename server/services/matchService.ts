@@ -1,12 +1,12 @@
 import { Op } from 'sequelize';
 import {
   Match,
+  MatchPlayer,
   MatchPlayerBattingStat,
   MatchPlayerBowlingStat,
   MatchPlayerFieldingStat,
-  Player,
 } from '../models';
-import { findPlayer, findPlayers } from './playerService';
+import { findPlayers } from './playerService';
 
 interface CreateMatchAttributes {
   oppositeTeamId: number | null;
@@ -43,8 +43,14 @@ export const getOutdoorMatches = async () => {
 };
 
 export const setMatchPlayers = async (match: Match, players: number[]) => {
-  const selectedPlayers = await findPlayers(players);
+  const previousRecords = await MatchPlayer.findAll({
+    where: { matchId: match.dataValues.id },
+  });
+  for (let i = 0; i < previousRecords.length; i++) {
+    await previousRecords[i].destroy();
+  }
 
+  const selectedPlayers = await findPlayers(players);
   return match.setPlayers(selectedPlayers);
 };
 
@@ -60,7 +66,11 @@ export const setMatchPlayersBattingStats = async (
     points: number;
   }[]
 ) => {
-  match.setMatchPlayerBattingStats([]);
+  const previousRecords = await match.getMatchPlayerBattingStats();
+  for (let i = 0; i < previousRecords.length; i++) {
+    await previousRecords[i].destroy();
+  }
+
   const playersStats = players.map((player) => ({
     playerId: player.id,
     score: player.score,
@@ -90,7 +100,11 @@ export const setMatchPlayersBowlingStats = async (
     points: number;
   }[]
 ) => {
-  match.setMatchPlayerBowlingStats([]);
+  const previousRecords = await match.getMatchPlayerBowlingStats();
+  for (let i = 0; i < previousRecords.length; i++) {
+    await previousRecords[i].destroy();
+  }
+
   const playersStats = players.map((player) => ({
     playerId: player.id,
     wickets: player.wickets,
@@ -119,7 +133,11 @@ export const setMatchPlayersFieldingStats = async (
     points: number;
   }[]
 ) => {
-  match.setMatchPlayerFieldingStats([]);
+  const previousRecords = await match.getMatchPlayerFieldingStats();
+  for (let i = 0; i < previousRecords.length; i++) {
+    await previousRecords[i].destroy();
+  }
+
   const playersStats = players.map((player) => ({
     playerId: player.id,
     catches: player.catches,
