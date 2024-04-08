@@ -181,7 +181,7 @@ const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
       )}
       {props.errors && props.errors.length && true && (
         <Text style={styles.error}>
-          {Object.values(props.errors[0].values)[0]}
+          {Object.values(props.errors[0]?.values ?? [''])[0]}
         </Text>
       )}
     </View>

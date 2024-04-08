@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
@@ -8,13 +8,22 @@ import TabBar from '../components/base/TabBar';
 import CompactMatchItem from '../components/CompactMatchItem';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 import ConfirmBox from '../components/base/ConfirmBox';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
 import { PPLMatch } from '../types';
 import EmptyListMessage from '../components/base/EmptyListMessage';
 import { UserTypes } from '../constants/UserTypes';
+import { useIsFocused } from '@react-navigation/native';
+import {
+  retrieveOutdoorMatches,
+  retrievePPLMatches,
+} from '../redux/slices/matchSlice';
+import { retrieveTeams } from '../redux/slices/teamSlice';
+import { retrievePlayers } from '../redux/slices/playerSlice';
 
 const Matches = ({ navigation }) => {
+  const focused = useIsFocused();
+  const dispatch = useDispatch<AppDispatch>();
   const userType = useSelector((state: RootState) => state.auth.userType);
   const outdoors = useSelector((state: RootState) => state.match.outdoors);
   const ppls = useSelector((state: RootState) => state.match.ppls);
@@ -22,6 +31,15 @@ const Matches = ({ navigation }) => {
   const [selectedTabItem, setSelectedTabItem] = useState('outdoor');
   const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
     useState(false);
+
+  useEffect(() => {
+    if (focused) {
+      dispatch(retrieveOutdoorMatches());
+      dispatch(retrievePPLMatches());
+      dispatch(retrieveTeams());
+      dispatch(retrievePlayers());
+    }
+  }, [focused]);
 
   return (
     <View style={styles.container}>
@@ -52,20 +70,8 @@ const Matches = ({ navigation }) => {
             key={item.id}
             {...item}
             onPress={() =>
-              navigation.navigate(
-                selectedTabItem === 'outdoor'
-                  ? NavigationRoutes.OPPOSITE_TEAM_MATCHES
-                  : NavigationRoutes.SCORECARD,
-                item
-              )
+              navigation.navigate(NavigationRoutes.OPPOSITE_TEAM_MATCHES, item)
             }
-            {...(selectedTabItem === 'ppl'
-              ? {
-                  onRequestDelete: () => setDeleteConfirmationVisible(true),
-                  onRequestEdit: () =>
-                    navigation.navigate(NavigationRoutes.CREATE_MATCH),
-                }
-              : {})}
           />
         )}
       />

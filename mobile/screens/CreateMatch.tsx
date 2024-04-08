@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, ToastAndroid } from 'react-native';
 import SectionTitle from '../components/base/SectionTitle';
 import TextInput from '../components/base/TextInput';
 import PlayersPicker from '../components/PlayersPicker';
@@ -112,7 +112,25 @@ const CreateMatch = ({ navigation }) => {
             fieldingStats: [],
           }}
           validationSchema={matchValidationSchema}
-          onSubmit={(values) => dispatch(createMatch(values))}>
+          onSubmit={(values) =>
+            dispatch(createMatch(values))
+              .unwrap()
+              .then(() => {
+                ToastAndroid.showWithGravity(
+                  'Match created successfully.',
+                  ToastAndroid.SHORT,
+                  ToastAndroid.BOTTOM
+                );
+                navigation.goBack();
+              })
+              .catch((error) => {
+                ToastAndroid.showWithGravity(
+                  error,
+                  ToastAndroid.SHORT,
+                  ToastAndroid.BOTTOM
+                );
+              })
+          }>
           {({ handleSubmit, setFieldValue, values, errors }) => (
             <>
               <SectionTitle title="Match Details" marginTop={10} />

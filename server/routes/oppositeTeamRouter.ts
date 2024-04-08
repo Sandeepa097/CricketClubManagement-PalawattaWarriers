@@ -23,4 +23,6 @@ oppositeTeamRouter.post(
   oppositeTeamController.create
 );
 
+oppositeTeamRouter.get('/', oppositeTeamController.get);
+
 export default oppositeTeamRouter;

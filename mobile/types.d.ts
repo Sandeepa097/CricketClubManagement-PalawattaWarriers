@@ -42,6 +42,9 @@ export interface SingleMatch {
   id: string | number;
   date: string;
   location: string;
+}
+
+export interface CompactSingleMatch extends SingleMatch {
   result: string;
 }
 
@@ -64,9 +67,9 @@ export interface OutdoorMatch extends CompactMatch {
     draw: number;
   };
   winningPercentage: number;
-  matches: SingleMatch[];
+  matches: CompactSingleMatch[];
 }
 
 export interface PPLMatch extends CompactMatch {
-  date: string;
+  matches: SingleMatch[];
 }

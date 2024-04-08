@@ -21,16 +21,20 @@ const OppositeTeamMatches = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <SectionTitle title={matchesDetails.title} marginTop={10} />
-      <TabBar
-        selected={selectedTabItem}
-        items={[
-          { id: 'all', name: getTabName('all', 'All') },
-          { id: 'won', name: getTabName('won', 'Won') },
-          { id: 'lost', name: getTabName('lost', 'Lost') },
-          { id: 'draw', name: getTabName('draw', 'Draw') },
-        ]}
-        onPressItem={(id) => setSelectedTabItem(id.toString())}
-      />
+      {matchesDetails.counts ? (
+        <TabBar
+          selected={selectedTabItem}
+          items={[
+            { id: 'all', name: getTabName('all', 'All') },
+            { id: 'won', name: getTabName('won', 'Won') },
+            { id: 'lost', name: getTabName('lost', 'Lost') },
+            { id: 'draw', name: getTabName('draw', 'Draw') },
+          ]}
+          onPressItem={(id) => setSelectedTabItem(id.toString())}
+        />
+      ) : (
+        <></>
+      )}
       <View style={{ marginTop: 15 }}>
         <FlatList
           data={matchesDetails.matches}

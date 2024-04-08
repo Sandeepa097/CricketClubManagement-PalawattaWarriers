@@ -9,13 +9,16 @@ import { findMatch } from '../services/matchService';
 
 const MatchValidations = [
   body('oppositeTeamId')
+    .optional()
+    .isInt()
     .toInt()
     .custom(async (value) => {
       if (!value) return true;
       const oppositeTeam = await findOppositeTeam({ id: value });
       if (!oppositeTeam) throw Error('Opposite team is invalid.');
       return true;
-    }),
+    })
+    .toInt(),
   body('date').notEmpty().withMessage('Date is required.'),
   body('location').notEmpty().withMessage('Location is required.'),
   body('result').custom((value) => {
@@ -69,7 +72,9 @@ const MatchValidations = [
     .toInt()
     .withMessage('Number of fours must be an unsigned integer.'),
   body('battingStats.*.values.isOut')
+    .optional()
     .isBoolean()
+    .toBoolean()
     .withMessage('Is out must be a boolean.'),
   body('bowlingStats').isArray().withMessage('Bowling stats must be an array.'),
   body('bowlingStats.*.id')

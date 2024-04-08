@@ -9,7 +9,7 @@ const width: number = Dimensions.get('window').width;
 interface OppositeMatchItemProps {
   date: string;
   location: string;
-  result: 'won' | 'lost' | 'draw';
+  result?: 'won' | 'lost' | 'draw';
   onPress: () => void;
   onRequestEdit?: () => void;
   onRequestDelete?: () => void;
@@ -59,11 +59,13 @@ const PressableOppositeMatchItem = (props: OppositeMatchItemProps) => {
           <Text style={styles.date}>{props.date}</Text>
           <Text style={styles.location}>{props.location}</Text>
         </View>
-        <FontAwesome5
-          name={icons[props.result].name}
-          size={35}
-          color={icons[props.result].color}
-        />
+        {props.result && true && (
+          <FontAwesome5
+            name={icons[props.result].name}
+            size={35}
+            color={icons[props.result].color}
+          />
+        )}
       </View>
     </Pressable>
   );

@@ -5,6 +5,8 @@ import {
   MatchPlayerBattingStat,
   MatchPlayerBowlingStat,
   MatchPlayerFieldingStat,
+  OppositeTeam,
+  Player,
 } from '../models';
 import { findPlayers } from './playerService';
 
@@ -34,14 +36,58 @@ export const removeMatch = async (id: number) => {
 export const getPPLMatches = async () => {
   return await Match.findAll({
     where: { oppositeTeamId: { [Op.is]: null } },
-    include: [{ all: true }],
+    include: [
+      {
+        model: Player,
+        as: 'officialPlayers',
+      },
+      {
+        model: MatchPlayerBattingStat,
+        as: 'battingStats',
+        include: [{ model: Player, as: 'player' }],
+      },
+      {
+        model: MatchPlayerBowlingStat,
+        as: 'bowlingStats',
+        include: [{ model: Player, as: 'player' }],
+      },
+      {
+        model: MatchPlayerFieldingStat,
+        as: 'fieldingStats',
+        include: [{ model: Player, as: 'player' }],
+      },
+    ],
   });
 };
 
 export const getOutdoorMatches = async () => {
   return await Match.findAll({
     where: { oppositeTeamId: { [Op.not]: null } },
-    include: [{ all: true }],
+    include: [
+      {
+        model: OppositeTeam,
+        as: 'oppositeTeam',
+      },
+      {
+        model: Player,
+        as: 'officialPlayers',
+      },
+      {
+        model: MatchPlayerBattingStat,
+        as: 'battingStats',
+        include: [{ model: Player, as: 'player' }],
+      },
+      {
+        model: MatchPlayerBowlingStat,
+        as: 'bowlingStats',
+        include: [{ model: Player, as: 'player' }],
+      },
+      {
+        model: MatchPlayerFieldingStat,
+        as: 'fieldingStats',
+        include: [{ model: Player, as: 'player' }],
+      },
+    ],
   });
 };
 

@@ -15,6 +15,12 @@ const initialState: TeamState = {
   teams: [],
 };
 
+export const retrieveTeams = createAsyncThunk('team/retrieve', async () => {
+  const response: any = await api.get('/teams');
+  if (response.ok) return response.data.oppositeTeams;
+  return [];
+});
+
 export const createTeam = createAsyncThunk(
   'team/create',
   async (payload: { name: string }) => {
@@ -28,12 +34,16 @@ const teamSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(
-      createTeam.fulfilled,
-      (state, action: PayloadAction<Team>) => {
+    builder
+      .addCase(createTeam.fulfilled, (state, action: PayloadAction<Team>) => {
         state.teams = [...state.teams, action.payload];
-      }
-    );
+      })
+      .addCase(
+        retrieveTeams.fulfilled,
+        (state, action: PayloadAction<Team[]>) => {
+          state.teams = action.payload;
+        }
+      );
   },
 });
 

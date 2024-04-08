@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { OutdoorMatch, PPLMatch } from '../../types';
-import { RootState } from '../store';
+import api from '../../api';
 
 interface MatchState {
   outdoors: OutdoorMatch[];
@@ -56,78 +56,222 @@ const initialState: MatchState = {
   ppls: [],
 };
 
+export const retrieveOutdoorMatches = createAsyncThunk(
+  'match/retrieveOutdoor',
+  async () => {
+    const response: any = await api.get('/matches?type=outdoor');
+    if (response.ok) {
+      const outdoorCompactMatches: OutdoorMatch[] = [];
+      const teamFlags = {};
+
+      for (let i = 0; i < response.data.matches.length; i++) {
+        if (teamFlags[response.data.matches[i].oppositeTeamId]) continue;
+        teamFlags[response.data.matches[i].oppositeTeamId] = true;
+
+        const oppositeTeamMatches = response.data.matches.filter(
+          (match: NewMatch) =>
+            match.oppositeTeamId === response.data.matches[i].oppositeTeamId
+        );
+
+        const counts = {
+          all: oppositeTeamMatches.length,
+          won: oppositeTeamMatches.filter(
+            (match: NewMatch) => match.result === 'won'
+          ).length,
+          lost: oppositeTeamMatches.filter(
+            (match: NewMatch) => match.result === 'lost'
+          ).length,
+          draw: oppositeTeamMatches.filter(
+            (match: NewMatch) => match.result === 'draw'
+          ).length,
+        };
+
+        const battingStats = {};
+        const bowlingStats = {};
+
+        oppositeTeamMatches.map((match: any) =>
+          match.battingStats.map((stat: any) => {
+            battingStats[stat.playerId] = {
+              id: stat.playerId,
+              name: stat.player.name,
+              avatar: stat.player.avatar,
+              score: (battingStats[stat.playerId]?.score || 0) + stat.score,
+              balls: (battingStats[stat.playerId]?.balls || 0) + stat.balls,
+              points: (battingStats[stat.playerId]?.points || 0) + stat.points,
+            };
+          })
+        );
+
+        oppositeTeamMatches.map((match: any) =>
+          match.bowlingStats.map((stat: any) => {
+            bowlingStats[stat.playerId] = {
+              id: stat.playerId,
+              name: stat.player.name,
+              avatar: stat.player.avatar,
+              wickets:
+                (bowlingStats[stat.playerId]?.wickets || 0) + stat.wickets,
+              conceded:
+                (bowlingStats[stat.playerId]?.conceded || 0) + stat.conceded,
+              points: (bowlingStats[stat.playerId]?.points || 0) + stat.points,
+            };
+          })
+        );
+
+        const bestBatsman: any =
+          Object.values(battingStats) && Object.values(battingStats).length
+            ? Object.values(battingStats).reduce(
+                (prevPlayer: any, currentPlayer: any) =>
+                  prevPlayer.points < currentPlayer.points
+                    ? currentPlayer
+                    : prevPlayer
+              )
+            : null;
+
+        const bestBowler: any =
+          Object.values(bowlingStats) && Object.values(bowlingStats).length
+            ? Object.values(bowlingStats).reduce(
+                (prevPlayer: any, currentPlayer: any) =>
+                  prevPlayer.points < currentPlayer.points
+                    ? currentPlayer
+                    : prevPlayer
+              )
+            : null;
+
+        outdoorCompactMatches.push({
+          id: response.data.matches[i].oppositeTeamId,
+          oppositeTeam: {
+            id: response.data.matches[i].oppositeTeam.id,
+            name: response.data.matches[i].oppositeTeam.name,
+          },
+          counts,
+          matches: oppositeTeamMatches,
+          winningPercentage: Math.round((counts.won * 100) / counts.all),
+          title: response.data.matches[i].oppositeTeam.name,
+          bestBatsman: bestBatsman
+            ? {
+                ...bestBatsman,
+                score: `${bestBatsman.score}/${bestBatsman.balls}`,
+              }
+            : null,
+          bestBowler: bestBowler
+            ? {
+                ...bestBowler,
+                score: `${bestBowler.wickets}/${bestBowler.conceded}`,
+              }
+            : null,
+        });
+      }
+
+      return outdoorCompactMatches;
+    }
+
+    return [];
+  }
+);
+
+export const retrievePPLMatches = createAsyncThunk(
+  'match/retrievePPL',
+  async () => {
+    const response: any = await api.get('/matches?type=ppl');
+    if (response.ok) {
+      const PPLCompactMatches: PPLMatch[] = [];
+      const dateFlags = {};
+
+      for (let i = 0; i < response.data.matches.length; i++) {
+        if (dateFlags[response.data.matches[i].date]) continue;
+        dateFlags[response.data.matches[i].date] = true;
+
+        const PPLMatches = response.data.matches.filter(
+          (match: NewMatch) => match.date === response.data.matches[i].date
+        );
+
+        const battingStats = {};
+        const bowlingStats = {};
+
+        PPLMatches.map((match: any) =>
+          match.battingStats.map((stat: any) => {
+            battingStats[stat.playerId] = {
+              id: stat.playerId,
+              name: stat.player.name,
+              avatar: stat.player.avatar,
+              score: (battingStats[stat.playerId]?.score || 0) + stat.score,
+              balls: (battingStats[stat.playerId]?.balls || 0) + stat.balls,
+              points: (battingStats[stat.playerId]?.points || 0) + stat.points,
+            };
+          })
+        );
+
+        PPLMatches.map((match: any) =>
+          match.bowlingStats.map((stat: any) => {
+            bowlingStats[stat.playerId] = {
+              id: stat.playerId,
+              name: stat.player.name,
+              avatar: stat.player.avatar,
+              wickets:
+                (bowlingStats[stat.playerId]?.wickets || 0) + stat.wickets,
+              conceded:
+                (bowlingStats[stat.playerId]?.conceded || 0) + stat.conceded,
+              points: (bowlingStats[stat.playerId]?.points || 0) + stat.points,
+            };
+          })
+        );
+
+        const bestBatsman: any =
+          Object.values(battingStats) && Object.values(battingStats).length
+            ? Object.values(battingStats).reduce(
+                (prevPlayer: any, currentPlayer: any) =>
+                  prevPlayer.points < currentPlayer.points
+                    ? currentPlayer
+                    : prevPlayer
+              )
+            : null;
+
+        const bestBowler: any =
+          Object.values(bowlingStats) && Object.values(bowlingStats).length
+            ? Object.values(bowlingStats).reduce(
+                (prevPlayer: any, currentPlayer: any) =>
+                  prevPlayer.points < currentPlayer.points
+                    ? currentPlayer
+                    : prevPlayer
+              )
+            : null;
+
+        PPLCompactMatches.push({
+          id: response.data.matches[i].oppositeTeamId,
+          matches: PPLMatches,
+          title: response.data.matches[i].date,
+          bestBatsman: bestBatsman
+            ? {
+                ...bestBatsman,
+                score: `${bestBatsman.score}/${bestBatsman.balls}`,
+              }
+            : null,
+          bestBowler: bestBowler
+            ? {
+                ...bestBowler,
+                score: `${bestBowler.wickets}/${bestBowler.conceded}`,
+              }
+            : null,
+        });
+      }
+
+      return PPLCompactMatches;
+    }
+
+    return [];
+  }
+);
+
 export const createMatch = createAsyncThunk(
   'match/create',
-  async (payload: NewMatch, { getState }) => {
-    const bestBatsman = payload.battingStats.length
-      ? {
-          id: payload.battingStats[0].id,
-          name: (getState() as RootState).player.players.find(
-            (player) => player.id === payload.battingStats[0].id
-          ).name,
-          avatar: (getState() as RootState).player.players.find(
-            (player) => player.id === payload.battingStats[0].id
-          ).avatar,
-          score: `${payload.battingStats[0].values.score}/${payload.battingStats[0].values.balls}`,
-        }
-      : null;
-    const bestBowler = payload.bowlingStats.length
-      ? {
-          id: payload.bowlingStats[0].id,
-          name: (getState() as RootState).player.players.find(
-            (player) => player.id === payload.bowlingStats[0].id
-          ).name,
-          avatar: (getState() as RootState).player.players.find(
-            (player) => player.id === payload.battingStats[0].id
-          ).avatar,
-          score: `${payload.bowlingStats[0].values.wickets}/${
-            Math.floor(Number(payload.bowlingStats[0].values.overs)) * 6 +
-            ((Math.floor(Number(payload.bowlingStats[0].values.overs)) * 10) %
-              10)
-          }`,
-        }
-      : null;
-
-    if (payload.isPPL) {
-      const id = (getState() as RootState).match.ppls.length + 1;
-      return { ...payload, id, bestBatsman, bestBowler, title: payload.date };
-    } else {
-      const compactMatch = (getState() as RootState).match.outdoors.find(
-        (outdoor) => outdoor.oppositeTeam.id === payload.oppositeTeamId
-      );
-      const id = compactMatch ? compactMatch.matches.length + 1 : 1;
-      return compactMatch
-        ? {
-            id,
-            date: payload.date,
-            location: payload.location,
-            result: payload.result,
-            compactMatchId: compactMatch.id,
-          }
-        : {
-            id: (getState() as RootState).match.outdoors.length + 1,
-            title: (getState() as RootState).team.teams.find(
-              (team) => team.id === payload.oppositeTeamId
-            ).name,
-            bestBatsman,
-            bestBowler,
-            counts: {
-              all: 0,
-              won: 0,
-              lost: 0,
-              draw: 0,
-            },
-            matches: [
-              {
-                id,
-                date: payload.date,
-                location: payload.location,
-                result: payload.result,
-              },
-            ],
-            winningPercentage: 10,
-          };
+  async (payload: NewMatch, { dispatch, rejectWithValue }) => {
+    const response: any = await api.post('/matches', payload);
+    if (response.ok) {
+      dispatch(retrieveOutdoorMatches());
+      dispatch(retrievePPLMatches());
+      return;
     }
+    return rejectWithValue('Match creation failed.');
   }
 );
 
@@ -136,47 +280,19 @@ export const matchSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(
-      createMatch.fulfilled,
-      (
-        state,
-        action: PayloadAction<OutdoorMatch | PPLMatch | NewMatch | any>
-      ) => {
-        if (action.payload.compactMatchId) {
-          state.outdoors = state.outdoors.map((outdoor) => {
-            if (outdoor.id === action.payload.compactMatchId) {
-              return {
-                ...outdoor,
-                matches: [
-                  ...outdoor.matches,
-                  {
-                    id: action.payload.id,
-                    date: action.payload.date,
-                    location: action.payload.location,
-                    result: action.payload.result,
-                  },
-                ],
-              };
-            } else {
-              return outdoor;
-            }
-          });
-        } else if ((action.payload as NewMatch).isPPL) {
-          state.ppls = [
-            ...state.ppls,
-            {
-              id: action.payload.id,
-              title: action.payload.title as string,
-              date: action.payload.date,
-              bestBatsman: action.payload.bestBatsman,
-              bestBowler: action.payload.bestBowler,
-            },
-          ];
-        } else {
-          state.outdoors = [...state.outdoors, action.payload];
+    builder
+      .addCase(
+        retrieveOutdoorMatches.fulfilled,
+        (state, action: PayloadAction<OutdoorMatch[]>) => {
+          state.outdoors = action.payload;
         }
-      }
-    );
+      )
+      .addCase(
+        retrievePPLMatches.fulfilled,
+        (state, action: PayloadAction<PPLMatch[]>) => {
+          state.ppls = action.payload;
+        }
+      );
   },
 });
 

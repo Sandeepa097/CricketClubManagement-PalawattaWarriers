@@ -10,7 +10,6 @@ import {
 import { Colors } from '../constants/Colors';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Logo from '../assets/Logo';
-import SwipeAction from './SwipeAction';
 
 interface PlayerDetailsType {
   id: string | number;
@@ -42,18 +41,9 @@ interface BestPlayerContainerProps extends PlayerDetailsType {
 
 const width: number = Dimensions.get('window').width;
 
-const CompactMatchItem = (props: CompactMatchItemProps) => {
-  if (props.onRequestDelete !== undefined && props.onRequestEdit !== undefined)
-    return (
-      <SwipeAction
-        onRequestDelete={props.onRequestDelete}
-        onRequestEdit={props.onRequestEdit}>
-        <PressableCompactItem {...props} />
-      </SwipeAction>
-    );
-
-  return <PressableCompactItem {...props} />;
-};
+const CompactMatchItem = (props: CompactMatchItemProps) => (
+  <PressableCompactItem {...props} />
+);
 
 const PressableCompactItem = (props: CompactMatchItemProps) => {
   const [inPress, setInPress] = useState(false);
@@ -69,9 +59,10 @@ const PressableCompactItem = (props: CompactMatchItemProps) => {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>{props.title}</Text>
-          {props.winningPercentage && true && (
-            <Text style={styles.title}>{props.winningPercentage}%</Text>
-          )}
+          {(props.winningPercentage || props.winningPercentage === 0) &&
+            true && (
+              <Text style={styles.title}>{props.winningPercentage}%</Text>
+            )}
         </View>
         <View style={styles.bestPlayersContainer}>
           {props.bestBatsman && true && (

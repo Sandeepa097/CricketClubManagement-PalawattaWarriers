@@ -39,3 +39,7 @@ export const findOppositeTeam = async (
     },
   });
 };
+
+export const getOppositeTeams = async () => {
+  return await OppositeTeam.findAll();
+};

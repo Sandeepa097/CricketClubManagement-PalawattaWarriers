@@ -37,6 +37,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   console.log('Method: ', req.method);
   console.log('Path: ', req.path);
   console.log('Body: ', req.body);
+  console.log('JSON: ', JSON.stringify(req.body));
   next();
 });
 
