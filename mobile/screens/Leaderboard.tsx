@@ -1,74 +1,37 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import TabBar from '../components/base/TabBar';
 import Toggle from '../components/base/Toggle';
 import PlayerRanking from '../components/PlayerRanking';
+import { useIsFocused } from '@react-navigation/native';
+import api from '../api';
 
 const Leaderboard = () => {
+  const focused = useIsFocused();
   const [selectedTabItem, setSelectedTabItem] = useState('overall');
+  const [leaderboard, setLeaderboard] = useState({
+    overall: [],
+    batting: [],
+    bowling: [],
+    fielding: [],
+  });
 
-  const sampleOverallBoard = [
-    {
-      id: 1,
-      name: 'Adonis Ross',
-      avatar: null,
-      points: 1300,
-    },
-    {
-      id: 2,
-      name: 'Robert Robinson',
-      avatar: null,
-      points: 1200,
-    },
-    {
-      id: 3,
-      name: 'Wesley Evans',
-      avatar: null,
-      points: 1085,
-    },
-    {
-      id: 4,
-      name: 'Adonis Ross',
-      avatar: null,
-      points: 980,
-    },
-    {
-      id: 5,
-      name: 'Adonis Ross',
-      avatar: null,
-      points: 800,
-    },
-    {
-      id: 6,
-      name: 'Adonis Ross',
-      avatar: null,
-      points: 500,
-    },
-    {
-      id: 7,
-      name: 'Adonis Ross',
-      avatar: null,
-      points: 400,
-    },
-    {
-      id: 8,
-      name: 'Adonis Ross',
-      avatar: null,
-      points: 200,
-    },
-    {
-      id: 9,
-      name: 'Adonis Ross',
-      avatar: null,
-      points: 100,
-    },
-    {
-      id: 10,
-      name: 'Adonis Ross',
-      avatar: null,
-      points: 13,
-    },
-  ];
+  useEffect(() => {
+    const getLeaderboard = async () => {
+      const response: any = await api.get('/rankings');
+      if (response.ok)
+        setLeaderboard({
+          ...leaderboard,
+          overall: response.data.overallRankings,
+          batting: response.data.battingRankings,
+          bowling: response.data.bowlingRankings,
+          fielding: response.data.fieldingRankings,
+        });
+    };
+
+    getLeaderboard();
+  }, [focused]);
+
   return (
     <View style={styles.container}>
       <Toggle
@@ -86,7 +49,7 @@ const Leaderboard = () => {
         ]}
         onPressItem={(id) => setSelectedTabItem(id.toString())}
       />
-      <PlayerRanking items={sampleOverallBoard} />
+      <PlayerRanking items={leaderboard[selectedTabItem]} />
     </View>
   );
 };
