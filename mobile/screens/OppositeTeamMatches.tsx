@@ -5,6 +5,7 @@ import TabBar from '../components/base/TabBar';
 import OppositeMatchItem from '../components/OppositeMatchItem';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 import ConfirmBox from '../components/base/ConfirmBox';
+import { CompactSingleMatch } from '../types';
 
 const OppositeTeamMatches = ({ route, navigation }) => {
   const matchesDetails = route.params;
@@ -37,7 +38,14 @@ const OppositeTeamMatches = ({ route, navigation }) => {
       )}
       <View style={{ marginTop: 15 }}>
         <FlatList
-          data={matchesDetails.matches}
+          data={
+            selectedTabItem === 'all'
+              ? matchesDetails.matches
+              : matchesDetails.matches.filter(
+                  (match: CompactSingleMatch) =>
+                    match.result === selectedTabItem
+                )
+          }
           renderItem={({ item }) => (
             <OppositeMatchItem
               key={item.id}

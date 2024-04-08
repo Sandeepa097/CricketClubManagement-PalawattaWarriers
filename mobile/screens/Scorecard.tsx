@@ -52,61 +52,6 @@ interface ScorecardProps extends MatchStatsProps {
 
 const width: number = Dimensions.get('window').width;
 
-const sampleScorecard: ScorecardProps = {
-  vs: 'Little Lions',
-  on: '27th January 2024',
-  in: 'Australia',
-  result: 'Won',
-  battingStats: [
-    {
-      player: 'Adonis Ross',
-      runs: '23*',
-      balls: 25,
-      fours: 2,
-      sixes: 1,
-    },
-    {
-      player: 'Robert Robinson',
-      runs: 56,
-      balls: 25,
-      fours: 4,
-      sixes: 2,
-    },
-  ],
-  bowlingStats: [
-    {
-      player: 'Adonis Ross',
-      wickets: 2,
-      overs: 3.5,
-      conceded: 24,
-      maidens: 1,
-    },
-    {
-      player: 'Robert Robinson',
-      wickets: 2,
-      overs: 3.5,
-      conceded: 24,
-      maidens: 1,
-    },
-  ],
-  fieldingStats: [
-    {
-      player: 'Adonis Ross',
-      catches: 2,
-      stumps: 3,
-      directHits: 1,
-      indirectHits: 0,
-    },
-    {
-      player: 'Robert Robinson',
-      catches: 2,
-      stumps: 3,
-      directHits: 1,
-      indirectHits: 0,
-    },
-  ],
-};
-
 const MatchStats = (props: MatchStatsProps) => {
   return (
     <View style={styles.matchStatContainer}>
@@ -126,9 +71,11 @@ const MatchStats = (props: MatchStatsProps) => {
           <Text style={[styles.statText, { marginBottom: 0 }]}>{props.in}</Text>
         </View>
       </View>
-      <View style={styles.resultContainer}>
-        <Text style={styles.resultText}>{props.result}</Text>
-      </View>
+      {props.result && true && (
+        <View style={styles.resultContainer}>
+          <Text style={styles.resultText}>{props.result}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -182,37 +129,57 @@ const PlayersStats = (props: PlayersStatsProps) => {
   );
 };
 
-const Scorecard = () => {
+const Scorecard = ({ route }) => {
+  const matchDetails: ScorecardProps = {
+    ...route.params,
+    vs: route.params.oppositeTeam?.name,
+    on: route.params.date,
+    in: route.params.location,
+    battingStats: route.params.battingStats.map((stat: any) => ({
+      ...stat,
+      player: stat.player.name,
+    })),
+    bowlingStats: route.params.bowlingStats.map((stat: any) => ({
+      ...stat,
+      player: stat.player.name,
+    })),
+    fieldingStats: route.params.fieldingStats.map((stat: any) => ({
+      ...stat,
+      player: stat.player.name,
+    })),
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{
           display: 'flex',
           alignItems: 'center',
+          paddingBottom: 10,
         }}>
         <SectionTitle title="Match Details" marginTop={10} />
         <MatchStats
-          vs={sampleScorecard.vs}
-          on={sampleScorecard.on}
-          in={sampleScorecard.in}
-          result={sampleScorecard.result}
+          vs={matchDetails.vs}
+          on={matchDetails.on}
+          in={matchDetails.in}
+          result={matchDetails.result}
         />
-        {sampleScorecard.battingStats.length > 0 && (
+        {matchDetails.battingStats.length > 0 && (
           <View>
             <SectionTitle title="Batting Stats" />
             <PlayersStats
               columns={[
                 { key: 'player', name: 'Batter' },
-                { key: 'runs', name: 'Runs' },
+                { key: 'score', name: 'Runs' },
                 { key: 'balls', name: 'Balls' },
                 { key: 'fours', name: '4s' },
                 { key: 'sixes', name: '6s' },
               ]}
-              values={sampleScorecard.battingStats}
+              values={matchDetails.battingStats}
             />
           </View>
         )}
-        {sampleScorecard.bowlingStats.length > 0 && (
+        {matchDetails.bowlingStats.length > 0 && (
           <View>
             <SectionTitle title="Bowling Stats" />
             <PlayersStats
@@ -223,11 +190,11 @@ const Scorecard = () => {
                 { key: 'overs', name: 'Overs' },
                 { key: 'maidens', name: 'Maidens' },
               ]}
-              values={sampleScorecard.bowlingStats}
+              values={matchDetails.bowlingStats}
             />
           </View>
         )}
-        {sampleScorecard.fieldingStats.length > 0 && (
+        {matchDetails.fieldingStats.length > 0 && (
           <View>
             <SectionTitle title="Fielding Stats" />
             <PlayersStats
@@ -238,7 +205,7 @@ const Scorecard = () => {
                 { key: 'directHits', name: 'Direct Hits' },
                 { key: 'indirectHits', name: 'Indirect Hits' },
               ]}
-              values={sampleScorecard.fieldingStats}
+              values={matchDetails.fieldingStats}
             />
           </View>
         )}
@@ -311,11 +278,13 @@ const styles = StyleSheet.create({
     color: Colors.BLACK,
     fontSize: 15,
     fontFamily: 'Anybody-Regular',
+    paddingRight: 2,
   },
   playerStatValueText: {
     color: Colors.WHITE,
     fontSize: 15,
     fontFamily: 'Anybody-Regular',
+    paddingRight: 2,
   },
 });
 
