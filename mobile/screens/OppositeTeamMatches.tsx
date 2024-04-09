@@ -6,8 +6,13 @@ import OppositeMatchItem from '../components/OppositeMatchItem';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 import ConfirmBox from '../components/base/ConfirmBox';
 import { CompactSingleMatch } from '../types';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import { setEditing } from '../redux/slices/statusSlice';
 
 const OppositeTeamMatches = ({ route, navigation }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const userType = useSelector((state: RootState) => state.auth.userType);
   const matchesDetails = route.params;
 
   const [selectedTabItem, setSelectedTabItem] = useState('all');
@@ -53,10 +58,15 @@ const OppositeTeamMatches = ({ route, navigation }) => {
               onPress={() =>
                 navigation.navigate(NavigationRoutes.SCORECARD, item)
               }
-              onRequestDelete={() => setDeleteConfirmationVisible(true)}
-              onRequestEdit={() =>
-                navigation.navigate(NavigationRoutes.CREATE_MATCH)
-              }
+              {...(userType === 'admin'
+                ? {
+                    onRequestDelete: () => setDeleteConfirmationVisible(true),
+                    onRequestEdit: () => {
+                      dispatch(setEditing(true));
+                      navigation.navigate(NavigationRoutes.CREATE_MATCH, item);
+                    },
+                  }
+                : {})}
             />
           )}
         />

@@ -23,7 +23,9 @@ interface ChildInputWithPlayersProps {
 
 const ChildInputWithPlayers = (props: ChildInputWithPlayersProps) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlayerIds, setSelectedPlayerIds] = useState([]);
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState(
+    props.values?.map((value) => value.id) || []
+  );
   const [values, setValues] = useState(props.values);
 
   const onPressItem = (id: string | number) => {

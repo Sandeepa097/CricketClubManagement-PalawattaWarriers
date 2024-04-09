@@ -15,11 +15,14 @@ import { Formik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import { createMatch } from '../redux/slices/matchSlice';
+import { setEditing } from '../redux/slices/statusSlice';
 
-const CreateMatch = ({ navigation }) => {
+const CreateMatch = ({ route, navigation }) => {
   const dispatch = useDispatch<AppDispatch>();
   const emptyPlayersMessage = 'No players found in the team';
   const players = useSelector((state: RootState) => state.player.players);
+  const editMatch = route.params;
+  console.log('edit ', editMatch?.battingStats);
 
   const yupPositiveIntegerSchema = (filedName: string) => {
     const message = `${filedName} should be a positive integer.`;
@@ -100,16 +103,46 @@ const CreateMatch = ({ navigation }) => {
         contentContainerStyle={{ display: 'flex', alignItems: 'center' }}>
         <Formik
           initialValues={{
-            isPPL: false,
-            oppositeTeamId: null,
-            date: '',
-            location: '',
-            result: null,
-            numberOfDeliveriesPerOver: 6,
-            officialPlayers: [],
-            battingStats: [],
-            bowlingStats: [],
-            fieldingStats: [],
+            isPPL: editMatch ? !editMatch.oppositeTeamId : false,
+            oppositeTeamId: editMatch?.oppositeTeamId || null,
+            date: editMatch?.date || '',
+            location: editMatch?.location || '',
+            result: editMatch?.result || null,
+            numberOfDeliveriesPerOver:
+              editMatch?.numberOfDeliveriesPerOver || 6,
+            officialPlayers:
+              editMatch?.officialPlayers.map((player: any) => player.id) || [],
+            battingStats:
+              editMatch?.battingStats.map((stat: any) => ({
+                id: stat.playerId,
+                values: {
+                  score: stat.score,
+                  balls: stat.balls,
+                  sixes: stat.sixes,
+                  fours: stat.fours,
+                  isOut: stat.isOut,
+                },
+              })) || [],
+            bowlingStats:
+              editMatch?.bowlingStats.map((stat: any) => ({
+                id: stat.playerId,
+                values: {
+                  wickets: stat.wickets,
+                  overs: stat.overs,
+                  conceded: stat.conceded,
+                  maidens: stat.maidens,
+                },
+              })) || [],
+            fieldingStats:
+              editMatch?.fieldingStats.map((stat: any) => ({
+                id: stat.playerId,
+                values: {
+                  catches: stat.catches,
+                  stumps: stat.stumps,
+                  directHits: stat.directHits,
+                  indirectHits: stat.indirectHits,
+                },
+              })) || [],
           }}
           validationSchema={matchValidationSchema}
           onSubmit={(values) =>
@@ -151,14 +184,14 @@ const CreateMatch = ({ navigation }) => {
                 placeholder="Date"
                 value={values.date}
                 onChange={(value) => setFieldValue('date', value)}
-                error={errors.date}
+                error={errors.date as string}
               />
               <TextInput
                 value={values.location}
                 onChangeText={(value) => setFieldValue('location', value)}
                 length="long"
                 placeholder="Location"
-                error={errors.location}
+                error={errors.location as string}
               />
               {!values.isPPL && (
                 <ResultsPicker
@@ -176,7 +209,7 @@ const CreateMatch = ({ navigation }) => {
                 }
                 length="long"
                 placeholder="Number of deliveries per over"
-                error={errors.numberOfDeliveriesPerOver}
+                error={errors.numberOfDeliveriesPerOver as string}
               />
               <PlayersPicker
                 placeholder="Players of Your Team"
@@ -286,7 +319,7 @@ const CreateMatch = ({ navigation }) => {
                   length="long"
                   style="filled"
                   color={Colors.DEEP_TEAL}
-                  text="Create"
+                  text={!editMatch ? 'Create' : 'Save'}
                   onPress={handleSubmit}
                 />
                 <Button
@@ -294,7 +327,10 @@ const CreateMatch = ({ navigation }) => {
                   style="outlined"
                   color={Colors.DEEP_TEAL}
                   text="Cancel"
-                  onPress={() => navigation.goBack()}
+                  onPress={() => {
+                    navigation.goBack();
+                    dispatch(setEditing(false));
+                  }}
                 />
               </View>
             </>
