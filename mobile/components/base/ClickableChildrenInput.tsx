@@ -82,9 +82,6 @@ const ItemInputSwitch = (props: SwitchInputProps) => {
 };
 
 const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
-  console.log('items', props.items);
-  console.log('itemsProperties', props.itemProperties);
-  console.log('itemValues', props.itemValues);
   const inputPropertyWidth = props.itemProperties.length
     ? (width - 20 - 30 - 10 * (props.itemProperties.length - 1)) /
       props.itemProperties.length

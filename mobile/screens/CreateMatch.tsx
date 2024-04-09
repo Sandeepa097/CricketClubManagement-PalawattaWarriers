@@ -22,7 +22,6 @@ const CreateMatch = ({ route, navigation }) => {
   const emptyPlayersMessage = 'No players found in the team';
   const players = useSelector((state: RootState) => state.player.players);
   const editMatch = route.params;
-  console.log('edit ', editMatch?.battingStats);
 
   const yupPositiveIntegerSchema = (filedName: string) => {
     const message = `${filedName} should be a positive integer.`;
