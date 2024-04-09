@@ -14,8 +14,9 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
-import { createMatch } from '../redux/slices/matchSlice';
+import { createMatch, updateMatch } from '../redux/slices/matchSlice';
 import { setEditing } from '../redux/slices/statusSlice';
+import { NavigationRoutes } from '../constants/NavigationRoutes';
 
 const CreateMatch = ({ route, navigation }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -145,15 +146,19 @@ const CreateMatch = ({ route, navigation }) => {
           }}
           validationSchema={matchValidationSchema}
           onSubmit={(values) =>
-            dispatch(createMatch(values))
+            dispatch(
+              editMatch
+                ? updateMatch({ ...values, id: editMatch.id })
+                : createMatch(values)
+            )
               .unwrap()
               .then(() => {
                 ToastAndroid.showWithGravity(
-                  'Match created successfully.',
+                  `Match ${editMatch ? 'updated' : 'created'} successfully.`,
                   ToastAndroid.SHORT,
                   ToastAndroid.BOTTOM
                 );
-                navigation.goBack();
+                navigation.navigate(NavigationRoutes.MATCHES);
               })
               .catch((error) => {
                 ToastAndroid.showWithGravity(

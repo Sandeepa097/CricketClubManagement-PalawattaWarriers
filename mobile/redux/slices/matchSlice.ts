@@ -51,6 +51,10 @@ interface NewMatch {
   fieldingStats: FieldingStat[];
 }
 
+interface UpdateMatch extends NewMatch {
+  id: number | string;
+}
+
 const initialState: MatchState = {
   outdoors: [],
   ppls: [],
@@ -272,6 +276,19 @@ export const createMatch = createAsyncThunk(
       return;
     }
     return rejectWithValue('Match creation failed.');
+  }
+);
+
+export const updateMatch = createAsyncThunk(
+  'match/update',
+  async (payload: UpdateMatch, { dispatch, rejectWithValue }) => {
+    const response: any = await api.put(`/matches/${payload.id}`, payload);
+    if (response.ok) {
+      dispatch(retrieveOutdoorMatches());
+      dispatch(retrievePPLMatches());
+      return;
+    }
+    return rejectWithValue('Failed to update match.');
   }
 );
 
