@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { OutdoorMatch, PPLMatch } from '../../types';
+import { CompactSingleMatch, OutdoorMatch, PPLMatch } from '../../types';
 import api from '../../api';
 
 interface MatchState {
@@ -53,6 +53,11 @@ interface NewMatch {
 
 interface UpdateMatch extends NewMatch {
   id: number | string;
+}
+
+interface DeleteMatch {
+  id: number | string;
+  oppositeTeamId: number | string;
 }
 
 const initialState: MatchState = {
@@ -292,6 +297,17 @@ export const updateMatch = createAsyncThunk(
   }
 );
 
+export const deleteMatch = createAsyncThunk(
+  'match/delete',
+  async (payload: DeleteMatch, { rejectWithValue }) => {
+    const response: any = await api.delete(`/matches/${payload.id}`);
+    if (response.ok) {
+      return payload;
+    }
+    return rejectWithValue('Failed to delete match.');
+  }
+);
+
 export const matchSlice = createSlice({
   name: 'match',
   initialState,
@@ -308,6 +324,43 @@ export const matchSlice = createSlice({
         retrievePPLMatches.fulfilled,
         (state, action: PayloadAction<PPLMatch[]>) => {
           state.ppls = action.payload;
+        }
+      )
+      .addCase(
+        deleteMatch.fulfilled,
+        (state, action: PayloadAction<DeleteMatch>) => {
+          if (action.payload.oppositeTeamId) {
+            state.outdoors = state.outdoors.map((outdoor) => {
+              const matches = outdoor.matches.filter(
+                (match) => match.id !== action.payload.id
+              );
+              const counts = {
+                all: matches.length,
+                won: matches.filter(
+                  (match: CompactSingleMatch) => match.result === 'won'
+                ).length,
+                lost: matches.filter(
+                  (match: CompactSingleMatch) => match.result === 'lost'
+                ).length,
+                draw: matches.filter(
+                  (match: CompactSingleMatch) => match.result === 'draw'
+                ).length,
+              };
+
+              return {
+                ...outdoor,
+                matches,
+                counts,
+              };
+            });
+          } else {
+            state.ppls = state.ppls.map((ppl) => ({
+              ...ppl,
+              matches: ppl.matches.filter(
+                (match) => match.id !== action.payload.id
+              ),
+            }));
+          }
         }
       );
   },
