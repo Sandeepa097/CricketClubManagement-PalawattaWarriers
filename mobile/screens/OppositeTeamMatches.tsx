@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, ToastAndroid, View } from 'react-native';
 import SectionTitle from '../components/base/SectionTitle';
 import TabBar from '../components/base/TabBar';
 import OppositeMatchItem from '../components/OppositeMatchItem';
@@ -9,15 +9,17 @@ import { CompactSingleMatch } from '../types';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import { setEditing } from '../redux/slices/statusSlice';
+import { deleteMatch } from '../redux/slices/matchSlice';
 
 const OppositeTeamMatches = ({ route, navigation }) => {
   const dispatch = useDispatch<AppDispatch>();
   const userType = useSelector((state: RootState) => state.auth.userType);
-  const matchesDetails = route.params;
 
+  const [matchesDetails, setMatchesDetails] = useState(route.params);
   const [selectedTabItem, setSelectedTabItem] = useState('all');
   const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
     useState(false);
+  const [deleteRequestedMatch, setDeleteRequestedMatch] = useState(null);
 
   const getTabName = (id: 'all' | 'won' | 'lost' | 'draw', name: string) => {
     const count = matchesDetails.counts[id] || 0;
@@ -60,7 +62,14 @@ const OppositeTeamMatches = ({ route, navigation }) => {
               }
               {...(userType === 'admin'
                 ? {
-                    onRequestDelete: () => setDeleteConfirmationVisible(true),
+                    onRequestDelete: () => {
+                      setDeleteRequestedMatch({
+                        id: item.id,
+                        oppositeTeamId: item.oppositeTeamId,
+                        result: item.result,
+                      });
+                      setDeleteConfirmationVisible(true);
+                    },
                     onRequestEdit: () => {
                       dispatch(setEditing(true));
                       navigation.navigate(NavigationRoutes.CREATE_MATCH, item);
@@ -74,10 +83,52 @@ const OppositeTeamMatches = ({ route, navigation }) => {
       <ConfirmBox
         visible={deleteConfirmationVisible}
         title="Are you sure you want to delete this match?"
-        ok={{ text: 'Delete', onPress: () => console.log('delete') }}
+        ok={{
+          text: 'Delete',
+          onPress: () => {
+            setDeleteRequestedMatch(null);
+            setDeleteConfirmationVisible(false);
+            dispatch(deleteMatch(deleteRequestedMatch))
+              .unwrap()
+              .then(() => {
+                setMatchesDetails({
+                  ...matchesDetails,
+                  matches: matchesDetails.matches.filter(
+                    (match: any) => match.id !== deleteRequestedMatch.id
+                  ),
+                  counts: deleteRequestedMatch.oppositeTeamId
+                    ? {
+                        ...matchesDetails.counts,
+                        all: matchesDetails.counts.all - 1,
+                        [deleteRequestedMatch.result]:
+                          matchesDetails.counts[deleteRequestedMatch.result] -
+                          1,
+                      }
+                    : undefined,
+                });
+                ToastAndroid.showWithGravity(
+                  'Match deleted successfully.',
+                  ToastAndroid.SHORT,
+                  ToastAndroid.BOTTOM
+                );
+              })
+              .catch((error) => {
+                setDeleteRequestedMatch(null);
+                setDeleteConfirmationVisible(false);
+                ToastAndroid.showWithGravity(
+                  error,
+                  ToastAndroid.SHORT,
+                  ToastAndroid.BOTTOM
+                );
+              });
+          },
+        }}
         cancel={{
           text: 'Cancel',
-          onPress: () => setDeleteConfirmationVisible(false),
+          onPress: () => {
+            setDeleteRequestedMatch(null);
+            setDeleteConfirmationVisible(false);
+          },
         }}
       />
     </View>

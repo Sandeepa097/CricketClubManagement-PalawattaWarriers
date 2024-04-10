@@ -91,7 +91,10 @@ const Players = ({ navigation }) => {
         }}
         cancel={{
           text: 'Cancel',
-          onPress: () => setDeleteConfirmationVisible(false),
+          onPress: () => {
+            setDeleteRequestedId(null);
+            setDeleteConfirmationVisible(false);
+          },
         }}
       />
       {userType === UserTypes.ADMIN && (
