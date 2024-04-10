@@ -3,6 +3,7 @@ import { Dimensions, StyleSheet, Text, View, FlatList } from 'react-native';
 import Logo from '../assets/Logo';
 import { Colors } from '../constants/Colors';
 import StrokedText from './base/StrokedText';
+import EmptyListMessage from './base/EmptyListMessage';
 
 interface RankingProps {
   id: string | number;
@@ -129,6 +130,10 @@ const PlayerRanking = ({ items }: { items: RankingProps[] }) => {
           )}
         />
       )}
+      <EmptyListMessage
+        visible={items.length < 3}
+        message="No enough players to do ranking."
+      />
     </View>
   );
 };

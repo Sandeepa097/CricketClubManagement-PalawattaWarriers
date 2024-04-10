@@ -8,10 +8,11 @@ import {
 import { StatusCodes } from 'http-status-codes';
 
 const getRankings = async (req: Request, res: Response) => {
-  const overallRankings = await getOverallRankings();
-  const battingRankings = await getBattingRankings();
-  const bowlingRankings = await getBowlingRankings();
-  const fieldingRankings = await getFieldingRankings();
+  const matchType = req.query.type as 'outdoor' | 'ppl' | null | undefined;
+  const overallRankings = await getOverallRankings(matchType || 'outdoor');
+  const battingRankings = await getBattingRankings(matchType || 'outdoor');
+  const bowlingRankings = await getBowlingRankings(matchType || 'outdoor');
+  const fieldingRankings = await getFieldingRankings(matchType || 'outdoor');
 
   return res.status(StatusCodes.OK).json({
     overallRankings,

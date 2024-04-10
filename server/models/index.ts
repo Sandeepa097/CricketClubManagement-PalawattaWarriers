@@ -34,6 +34,10 @@ MatchPlayerBattingStat.belongsTo(Player, {
   foreignKey: 'playerId',
   as: 'player',
 });
+MatchPlayerBattingStat.belongsTo(Match, {
+  foreignKey: 'matchId',
+  as: 'match',
+});
 
 // Bowling stats
 Match.hasMany(MatchPlayerBowlingStat, {
@@ -48,6 +52,10 @@ MatchPlayerBowlingStat.belongsTo(Player, {
   foreignKey: 'playerId',
   as: 'player',
 });
+MatchPlayerBowlingStat.belongsTo(Match, {
+  foreignKey: 'matchId',
+  as: 'match',
+});
 
 // Fielding stats
 Match.hasMany(MatchPlayerFieldingStat, {
@@ -61,6 +69,10 @@ Player.hasMany(MatchPlayerFieldingStat, {
 MatchPlayerFieldingStat.belongsTo(Player, {
   foreignKey: 'playerId',
   as: 'player',
+});
+MatchPlayerFieldingStat.belongsTo(Match, {
+  foreignKey: 'matchId',
+  as: 'match',
 });
 
 export {

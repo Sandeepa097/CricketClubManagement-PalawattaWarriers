@@ -1,5 +1,7 @@
+import { Op } from 'sequelize';
 import sequelizeConnection from '../config/sequelizeConnection';
 import {
+  Match,
   MatchPlayerBattingStat,
   MatchPlayerBowlingStat,
   MatchPlayerFieldingStat,
@@ -131,7 +133,7 @@ export const calculateFieldingPoints = ({
   return totalPoints;
 };
 
-export const getBattingRankings = async () => {
+export const getBattingRankings = async (matchType: 'outdoor' | 'ppl') => {
   return await Player.findAll({
     subQuery: false,
     group: ['Player.id'],
@@ -149,6 +151,16 @@ export const getBattingRankings = async () => {
         model: MatchPlayerBattingStat,
         as: 'battingStats',
         attributes: [],
+        include: [
+          {
+            model: Match,
+            as: 'match',
+            attributes: ['id', 'oppositeTeamId'],
+            where: {
+              oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
+            },
+          },
+        ],
       },
     ],
     order: [['points', 'DESC']],
@@ -156,7 +168,7 @@ export const getBattingRankings = async () => {
   });
 };
 
-export const getBowlingRankings = async () => {
+export const getBowlingRankings = async (matchType: 'outdoor' | 'ppl') => {
   return await Player.findAll({
     subQuery: false,
     group: ['Player.id'],
@@ -174,6 +186,16 @@ export const getBowlingRankings = async () => {
         model: MatchPlayerBowlingStat,
         as: 'bowlingStats',
         attributes: [],
+        include: [
+          {
+            model: Match,
+            as: 'match',
+            attributes: ['id', 'oppositeTeamId'],
+            where: {
+              oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
+            },
+          },
+        ],
       },
     ],
     order: [['points', 'DESC']],
@@ -181,7 +203,7 @@ export const getBowlingRankings = async () => {
   });
 };
 
-export const getFieldingRankings = async () => {
+export const getFieldingRankings = async (matchType: 'outdoor' | 'ppl') => {
   return await Player.findAll({
     subQuery: false,
     group: ['Player.id'],
@@ -199,7 +221,16 @@ export const getFieldingRankings = async () => {
         model: MatchPlayerFieldingStat,
         as: 'fieldingStats',
         attributes: [],
-        required: true,
+        include: [
+          {
+            model: Match,
+            as: 'match',
+            attributes: ['id', 'oppositeTeamId'],
+            where: {
+              oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
+            },
+          },
+        ],
       },
     ],
     order: [['points', 'DESC']],
@@ -207,7 +238,8 @@ export const getFieldingRankings = async () => {
   });
 };
 
-export const getOverallRankings = async () => {
+export const getOverallRankings = async (matchType: 'outdoor' | 'ppl') => {
+  const matchCondition = matchType === 'outdoor' ? 'IS NOT NULL' : 'IS NULL';
   return await Player.findAll({
     attributes: [
       'id',
@@ -215,7 +247,7 @@ export const getOverallRankings = async () => {
       'avatar',
       [
         sequelizeConnection.literal(
-          '(SELECT IFNULL(SUM(`points`), 0) FROM `MatchPlayerBattingStats` WHERE `playerId` = `Player`.`id`) + (SELECT IFNULL(SUM(`points`), 0) FROM `MatchPlayerBowlingStats` WHERE `playerId` = `Player`.`id`) + (SELECT IFNULL(SUM(`points`), 0) FROM `MatchPlayerFieldingStats` WHERE `playerId` = `Player`.`id`)'
+          `(SELECT IFNULL(SUM(MPBS.\`points\`), 0) FROM \`MatchPlayerBattingStats\` MPBS JOIN \`Matches\` M ON MPBS.\`matchId\` = M.\`id\` WHERE MPBS.\`playerId\` = \`Player\`.\`id\` AND M.\`oppositeTeamId\` ${matchCondition}) + (SELECT IFNULL(SUM(MPFS.\`points\`), 0) FROM \`MatchPlayerFieldingStats\` MPFS JOIN \`Matches\` M ON MPFS.\`matchId\` = M.\`id\` WHERE MPFS.\`playerId\` = \`Player\`.\`id\` AND M.\`oppositeTeamId\` ${matchCondition}) + (SELECT IFNULL(SUM(MPBS.\`points\`), 0) FROM \`MatchPlayerBowlingStats\` MPBS JOIN \`Matches\` M ON MPBS.\`matchId\` = M.\`id\` WHERE MPBS.\`playerId\` = \`Player\`.\`id\` AND M.\`oppositeTeamId\` ${matchCondition})`
         ),
         'points',
       ],

@@ -8,6 +8,7 @@ import api from '../api';
 
 const Leaderboard = () => {
   const focused = useIsFocused();
+  const [selectedLeaderboard, setSelectedLeaderboard] = useState('outdoor');
   const [selectedTabItem, setSelectedTabItem] = useState('overall');
   const [leaderboard, setLeaderboard] = useState({
     overall: [],
@@ -18,7 +19,9 @@ const Leaderboard = () => {
 
   useEffect(() => {
     const getLeaderboard = async () => {
-      const response: any = await api.get('/rankings');
+      const response: any = await api.get(`/rankings`, {
+        type: selectedLeaderboard,
+      });
       if (response.ok)
         setLeaderboard({
           ...leaderboard,
@@ -30,14 +33,14 @@ const Leaderboard = () => {
     };
 
     getLeaderboard();
-  }, [focused]);
+  }, [focused, selectedLeaderboard]);
 
   return (
     <View style={styles.container}>
       <Toggle
-        left={{ id: 'left', name: 'Outdoor' }}
-        right={{ id: 'right', name: 'PPL' }}
-        onPress={(id) => id}
+        left={{ id: 'outdoor', name: 'Outdoor' }}
+        right={{ id: 'ppl', name: 'PPL' }}
+        onPress={(id) => setSelectedLeaderboard(id as string)}
       />
       <TabBar
         selected={selectedTabItem}

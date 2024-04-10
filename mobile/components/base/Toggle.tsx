@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -24,6 +24,10 @@ const width: number = Dimensions.get('window').width;
 
 const Toggle = (props: ToggleProps) => {
   const [isToggleLeft, setIsToggleLeft] = useState(true);
+  useEffect(() => {
+    props.onPress(isToggleLeft ? props.right.id : props.left.id);
+  }, []);
+
   return (
     <TouchableOpacity
       style={styles.container}
