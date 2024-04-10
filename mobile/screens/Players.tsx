@@ -42,7 +42,11 @@ const Players = ({ navigation }) => {
         message="No players found."
       />
       <FlatList
-        data={players}
+        data={players.filter(
+          (player) =>
+            player.name.toLowerCase().indexOf(searchText.toLocaleLowerCase()) >
+            -1
+        )}
         renderItem={({ item }) => (
           <PlayerItem
             key={item.id}
@@ -60,6 +64,9 @@ const Players = ({ navigation }) => {
             }}
           />
         )}
+        ListEmptyComponent={
+          <EmptyListMessage visible={true} message="No players found." />
+        }
       />
       <ConfirmBox
         visible={deleteConfirmationVisible}

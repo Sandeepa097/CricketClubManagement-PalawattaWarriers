@@ -64,7 +64,21 @@ const Matches = ({ navigation }) => {
         message="No matches found."
       />
       <FlatList
-        data={(selectedTabItem === 'outdoor' ? outdoors : ppls) as PPLMatch[]}
+        data={
+          (selectedTabItem === 'outdoor'
+            ? outdoors.filter(
+                (outdoor) =>
+                  outdoor.title
+                    .toLowerCase()
+                    .indexOf(searchText.toLocaleLowerCase()) > -1
+              )
+            : ppls.filter(
+                (ppl) =>
+                  ppl.title
+                    .toLowerCase()
+                    .indexOf(searchText.toLocaleLowerCase()) > -1
+              )) as PPLMatch[]
+        }
         renderItem={({ item }) => (
           <CompactMatchItem
             key={item.id}
@@ -74,6 +88,9 @@ const Matches = ({ navigation }) => {
             }
           />
         )}
+        ListEmptyComponent={
+          <EmptyListMessage visible={true} message="No matches found." />
+        }
       />
       <ConfirmBox
         visible={deleteConfirmationVisible}
