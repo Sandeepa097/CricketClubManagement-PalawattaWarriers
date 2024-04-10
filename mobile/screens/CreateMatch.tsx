@@ -207,7 +207,7 @@ const CreateMatch = ({ route, navigation }) => {
                 />
               )}
               <TextInput
-                value={values.numberOfDeliveriesPerOver.toString()}
+                value={values.numberOfDeliveriesPerOver?.toString()}
                 onChangeText={(value) =>
                   setFieldValue('numberOfDeliveriesPerOver', value)
                 }

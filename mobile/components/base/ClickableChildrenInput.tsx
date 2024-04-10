@@ -151,7 +151,7 @@ const ClickableChildrenInput = (props: ClickableChildrenInputProps) => {
                         keyboardType={itemProperty.keyboardType}
                         value={props.itemValues
                           .find((itemValue) => itemValue.id === item.id)
-                          ?.values[itemProperty.name].toString()}
+                          ?.values[itemProperty.name]?.toString()}
                         onChange={(text) =>
                           updateValues(item.id, itemProperty.name, text)
                         }

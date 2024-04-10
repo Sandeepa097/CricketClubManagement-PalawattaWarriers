@@ -84,7 +84,7 @@ const RollsPicker = (props: RollsPickerProps) => {
         onPress={() => setModalVisible(true)}
       />
       {props.error && true && (
-        <Text style={styles.error}>{props.error.toString()}</Text>
+        <Text style={styles.error}>{props.error?.toString()}</Text>
       )}
       <Modal
         isVisible={modalVisible}
