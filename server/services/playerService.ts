@@ -76,7 +76,53 @@ export const getPlayerBattingStats = async (
     order: sequelizeConnection.literal('score DESC'),
   });
 
-  return { bestScore };
+  const totalScore = (
+    await MatchPlayerBattingStat.findOne({
+      where: { playerId },
+      attributes: [
+        [
+          sequelizeConnection.fn('SUM', sequelizeConnection.col('score')),
+          'score',
+        ],
+      ],
+      group: ['playerId'],
+      include: [
+        {
+          model: Match,
+          as: 'match',
+          attributes: ['id', 'oppositeTeamId'],
+          where: {
+            oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
+          },
+        },
+      ],
+    })
+  )?.dataValues?.score;
+
+  const dismissedCount = (
+    await MatchPlayerBattingStat.findOne({
+      where: { playerId, isOut: true },
+      attributes: [
+        [
+          sequelizeConnection.fn('COUNT', sequelizeConnection.col('isOut')),
+          'dismissedCount',
+        ],
+      ],
+      group: ['playerId'],
+      include: [
+        {
+          model: Match,
+          as: 'match',
+          attributes: ['id', 'oppositeTeamId'],
+          where: {
+            oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
+          },
+        },
+      ],
+    })
+  )?.dataValues?.dismissedCount;
+
+  return { bestScore, totalScore, dismissedCount };
 };
 
 export const getPlayerBowlingStats = async (
@@ -107,5 +153,51 @@ export const getPlayerBowlingStats = async (
     order: sequelizeConnection.literal('wickets DESC'),
   });
 
-  return { bestScore };
+  const totalWickets = (
+    await MatchPlayerBowlingStat.findOne({
+      where: { playerId },
+      attributes: [
+        [
+          sequelizeConnection.fn('SUM', sequelizeConnection.col('wickets')),
+          'wickets',
+        ],
+      ],
+      group: ['playerId'],
+      include: [
+        {
+          model: Match,
+          as: 'match',
+          attributes: ['id', 'oppositeTeamId'],
+          where: {
+            oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
+          },
+        },
+      ],
+    })
+  )?.dataValues?.wickets;
+
+  const totalConceded = (
+    await MatchPlayerBowlingStat.findOne({
+      where: { playerId },
+      attributes: [
+        [
+          sequelizeConnection.fn('SUM', sequelizeConnection.col('conceded')),
+          'conceded',
+        ],
+      ],
+      group: ['playerId'],
+      include: [
+        {
+          model: Match,
+          as: 'match',
+          attributes: ['id', 'oppositeTeamId'],
+          where: {
+            oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
+          },
+        },
+      ],
+    })
+  )?.dataValues?.conceded;
+
+  return { bestScore, totalWickets, totalConceded };
 };
