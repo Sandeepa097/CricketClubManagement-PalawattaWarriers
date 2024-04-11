@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import {
   createPlayer,
+  getPlayerBowlingStats,
+  getPlayerBattingStats,
   getPlayers,
   removePlayer,
   updatePlayer,
@@ -71,4 +73,19 @@ const get = async (req: Request, res: Response) => {
   return res.status(StatusCodes.OK).json({ players });
 };
 
-export default { create, update, remove, get };
+const getStats = async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const pplStats = {
+    battingStats: await getPlayerBattingStats(id, 'ppl'),
+    bowlingStats: await getPlayerBowlingStats(id, 'ppl'),
+  };
+
+  const outdoorStats = {
+    battingStats: await getPlayerBattingStats(id, 'outdoor'),
+    bowlingStats: await getPlayerBowlingStats(id, 'outdoor'),
+  };
+
+  return res.status(StatusCodes.OK).json({ outdoorStats, pplStats });
+};
+
+export default { create, update, remove, get, getStats };

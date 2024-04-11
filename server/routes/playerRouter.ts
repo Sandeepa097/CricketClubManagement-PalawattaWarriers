@@ -117,6 +117,8 @@ playerRouter.put(
   playerController.update
 );
 
+playerRouter.get('/:id/stats', playerController.getStats);
+
 playerRouter.delete(
   '/:id',
   validatePermissions(UserTypes.ADMIN),
