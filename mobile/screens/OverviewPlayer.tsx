@@ -32,7 +32,7 @@ interface PlayerMatchStatResponse {
   };
   bowlingStats: {
     bestScore?: {
-      overs: number;
+      conceded: number;
       wickets: number;
       match: {
         date: string;
@@ -117,6 +117,14 @@ const OverviewPlayer = ({ route }) => {
               }/${playerStats.outdoor.battingStats.bestScore.balls}`}
             />
           )}
+        {playerStats.outdoor.bowlingStats?.bestScore &&
+          playerStats.outdoor.bowlingStats.bestScore !== null && (
+            <PlayerStat
+              header="Highest Wickets count"
+              body={`On ${playerStats.outdoor.bowlingStats.bestScore.match.oppositeTeam.name}`}
+              value={`${playerStats.outdoor.bowlingStats.bestScore.wickets}/${playerStats.outdoor.bowlingStats.bestScore.conceded}`}
+            />
+          )}
         {playerStats.outdoor.battingStats?.averageStrikeRate &&
           playerStats.outdoor.battingStats.averageStrikeRate !== null && (
             <PlayerStat
@@ -125,6 +133,14 @@ const OverviewPlayer = ({ route }) => {
               value={playerStats.outdoor.battingStats.averageStrikeRate.toFixed(
                 2
               )}
+            />
+          )}
+        {playerStats.outdoor.bowlingStats?.averageEconomy &&
+          playerStats.outdoor.bowlingStats.averageEconomy !== null && (
+            <PlayerStat
+              header="Economy"
+              body="Average"
+              value={playerStats.outdoor.bowlingStats.averageEconomy.toFixed(2)}
             />
           )}
         {playerStats.outdoor.battingStats?.totalBalls &&
@@ -141,6 +157,17 @@ const OverviewPlayer = ({ route }) => {
               }
             />
           )}
+        {playerStats.outdoor.bowlingStats?.totalWickets &&
+          playerStats.outdoor.bowlingStats.totalWickets !== null && (
+            <PlayerStat
+              header="Bowling Average"
+              body="Average"
+              value={(
+                playerStats.outdoor.bowlingStats.totalConceded /
+                playerStats.outdoor.bowlingStats.totalWickets
+              ).toFixed(2)}
+            />
+          )}
         {playerStats.outdoor.battingStats?.totalBalls &&
           playerStats.outdoor.battingStats.totalBalls !== null && (
             <PlayerStat
@@ -148,6 +175,16 @@ const OverviewPlayer = ({ route }) => {
               body="count"
               value={`${playerStats.outdoor.battingStats.totalScore || 0}/${
                 playerStats.outdoor.battingStats.totalBalls
+              }`}
+            />
+          )}
+        {playerStats.outdoor.bowlingStats?.totalWickets !== undefined &&
+          playerStats.outdoor.bowlingStats?.totalWickets !== null && (
+            <PlayerStat
+              header="Total Wickets"
+              body="count"
+              value={`${playerStats.outdoor.bowlingStats.totalWickets || 0}/${
+                playerStats.outdoor.bowlingStats.totalConceded
               }`}
             />
           )}
@@ -168,12 +205,28 @@ const OverviewPlayer = ({ route }) => {
               }/${playerStats.ppl.battingStats.bestScore.balls}`}
             />
           )}
+        {playerStats.ppl.bowlingStats?.bestScore &&
+          playerStats.ppl.bowlingStats.bestScore !== null && (
+            <PlayerStat
+              header="Highest Wickets count"
+              body={`On ${playerStats.ppl.bowlingStats.bestScore.match.date}`}
+              value={`${playerStats.ppl.bowlingStats.bestScore.wickets}/${playerStats.ppl.bowlingStats.bestScore.conceded}`}
+            />
+          )}
         {playerStats.ppl.battingStats?.averageStrikeRate &&
           playerStats.ppl.battingStats.averageStrikeRate !== null && (
             <PlayerStat
               header="Strike Rate"
               body="Average"
               value={playerStats.ppl.battingStats.averageStrikeRate.toFixed(2)}
+            />
+          )}
+        {playerStats.ppl.bowlingStats?.averageEconomy &&
+          playerStats.ppl.bowlingStats.averageEconomy !== null && (
+            <PlayerStat
+              header="Economy"
+              body="Average"
+              value={playerStats.ppl.bowlingStats.averageEconomy.toFixed(2)}
             />
           )}
         {playerStats.ppl.battingStats?.totalBalls &&
@@ -190,6 +243,17 @@ const OverviewPlayer = ({ route }) => {
               }
             />
           )}
+        {playerStats.ppl.bowlingStats?.totalWickets &&
+          playerStats.ppl.bowlingStats.totalWickets !== null && (
+            <PlayerStat
+              header="Bowling Average"
+              body="Average"
+              value={(
+                playerStats.ppl.bowlingStats.totalConceded /
+                playerStats.ppl.bowlingStats.totalWickets
+              ).toFixed(2)}
+            />
+          )}
         {playerStats.ppl.battingStats?.totalBalls &&
           playerStats.ppl.battingStats.totalBalls !== null && (
             <PlayerStat
@@ -197,6 +261,16 @@ const OverviewPlayer = ({ route }) => {
               body="count"
               value={`${playerStats.ppl.battingStats.totalScore || 0}/${
                 playerStats.ppl.battingStats.totalBalls
+              }`}
+            />
+          )}
+        {playerStats.ppl.bowlingStats?.totalWickets !== undefined &&
+          playerStats.ppl.bowlingStats?.totalWickets !== null && (
+            <PlayerStat
+              header="Total Wickets"
+              body="count"
+              value={`${playerStats.ppl.bowlingStats.totalWickets || 0}/${
+                playerStats.ppl.bowlingStats.totalConceded
               }`}
             />
           )}
