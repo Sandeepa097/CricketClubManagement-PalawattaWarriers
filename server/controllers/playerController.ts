@@ -76,19 +76,19 @@ const get = async (req: Request, res: Response) => {
 
 const getStats = async (req: Request, res: Response) => {
   const id = req.params.id;
-  const pplStats = {
+  const ppl = {
     battingStats: await getPlayerBattingStats(id, 'ppl'),
     bowlingStats: await getPlayerBowlingStats(id, 'ppl'),
     matchesCount: await getPlayerMatchesCount(id, 'ppl'),
   };
 
-  const outdoorStats = {
+  const outdoor = {
     battingStats: await getPlayerBattingStats(id, 'outdoor'),
     bowlingStats: await getPlayerBowlingStats(id, 'outdoor'),
     matchesCount: await getPlayerMatchesCount(id, 'outdoor'),
   };
 
-  return res.status(StatusCodes.OK).json({ outdoorStats, pplStats });
+  return res.status(StatusCodes.OK).json({ outdoor, ppl });
 };
 
 export default { create, update, remove, get, getStats };

@@ -4,6 +4,7 @@ import {
   Match,
   MatchPlayerBattingStat,
   MatchPlayerBowlingStat,
+  OppositeTeam,
   Player,
 } from '../models';
 import sequelizeConnection from '../config/sequelizeConnection';
@@ -67,10 +68,17 @@ export const getPlayerBattingStats = async (
       {
         model: Match,
         as: 'match',
-        attributes: ['id', 'oppositeTeamId'],
+        attributes: ['id', 'oppositeTeamId', 'date', 'location'],
         where: {
           oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
         },
+        include: [
+          {
+            model: OppositeTeam,
+            as: 'oppositeTeam',
+            attributes: ['name'],
+          },
+        ],
       },
     ],
     order: sequelizeConnection.literal('score DESC'),
@@ -121,6 +129,29 @@ export const getPlayerBattingStats = async (
     })
   )?.dataValues?.score;
 
+  const totalBalls = (
+    await MatchPlayerBattingStat.findOne({
+      where: { playerId },
+      attributes: [
+        [
+          sequelizeConnection.fn('SUM', sequelizeConnection.col('balls')),
+          'balls',
+        ],
+      ],
+      group: ['playerId'],
+      include: [
+        {
+          model: Match,
+          as: 'match',
+          attributes: ['id', 'oppositeTeamId'],
+          where: {
+            oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
+          },
+        },
+      ],
+    })
+  )?.dataValues?.balls;
+
   const dismissedCount = (
     await MatchPlayerBattingStat.findOne({
       where: { playerId, isOut: true },
@@ -144,7 +175,13 @@ export const getPlayerBattingStats = async (
     })
   )?.dataValues?.dismissedCount;
 
-  return { bestScore, averageStrikeRate, totalScore, dismissedCount };
+  return {
+    bestScore,
+    averageStrikeRate,
+    totalScore,
+    totalBalls,
+    dismissedCount,
+  };
 };
 
 export const getPlayerBowlingStats = async (
@@ -166,10 +203,17 @@ export const getPlayerBowlingStats = async (
       {
         model: Match,
         as: 'match',
-        attributes: ['id', 'oppositeTeamId', 'numberOfDeliveriesPerOver'],
+        attributes: ['id', 'oppositeTeamId', 'date', 'location'],
         where: {
           oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
         },
+        include: [
+          {
+            model: OppositeTeam,
+            as: 'oppositeTeam',
+            attributes: ['name'],
+          },
+        ],
       },
     ],
     order: sequelizeConnection.literal('wickets DESC'),
