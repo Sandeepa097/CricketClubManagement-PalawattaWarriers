@@ -192,13 +192,13 @@ export const getPlayerBowlingStats = async (
     where: { playerId },
     attributes: [
       'playerId',
-      'overs',
+      'conceded',
       [
         sequelizeConnection.fn('MAX', sequelizeConnection.col('wickets')),
         'wickets',
       ],
     ],
-    group: ['playerId', 'overs'],
+    group: ['playerId', 'conceded'],
     include: [
       {
         model: Match,
