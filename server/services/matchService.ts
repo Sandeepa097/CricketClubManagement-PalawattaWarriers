@@ -112,6 +112,7 @@ export const setMatchPlayersBattingStats = async (
     sixes?: number;
     fours?: number;
     isOut?: boolean;
+    strikeRate: number;
     points: number;
   }[]
 ) => {
@@ -127,6 +128,7 @@ export const setMatchPlayersBattingStats = async (
     sixes: player.sixes,
     fours: player.fours,
     isOut: player.isOut,
+    strikeRate: player.strikeRate,
     points: player.points,
   }));
   return await Promise.all(
@@ -144,6 +146,7 @@ export const setMatchPlayersBowlingStats = async (
     overs: number;
     conceded?: number;
     maidens?: number;
+    economy: number;
     points: number;
   }[]
 ) => {
@@ -158,6 +161,7 @@ export const setMatchPlayersBowlingStats = async (
     overs: player.overs,
     conceded: player.conceded,
     maidens: player.maidens,
+    economy: player.economy,
     points: player.points,
   }));
   return await Promise.all(

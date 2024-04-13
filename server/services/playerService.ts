@@ -76,6 +76,28 @@ export const getPlayerBattingStats = async (
     order: sequelizeConnection.literal('score DESC'),
   });
 
+  const averageStrikeRate = (
+    await MatchPlayerBattingStat.findOne({
+      where: { playerId },
+      attributes: [
+        [
+          sequelizeConnection.fn('AVG', sequelizeConnection.col('strikeRate')),
+          'strikeRate',
+        ],
+      ],
+      include: [
+        {
+          model: Match,
+          as: 'match',
+          attributes: ['id', 'oppositeTeamId'],
+          where: {
+            oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
+          },
+        },
+      ],
+    })
+  )?.dataValues.strikeRate;
+
   const totalScore = (
     await MatchPlayerBattingStat.findOne({
       where: { playerId },
@@ -122,7 +144,7 @@ export const getPlayerBattingStats = async (
     })
   )?.dataValues?.dismissedCount;
 
-  return { bestScore, totalScore, dismissedCount };
+  return { bestScore, averageStrikeRate, totalScore, dismissedCount };
 };
 
 export const getPlayerBowlingStats = async (
@@ -152,6 +174,28 @@ export const getPlayerBowlingStats = async (
     ],
     order: sequelizeConnection.literal('wickets DESC'),
   });
+
+  const averageEconomy = (
+    await MatchPlayerBowlingStat.findOne({
+      where: { playerId },
+      attributes: [
+        [
+          sequelizeConnection.fn('AVG', sequelizeConnection.col('economy')),
+          'economy',
+        ],
+      ],
+      include: [
+        {
+          model: Match,
+          as: 'match',
+          attributes: ['id', 'oppositeTeamId'],
+          where: {
+            oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
+          },
+        },
+      ],
+    })
+  )?.dataValues.economy;
 
   const totalWickets = (
     await MatchPlayerBowlingStat.findOne({
@@ -199,7 +243,7 @@ export const getPlayerBowlingStats = async (
     })
   )?.dataValues?.conceded;
 
-  return { bestScore, totalWickets, totalConceded };
+  return { bestScore, averageEconomy, totalWickets, totalConceded };
 };
 
 export const getPlayerMatchesCount = async (
