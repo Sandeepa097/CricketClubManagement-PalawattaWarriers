@@ -9,6 +9,7 @@ interface MatchPlayerBattingStatInstance extends Model {
   sixes: number;
   fours: number;
   isOut: boolean;
+  strikeRate: number;
   points: number;
 }
 
@@ -23,6 +24,7 @@ class MatchPlayerBattingStat
   public sixes!: number;
   public fours!: number;
   public isOut!: boolean;
+  public strikeRate!: number;
   public points!: number;
 
   static associate(models: any) {
@@ -39,6 +41,7 @@ MatchPlayerBattingStat.init(
     sixes: DataTypes.INTEGER.UNSIGNED,
     fours: DataTypes.INTEGER.UNSIGNED,
     isOut: DataTypes.BOOLEAN,
+    strikeRate: DataTypes.DECIMAL(7, 3).UNSIGNED,
     points: DataTypes.INTEGER,
   },
   {

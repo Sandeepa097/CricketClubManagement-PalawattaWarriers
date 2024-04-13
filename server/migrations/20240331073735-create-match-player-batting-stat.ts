@@ -51,6 +51,10 @@ export = {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
+      strikeRate: {
+        allowNull: false,
+        type: Sequelize.DECIMAL(7, 3).UNSIGNED,
+      },
       points: {
         allowNull: false,
         type: Sequelize.INTEGER,

@@ -57,7 +57,7 @@ export const calculateBattingPoints = ({
   if (strikeRate < 50) totalPoints -= 10;
 
   // Points for strike rate if scored more than 10 runs
-  if ((score || 0) < 10) return totalPoints;
+  if ((score || 0) < 10) return { totalPoints, strikeRate };
 
   if (strikeRate >= 100 && strikeRate < 125) totalPoints += 10;
   else if (strikeRate >= 125 && strikeRate < 150) totalPoints += 20;
@@ -73,7 +73,7 @@ export const calculateBattingPoints = ({
   if ((score || 0) >= 50) totalPoints += 50;
   if ((score || 0) > 50) totalPoints += (score || 0) * 2;
 
-  return totalPoints;
+  return { totalPoints, strikeRate };
 };
 
 export const calculateBowlingPoints = ({
@@ -103,8 +103,8 @@ export const calculateBowlingPoints = ({
     Math.floor(totalNumberOfBalls / 6) + (totalNumberOfBalls % 6) / 10;
 
   // Points for economy if bowled at least 2 overs
-  if (oversIfSixDeliveriesPerOver < 2) return totalPoints;
   const economy = (conceded || 0) / oversIfSixDeliveriesPerOver;
+  if (oversIfSixDeliveriesPerOver < 2) return { totalPoints, economy };
 
   if (economy < 2) totalPoints += 30;
   else if (economy < 4) totalPoints += 20;
@@ -114,7 +114,7 @@ export const calculateBowlingPoints = ({
   else if (economy < 12) totalPoints -= 20;
   else if (economy >= 12) totalPoints -= 30;
 
-  return totalPoints;
+  return { totalPoints, economy };
 };
 
 export const calculateFieldingPoints = ({

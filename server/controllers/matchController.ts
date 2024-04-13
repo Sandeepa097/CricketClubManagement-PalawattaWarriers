@@ -72,22 +72,30 @@ const create = async (req: Request, res: Response) => {
   await setMatchPlayers(createdMatch, officialPlayers);
   await setMatchPlayersBattingStats(
     createdMatch,
-    (battingStats as BattingStatsInterface[]).map((stat) => ({
-      id: stat.id,
-      ...stat.values,
-      points: calculateBattingPoints({ ...stat.values }),
-    }))
+    (battingStats as BattingStatsInterface[]).map((stat) => {
+      const battingPoints = calculateBattingPoints({ ...stat.values });
+      return {
+        id: stat.id,
+        ...stat.values,
+        strikeRate: battingPoints.strikeRate,
+        points: battingPoints.totalPoints,
+      };
+    })
   );
   await setMatchPlayersBowlingStats(
     createdMatch,
-    (bowlingStats as BowlingStatsInterface[]).map((stat) => ({
-      id: stat.id,
-      ...stat.values,
-      points: calculateBowlingPoints({
+    (bowlingStats as BowlingStatsInterface[]).map((stat) => {
+      const bowlingPoints = calculateBowlingPoints({
         ...stat.values,
         numberOfDeliveriesPerOver,
-      }),
-    }))
+      });
+      return {
+        id: stat.id,
+        ...stat.values,
+        economy: bowlingPoints.economy,
+        points: bowlingPoints.totalPoints,
+      };
+    })
   );
 
   await setMatchPlayersFieldingStats(
@@ -142,23 +150,31 @@ const update = async (req: Request, res: Response) => {
 
   await setMatchPlayersBattingStats(
     updatedMatch,
-    (battingStats as BattingStatsInterface[]).map((stat) => ({
-      id: stat.id,
-      ...stat.values,
-      points: calculateBattingPoints({ ...stat.values }),
-    }))
+    (battingStats as BattingStatsInterface[]).map((stat) => {
+      const battingPoints = calculateBattingPoints({ ...stat.values });
+      return {
+        id: stat.id,
+        ...stat.values,
+        strikeRate: battingPoints.strikeRate,
+        points: battingPoints.totalPoints,
+      };
+    })
   );
 
   await setMatchPlayersBowlingStats(
     updatedMatch,
-    (bowlingStats as BowlingStatsInterface[]).map((stat) => ({
-      id: stat.id,
-      ...stat.values,
-      points: calculateBowlingPoints({
+    (bowlingStats as BowlingStatsInterface[]).map((stat) => {
+      const bowlingPoints = calculateBowlingPoints({
         ...stat.values,
         numberOfDeliveriesPerOver,
-      }),
-    }))
+      });
+      return {
+        id: stat.id,
+        ...stat.values,
+        economy: bowlingPoints.economy,
+        points: bowlingPoints.totalPoints,
+      };
+    })
   );
 
   await setMatchPlayersFieldingStats(

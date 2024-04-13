@@ -8,6 +8,7 @@ interface MatchPlayerBowlingStatInstance extends Model {
   overs: number;
   conceded: number;
   maidens: number;
+  economy: number;
   points: number;
 }
 
@@ -21,6 +22,7 @@ class MatchPlayerBowlingStat
   public overs!: number;
   public conceded!: number;
   public maidens!: number;
+  public economy!: number;
   public points!: number;
 
   static associate(models: any) {
@@ -36,6 +38,7 @@ MatchPlayerBowlingStat.init(
     overs: DataTypes.DECIMAL(3, 1).UNSIGNED,
     conceded: DataTypes.INTEGER.UNSIGNED,
     maidens: DataTypes.INTEGER.UNSIGNED,
+    economy: DataTypes.DECIMAL(6, 3).UNSIGNED,
     points: DataTypes.INTEGER,
   },
   {

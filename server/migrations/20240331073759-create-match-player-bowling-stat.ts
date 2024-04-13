@@ -46,6 +46,10 @@ export = {
         type: Sequelize.INTEGER.UNSIGNED,
         defaultValue: 0,
       },
+      economy: {
+        allowNull: false,
+        type: Sequelize.DECIMAL(6, 3).UNSIGNED,
+      },
       points: {
         allowNull: false,
         type: Sequelize.INTEGER,
