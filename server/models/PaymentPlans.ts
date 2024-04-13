@@ -22,6 +22,19 @@ PaymentPlan.init(
     fee: DataTypes.INTEGER.UNSIGNED,
     effectiveMonth: DataTypes.INTEGER,
     effectiveYear: DataTypes.INTEGER,
+    effectiveFrom: {
+      type: DataTypes.VIRTUAL,
+      get: function () {
+        return {
+          month: this.getDataValue('effectiveMonth'),
+          year: this.getDataValue('effectiveYear'),
+        };
+      },
+      set: function (effectiveFrom: { month: number; year: number }) {
+        this.setDataValue('effectiveMonth', effectiveFrom.month);
+        this.setDataValue('effectiveYear', effectiveFrom.year);
+      },
+    },
   },
   {
     sequelize: sequelizeConnection,
