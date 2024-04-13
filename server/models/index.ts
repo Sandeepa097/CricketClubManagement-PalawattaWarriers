@@ -6,6 +6,8 @@ import MatchPlayer from './MatchPlayer';
 import MatchPlayerBattingStat from './MatchPlayerBattingStat';
 import MatchPlayerBowlingStat from './MatchPlayerBowlingStat';
 import MatchPlayerFieldingStat from './MatchPlayerFieldingStat';
+import PaymentPlan from './PaymentPlans';
+import Payment from './Payment';
 
 // Opposite team
 Match.belongsTo(OppositeTeam, {
@@ -79,6 +81,16 @@ MatchPlayerFieldingStat.belongsTo(Match, {
   as: 'match',
 });
 
+// Payments
+Payment.belongsTo(Player, {
+  foreignKey: 'playerId',
+  as: 'player',
+});
+Player.hasMany(Payment, {
+  foreignKey: 'playerId',
+  as: 'payments',
+});
+
 export {
   User,
   Player,
@@ -88,4 +100,6 @@ export {
   MatchPlayerBattingStat,
   MatchPlayerBowlingStat,
   MatchPlayerFieldingStat,
+  PaymentPlan,
+  Payment,
 };
