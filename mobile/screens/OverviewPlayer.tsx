@@ -173,9 +173,7 @@ const OverviewPlayer = ({ route }) => {
             <PlayerStat
               header="Total Runs"
               body="count"
-              value={`${playerStats.outdoor.battingStats.totalScore || 0}/${
-                playerStats.outdoor.battingStats.totalBalls
-              }`}
+              value={`${playerStats.outdoor.battingStats.totalScore || 0}`}
             />
           )}
         {playerStats.outdoor.bowlingStats?.totalWickets !== undefined &&
@@ -183,9 +181,7 @@ const OverviewPlayer = ({ route }) => {
             <PlayerStat
               header="Total Wickets"
               body="count"
-              value={`${playerStats.outdoor.bowlingStats.totalWickets || 0}/${
-                playerStats.outdoor.bowlingStats.totalConceded
-              }`}
+              value={`${playerStats.outdoor.bowlingStats.totalWickets || 0}`}
             />
           )}
         <PlayerStat
@@ -259,9 +255,7 @@ const OverviewPlayer = ({ route }) => {
             <PlayerStat
               header="Total Runs"
               body="count"
-              value={`${playerStats.ppl.battingStats.totalScore || 0}/${
-                playerStats.ppl.battingStats.totalBalls
-              }`}
+              value={`${playerStats.ppl.battingStats.totalScore || 0}`}
             />
           )}
         {playerStats.ppl.bowlingStats?.totalWickets !== undefined &&
@@ -269,9 +263,7 @@ const OverviewPlayer = ({ route }) => {
             <PlayerStat
               header="Total Wickets"
               body="count"
-              value={`${playerStats.ppl.bowlingStats.totalWickets || 0}/${
-                playerStats.ppl.bowlingStats.totalConceded
-              }`}
+              value={`${playerStats.ppl.bowlingStats.totalWickets || 0}`}
             />
           )}
         <PlayerStat
