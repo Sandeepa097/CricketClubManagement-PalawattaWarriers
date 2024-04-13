@@ -19,7 +19,11 @@ Match.belongsToMany(Player, {
   foreignKey: 'matchId',
   as: 'officialPlayers',
 });
-Player.belongsToMany(Match, { through: MatchPlayer, foreignKey: 'playerId' });
+Player.belongsToMany(Match, {
+  through: MatchPlayer,
+  foreignKey: 'playerId',
+  as: 'playedMatches',
+});
 
 // Batting stats
 Match.hasMany(MatchPlayerBattingStat, {

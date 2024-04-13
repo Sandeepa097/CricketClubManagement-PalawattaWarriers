@@ -201,3 +201,36 @@ export const getPlayerBowlingStats = async (
 
   return { bestScore, totalWickets, totalConceded };
 };
+
+export const getPlayerMatchesCount = async (
+  playerId: number | string,
+  matchType: 'ppl' | 'outdoor'
+) => {
+  const matchesCount = (
+    await Player.findOne({
+      subQuery: false,
+      where: { id: playerId },
+      attributes: [
+        [
+          sequelizeConnection.fn(
+            'COUNT',
+            sequelizeConnection.col('playedMatches.id')
+          ),
+          'matchesCount',
+        ],
+      ],
+      include: [
+        {
+          model: Match,
+          as: 'playedMatches',
+          attributes: ['id', 'oppositeTeamId'],
+          where: {
+            oppositeTeamId: { [matchType === 'ppl' ? Op.is : Op.not]: null },
+          },
+        },
+      ],
+    })
+  )?.dataValues.matchesCount;
+
+  return matchesCount;
+};

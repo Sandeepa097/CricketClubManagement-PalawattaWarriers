@@ -7,6 +7,7 @@ import {
   getPlayers,
   removePlayer,
   updatePlayer,
+  getPlayerMatchesCount,
 } from '../services/playerService';
 import { isBase64, uploadFile } from '../services/fileService';
 
@@ -78,11 +79,13 @@ const getStats = async (req: Request, res: Response) => {
   const pplStats = {
     battingStats: await getPlayerBattingStats(id, 'ppl'),
     bowlingStats: await getPlayerBowlingStats(id, 'ppl'),
+    matchesCount: await getPlayerMatchesCount(id, 'ppl'),
   };
 
   const outdoorStats = {
     battingStats: await getPlayerBattingStats(id, 'outdoor'),
     bowlingStats: await getPlayerBowlingStats(id, 'outdoor'),
+    matchesCount: await getPlayerMatchesCount(id, 'outdoor'),
   };
 
   return res.status(StatusCodes.OK).json({ outdoorStats, pplStats });
