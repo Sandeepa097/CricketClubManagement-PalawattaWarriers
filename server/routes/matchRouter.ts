@@ -8,31 +8,36 @@ import { findPlayer } from '../services/playerService';
 import { findMatch } from '../services/matchService';
 
 const MatchValidations = [
+  body('isPPL').toBoolean().isBoolean(),
   body('oppositeTeamId')
-    .optional()
+    .if(({ req }) => {
+      return !req.body.isPPL;
+    })
     .isInt()
     .toInt()
     .custom(async (value) => {
-      if (!value) return true;
       const oppositeTeam = await findOppositeTeam({ id: value });
       if (!oppositeTeam) throw Error('Opposite team is invalid.');
       return true;
-    })
-    .toInt(),
+    }),
   body('date').notEmpty().withMessage('Date is required.'),
   body('location').notEmpty().withMessage('Location is required.'),
-  body('result').custom((value) => {
-    if (!value) return true;
-    if (value !== 'won' && value !== 'lost' && value !== 'draw')
-      throw Error('Result is invalid.');
-    return true;
-  }),
+  body('result')
+    .if(({ req }) => {
+      return !req.body.isPPL;
+    })
+    .custom((value) => {
+      if (value !== 'won' && value !== 'lost' && value !== 'draw')
+        throw Error('Result is invalid.');
+      return true;
+    }),
   body('numberOfDeliveriesPerOver')
     .isInt({ min: 1, max: 10 })
     .withMessage(
       'Number of deliveries for an over should be between 1 and 10.'
     ),
   body('officialPlayers')
+    .optional()
     .isArray()
     .withMessage('Official players must be an array.'),
   body('officialPlayers.*')
@@ -43,7 +48,10 @@ const MatchValidations = [
       if (!player) throw Error('Official player id is invalid.');
       return true;
     }),
-  body('battingStats').isArray().withMessage('Batting stats must be an array.'),
+  body('battingStats')
+    .optional()
+    .isArray()
+    .withMessage('Batting stats must be an array.'),
   body('battingStats.*.id')
     .notEmpty()
     .withMessage('Batting stats player id is required.')
@@ -76,7 +84,10 @@ const MatchValidations = [
     .isBoolean()
     .toBoolean()
     .withMessage('Is out must be a boolean.'),
-  body('bowlingStats').isArray().withMessage('Bowling stats must be an array.'),
+  body('bowlingStats')
+    .optional()
+    .isArray()
+    .withMessage('Bowling stats must be an array.'),
   body('bowlingStats.*.id')
     .notEmpty()
     .withMessage('Bowling stats player id is required.')
@@ -105,6 +116,7 @@ const MatchValidations = [
     .toInt()
     .withMessage('Number of maidens must be an unsigned integer.'),
   body('fieldingStats')
+    .optional()
     .isArray()
     .withMessage('Fielding stats must be an array.'),
   body('fieldingStats.*.id')
