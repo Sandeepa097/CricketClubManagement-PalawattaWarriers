@@ -143,10 +143,15 @@ const Scorecard = ({ route }) => {
       ...stat,
       player: stat.player.name,
     })),
-    fieldingStats: route.params.fieldingStats.map((stat: any) => ({
-      ...stat,
-      player: stat.player.name,
-    })),
+    fieldingStats: route.params.fieldingStats
+      .filter(
+        (stat: any) =>
+          stat.catches || stat.stumps || stat.directHits || stat.indirectHits
+      )
+      .map((stat: any) => ({
+        ...stat,
+        player: stat.player.name,
+      })),
   };
 
   return (
