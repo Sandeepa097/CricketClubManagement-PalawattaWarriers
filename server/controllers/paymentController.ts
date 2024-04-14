@@ -1,0 +1,138 @@
+import { Request, Response } from 'express';
+import {
+  createPayment,
+  createPaymentPlan,
+  getNearestFuturePlan,
+  getOngoingPlan,
+  getPayments,
+  projectedAndDueAmounts,
+  removePayment,
+  removePaymentPlan,
+  updatePayment,
+  updatePaymentPlan,
+} from '../services/paymentService';
+import { StatusCodes } from 'http-status-codes';
+
+const pay = async (req: Request, res: Response) => {
+  const { id, amount } = req.body;
+
+  const createdPayment = await createPayment({
+    playerId: id,
+    amount,
+  });
+
+  return res.status(StatusCodes.CREATED).json({
+    message: 'Payment created successfully.',
+    payment: createdPayment,
+  });
+};
+
+const updatePay = async (req: Request, res: Response) => {
+  const paymentId: string = req.params.id;
+  const { id, amount } = req.body;
+
+  const updatedPayment = await updatePayment(paymentId, {
+    playerId: id,
+    amount,
+  });
+
+  return res.status(StatusCodes.OK).json({
+    message: 'Payment updated successfully.',
+  });
+};
+
+const removePay = async (req: Request, res: Response) => {
+  const id: string = req.params.id;
+  await removePayment(id);
+
+  return res.status(StatusCodes.NO_CONTENT).json({
+    message: 'Payment removed successfully.',
+  });
+};
+
+const createPlan = async (req: Request, res: Response) => {
+  const {
+    fee,
+    effectiveFrom,
+  }: { fee: number; effectiveFrom: { month: number; year: number } } = req.body;
+
+  const createdPaymentPlan = await createPaymentPlan({
+    fee,
+    effectiveFrom,
+  });
+
+  return res.status(StatusCodes.CREATED).json({
+    message: 'Payment plan created successfully.',
+    plan: createdPaymentPlan,
+  });
+};
+
+const updatePlan = async (req: Request, res: Response) => {
+  const id: string = req.params.id;
+  const { fee, effectiveFrom } = req.body;
+
+  const updatedPlan = await updatePaymentPlan(id, {
+    fee,
+    effectiveFrom,
+  });
+
+  return res.status(StatusCodes.OK).json({
+    message: 'Payment plan updated successfully.',
+  });
+};
+
+const removePlan = async (req: Request, res: Response) => {
+  const id: string = req.params.id;
+
+  await removePaymentPlan(id);
+
+  return res.status(StatusCodes.NO_CONTENT).json({
+    message: 'Payment plan removed successfully.',
+  });
+};
+
+const getPaymentPlans = async (req: Request, res: Response) => {
+  const month: number = Number(req.query.month);
+  const year: number = Number(req.query.year);
+  Number;
+
+  const onGoingPlan = await getOngoingPlan({ month, year });
+  const futurePlan = await getNearestFuturePlan({ month, year });
+
+  return res.status(StatusCodes.OK).json({
+    onGoingPlan,
+    futurePlan,
+  });
+};
+
+const getProjectionsAndDues = async (req: Request, res: Response) => {
+  const month: number = Number(req.query.month);
+  const year: number = Number(req.query.year);
+  Number;
+
+  const projectionsAndDues = await projectedAndDueAmounts({ month, year });
+
+  return res.status(StatusCodes.OK).json({
+    ...projectionsAndDues,
+  });
+};
+
+const getPreviousPayments = async (req: Request, res: Response) => {
+  const payments = await getPayments();
+
+  return res.status(StatusCodes.OK).json({
+    payments,
+  });
+};
+
+export default {
+  pay,
+  updatePay,
+  removePay,
+  createPlan,
+  updatePlan,
+  removePlan,
+  getPaymentPlans,
+  getProjectionsAndDues,
+  getPreviousPayments,
+};
