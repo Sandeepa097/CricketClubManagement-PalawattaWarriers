@@ -6,7 +6,7 @@ import MatchPlayer from './MatchPlayer';
 import MatchPlayerBattingStat from './MatchPlayerBattingStat';
 import MatchPlayerBowlingStat from './MatchPlayerBowlingStat';
 import MatchPlayerFieldingStat from './MatchPlayerFieldingStat';
-import PaymentPlan from './PaymentPlans';
+import PaymentPlan from './PaymentPlan';
 import Payment from './Payment';
 
 // Opposite team
