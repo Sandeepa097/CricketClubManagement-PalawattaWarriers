@@ -59,6 +59,7 @@ export const getPayments = async () => {
       model: Player,
       as: 'player',
     },
+    order: [['id', 'DESC']],
   });
 };
 
