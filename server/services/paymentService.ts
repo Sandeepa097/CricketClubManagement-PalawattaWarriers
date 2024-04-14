@@ -4,7 +4,7 @@ import sequelizeConnection from '../config/sequelizeConnection';
 
 interface PaymentPlanAttributes {
   fee: number;
-  effectiveSince: {
+  effectiveFrom: {
     month: number;
     year: number;
   };
@@ -20,26 +20,37 @@ export const createPaymentPlan = async (paymentPlan: PaymentPlanAttributes) => {
 };
 
 export const updatePaymentPlan = async (
-  id: number,
+  id: number | string,
   paymentPlan: PaymentPlanAttributes
 ) => {
   return await PaymentPlan.update(paymentPlan, { where: { id } });
 };
 
-export const removePaymentPlan = async (id: number) => {
+export const removePaymentPlan = async (id: number | string) => {
   return await PaymentPlan.destroy({ where: { id } });
+};
+
+export const findPaymentPlan = async (id: number | string) => {
+  return await PaymentPlan.findByPk(id);
 };
 
 export const createPayment = async (payment: PaymentAttributes) => {
   return await Payment.create({ ...payment });
 };
 
-export const updatePayment = async (id: number, payment: PaymentAttributes) => {
+export const updatePayment = async (
+  id: number | string,
+  payment: PaymentAttributes
+) => {
   return await Payment.update(payment, { where: { id } });
 };
 
-export const removePayment = async (id: number) => {
+export const removePayment = async (id: number | string) => {
   return await Payment.destroy({ where: { id } });
+};
+
+export const findPayment = async (id: number | string) => {
+  return await Payment.findByPk(id);
 };
 
 export const getPayments = async () => {
