@@ -5,11 +5,12 @@ import {
   getNearestFuturePlan,
   getOngoingPlan,
   getPayments,
-  projectedAndDueAmounts,
+  getDuePayments,
   removePayment,
   removePaymentPlan,
   updatePayment,
   updatePaymentPlan,
+  getProjectionsAndDues,
 } from '../services/paymentService';
 import { StatusCodes } from 'http-status-codes';
 
@@ -105,15 +106,26 @@ const getPaymentPlans = async (req: Request, res: Response) => {
   });
 };
 
-const getProjectionsAndDues = async (req: Request, res: Response) => {
+const getProjections = async (req: Request, res: Response) => {
   const month: number = Number(req.query.month);
   const year: number = Number(req.query.year);
   Number;
 
-  const projectionsAndDues = await projectedAndDueAmounts({ month, year });
+  const projections = await getProjectionsAndDues({ month, year });
+  return res.status(StatusCodes.OK).json({
+    ...projections,
+  });
+};
+
+const getDues = async (req: Request, res: Response) => {
+  const month: number = Number(req.query.month);
+  const year: number = Number(req.query.year);
+  Number;
+
+  const duePayments = await getDuePayments({ month, year });
 
   return res.status(StatusCodes.OK).json({
-    ...projectionsAndDues,
+    ...duePayments,
   });
 };
 
@@ -133,6 +145,7 @@ export default {
   updatePlan,
   removePlan,
   getPaymentPlans,
-  getProjectionsAndDues,
+  getDues,
+  getProjections,
   getPreviousPayments,
 };

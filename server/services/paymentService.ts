@@ -63,8 +63,7 @@ export const getPayments = async () => {
 };
 
 export const getOngoingPlan = async (date: { month: number; year: number }) => {
-  const consideringDate = new Date(date.year, date.month, 1);
-
+  const consideringDate = new Date(Date.UTC(date.year, date.month, 1, 0, 0, 0));
   const paymentPlan = await PaymentPlan.findOne({
     where: {
       [Op.and]: [
@@ -97,7 +96,7 @@ export const getNearestFuturePlan = async (date: {
   year: number;
   month: number;
 }) => {
-  const consideringDate = new Date(date.year, date.month, 1);
+  const consideringDate = new Date(Date.UTC(date.year, date.month, 1, 0, 0, 0));
 
   const paymentPlan = await PaymentPlan.findOne({
     where: {
@@ -127,14 +126,66 @@ export const getNearestFuturePlan = async (date: {
   return paymentPlan;
 };
 
-export const projectedAndDueAmounts = async (date: {
+export const getDuePayments = async (date: { month: number; year: number }) => {
+  const consideringDate = new Date(Date.UTC(date.year, date.month, 1, 0, 0, 0));
+  const payersOfConsideringDate = await Player.findAll({
+    where: {
+      [Op.and]: [
+        sequelizeConnection.where(
+          sequelizeConnection.fn(
+            'DATE',
+            sequelizeConnection.fn(
+              'CONCAT',
+              sequelizeConnection.col('feesPayingYear'),
+              '-',
+              sequelizeConnection.literal('1 + feesPayingMonth'),
+              '-01'
+            )
+          ),
+          '<=',
+          consideringDate
+        ),
+      ],
+    },
+  });
+
+  const duePlayers = [];
+
+  let due = 0;
+  for (let i = 0; i < payersOfConsideringDate.length; i++) {
+    const mustHavePaid = await calculateSinglePlayerProjectedTotal(
+      {
+        month: payersOfConsideringDate[i].dataValues.feesPayingMonth,
+        year: payersOfConsideringDate[i].dataValues.feesPayingYear,
+      },
+      date
+    );
+
+    const totalPaid = await calculateSinglePlayerTotalPaid(
+      payersOfConsideringDate[i].dataValues.id
+    );
+
+    const dueAmount = mustHavePaid - totalPaid;
+
+    if (dueAmount > 0) {
+      duePlayers.push({
+        ...payersOfConsideringDate[i].dataValues,
+        due: dueAmount,
+      });
+    }
+    due += dueAmount > 0 ? dueAmount : 0;
+  }
+
+  return { due, duePlayers };
+};
+
+export const getProjectionsAndDues = async (date: {
   month: number;
   year: number;
 }) => {
-  const consideringDate = new Date(date.year, date.month, 1);
+  const consideringDate = new Date(Date.UTC(date.year, date.month, 1, 0, 0, 0));
   const effectivePlan = await getOngoingPlan(date);
   const payersOfConsideringDate = await Player.findAll({
-    attributes: ['id', 'feesPayingMonth', 'feesPayingYear'],
     where: {
       [Op.and]: [
         sequelizeConnection.where(
@@ -158,8 +209,6 @@ export const projectedAndDueAmounts = async (date: {
   const projected =
     effectivePlan?.dataValues.fee * payersOfConsideringDate.length;
 
-  const duePlayers = [];
-
   let due = 0;
   for (let i = 0; i < payersOfConsideringDate.length; i++) {
     const mustHavePaid = await calculateSinglePlayerProjectedTotal(
@@ -169,31 +218,30 @@ export const projectedAndDueAmounts = async (date: {
       },
       date
     );
+
     const totalPaid = await calculateSinglePlayerTotalPaid(
       payersOfConsideringDate[i].dataValues.id
     );
 
     const dueAmount = mustHavePaid - totalPaid;
-    if (dueAmount > 0) {
-      duePlayers.push({
-        ...payersOfConsideringDate[i].dataValues,
-        due: dueAmount,
-      });
+    if (dueAmount > effectivePlan?.dataValues.fee) {
+      due += effectivePlan?.dataValues.fee;
+    } else if (dueAmount > 0) {
+      due += dueAmount;
     }
-    due += dueAmount > 0 ? dueAmount : 0;
   }
 
-  return { projected, due, duePlayers };
+  return { projected, due };
 };
 
 export const calculateSinglePlayerProjectedTotal = async (
   start: { month: number; year: number },
   end: { month: number; year: number }
 ) => {
-  const startDate = new Date(start.year, start.month, 1);
-  const endDate = new Date(end.year, end.month, 1);
+  const startDate = new Date(Date.UTC(start.year, start.month, 1, 0, 0, 0));
+  const endDate = new Date(Date.UTC(end.year, end.month, 1, 0, 0, 0));
 
-  const paymentPlans = await PaymentPlan.findAll({
+  const futurePlans = await PaymentPlan.findAll({
     where: {
       [Op.and]: [
         sequelizeConnection.where(
@@ -207,7 +255,7 @@ export const calculateSinglePlayerProjectedTotal = async (
               '-01'
             )
           ),
-          '>=',
+          '>',
           startDate
         ),
         sequelizeConnection.where(
@@ -232,41 +280,56 @@ export const calculateSinglePlayerProjectedTotal = async (
     ],
   });
 
+  const paymentPlans = futurePlans.map((plan) => ({
+    fee: plan.dataValues.fee,
+    effectiveMonth: plan.dataValues.effectiveMonth,
+    effectiveYear: plan.dataValues.effectiveYear,
+  }));
+
+  const firstPlan = await getOngoingPlan(start);
+  const startLoop = {
+    fee: firstPlan?.dataValues.fee,
+    effectiveMonth: start.month,
+    effectiveYear: start.year,
+  };
+  const endLoop = {
+    fee: 0,
+    effectiveYear: end.year,
+    effectiveMonth: end.month,
+  };
+
+  paymentPlans.unshift(startLoop);
+  paymentPlans.push(endLoop);
+
   let totalFee = 0;
-  let previousDate = startDate;
-  for (const paymentPlan of paymentPlans) {
-    const effectiveDate = new Date(
-      paymentPlan.effectiveYear,
-      paymentPlan.effectiveMonth,
-      1
-    );
+
+  for (let i = 0; i < paymentPlans.length - 1; i++) {
     const months =
-      (effectiveDate.getFullYear() - previousDate.getFullYear()) * 12 +
-      effectiveDate.getMonth() -
-      previousDate.getMonth();
-    totalFee += months * paymentPlan.fee;
-    previousDate = effectiveDate;
+      (paymentPlans[i + 1].effectiveYear - paymentPlans[i].effectiveYear) * 12 +
+      (paymentPlans[i + 1].effectiveMonth - paymentPlans[i].effectiveMonth);
+    totalFee += months * paymentPlans[i].fee;
   }
-  const remainingMonths =
-    (endDate.getFullYear() - previousDate.getFullYear()) * 12 +
-    endDate.getMonth() -
-    previousDate.getMonth();
-  totalFee += remainingMonths * paymentPlans[paymentPlans.length - 1].fee;
 
   return totalFee;
 };
 
 export const calculateSinglePlayerTotalPaid = async (playerId: number) => {
-  return (
-    await Payment.findOne({
-      where: { playerId },
-      attributes: [
-        [
-          sequelizeConnection.fn('SUM', sequelizeConnection.col('amount')),
-          'amount',
-        ],
+  const player = await Player.findOne({
+    where: { id: playerId },
+    attributes: [
+      [
+        sequelizeConnection.literal('IFNULL(SUM(`payments`.`amount`), 0)'),
+        'totalPaid',
       ],
-      group: ['playerId'],
-    })
-  )?.dataValues?.amount;
+    ],
+    include: [
+      {
+        model: Payment,
+        as: 'payments',
+      },
+    ],
+    group: ['Player.id'],
+  });
+
+  return player?.dataValues?.totalPaid || 0;
 };

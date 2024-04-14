@@ -33,6 +33,23 @@ paymentRouter.post(
 paymentRouter.get('/', paymentController.getPreviousPayments);
 
 paymentRouter.get(
+  '/dues',
+  validateRequest([
+    query('month')
+      .notEmpty()
+      .withMessage('Month is required.')
+      .isInt({ min: 0, max: 11 })
+      .withMessage('Month must be an integer between 0 and 11.'),
+    query('year')
+      .notEmpty()
+      .withMessage('Year is required.')
+      .isInt({ min: 1 })
+      .withMessage('Year must be a positive integer.'),
+  ]),
+  paymentController.getDues
+);
+
+paymentRouter.get(
   '/projections',
   validateRequest([
     query('month')
@@ -46,7 +63,7 @@ paymentRouter.get(
       .isInt({ min: 1 })
       .withMessage('Year must be a positive integer.'),
   ]),
-  paymentController.getProjectionsAndDues
+  paymentController.getProjections
 );
 
 paymentRouter.post(
@@ -125,7 +142,22 @@ paymentRouter.delete(
   paymentController.removePlan
 );
 
-paymentRouter.get('/plans', paymentController.getPaymentPlans);
+paymentRouter.get(
+  '/plans',
+  validateRequest([
+    query('month')
+      .notEmpty()
+      .withMessage('Month is required.')
+      .isInt({ min: 0, max: 11 })
+      .withMessage('Month must be an integer between 0 and 11.'),
+    query('year')
+      .notEmpty()
+      .withMessage('Year is required.')
+      .isInt({ min: 1 })
+      .withMessage('Year must be a positive integer.'),
+  ]),
+  paymentController.getPaymentPlans
+);
 
 paymentRouter.put(
   '/:id',
@@ -172,3 +204,5 @@ paymentRouter.delete(
   ]),
   paymentController.removePay
 );
+
+export default paymentRouter;
