@@ -42,13 +42,13 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.get('/', (req: Request, res: Response) => {
-  res.status(StatusCodes.OK).json({ message: 'Palawatta Warriers Server' });
+  res.status(StatusCodes.OK).json({ message: 'Palawatta Warriers Server.' });
 });
 
 app.use('/api', router);
 
 app.use((req: Request, res: Response) => {
-  res.status(StatusCodes.NOT_FOUND).send({ message: 'Unknown endpoint' });
+  res.status(StatusCodes.NOT_FOUND).send({ message: 'Unknown endpoint.' });
 });
 
 export default app;

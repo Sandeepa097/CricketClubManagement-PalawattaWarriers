@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import ChildInputWithPlayers from '../components/ChildInputWithPlayers';
 import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
+import { PlayerType } from '../types';
 
 const samplePlayersList: PlayerType[] = [
   {
