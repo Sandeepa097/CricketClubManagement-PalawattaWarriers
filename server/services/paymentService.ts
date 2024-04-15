@@ -38,6 +38,10 @@ export const createPayment = async (payment: PaymentAttributes) => {
   return await Payment.create({ ...payment });
 };
 
+export const createBulkPayments = async (payments: PaymentAttributes[]) => {
+  return await Payment.bulkCreate(payments as any[]);
+};
+
 export const updatePayment = async (
   id: number | string,
   payment: PaymentAttributes

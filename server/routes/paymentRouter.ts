@@ -12,7 +12,8 @@ paymentRouter.post(
   '/',
   validatePermissions(UserTypes.ADMIN),
   validateRequest([
-    body('id')
+    body('details').isArray().withMessage('Payment details must be an array.'),
+    body('details.*.id')
       .toInt()
       .custom(async (value) => {
         if (!value) return true;
@@ -20,7 +21,7 @@ paymentRouter.post(
         if (!player) throw Error('Player id is invalid.');
         return true;
       }),
-    body('amount')
+    body('details.*.values.amount')
       .notEmpty()
       .withMessage('Amount is required.')
       .isInt({ min: 1 })

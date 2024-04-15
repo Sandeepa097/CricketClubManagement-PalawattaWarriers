@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import {
-  createPayment,
   createPaymentPlan,
   getNearestFuturePlan,
   getOngoingPlan,
@@ -11,20 +10,22 @@ import {
   updatePayment,
   updatePaymentPlan,
   getProjectionsAndDues,
+  createBulkPayments,
 } from '../services/paymentService';
 import { StatusCodes } from 'http-status-codes';
 
 const pay = async (req: Request, res: Response) => {
-  const { id, amount } = req.body;
+  const { details } = req.body;
+  const payments = details.map((detail: any) => ({
+    playerId: detail.id,
+    amount: detail.values.amount,
+  }));
 
-  const createdPayment = await createPayment({
-    playerId: id,
-    amount,
-  });
+  const createdPayments = await createBulkPayments(payments);
 
   return res.status(StatusCodes.CREATED).json({
     message: 'Payment created successfully.',
-    payment: createdPayment,
+    payment: createdPayments,
   });
 };
 

@@ -1,5 +1,5 @@
-import React, { Children } from 'react';
-import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import Logo from '../assets/Logo';
 import { Colors } from '../constants/Colors';
 import StrokedText from './base/StrokedText';
@@ -10,6 +10,7 @@ interface PaymentProps {
   name: string;
   avatar?: string;
   payment: number;
+  timestamp?: Date;
   pending?: boolean;
   onRequestDelete?: () => void;
   onRequestEdit?: () => void;
@@ -47,9 +48,17 @@ const ChildPaymentItem = (props: PaymentProps) => {
         <View style={styles.avatarContainer}>
           <Logo height={30} fill={Colors.DEEP_TEAL} />
         </View>
-        <Text style={props.pending ? styles.pendingName : styles.previousName}>
-          {props.name}
-        </Text>
+        <View>
+          <Text
+            style={props.pending ? styles.pendingName : styles.previousName}>
+            {props.name}
+          </Text>
+          {props.timestamp && true && (
+            <Text style={styles.timestamp}>
+              {props.timestamp.toLocaleString('en-GB', { hour12: true })}
+            </Text>
+          )}
+        </View>
       </View>
       {!props.pending && (
         <Text style={styles.previousPayment}>{props.payment}</Text>
@@ -127,18 +136,23 @@ const styles = StyleSheet.create({
   },
   pendingName: {
     fontFamily: 'Anybody-Regular',
-    fontSize: 15,
+    fontSize: 18,
     color: Colors.OFF_WHITE,
   },
   previousName: {
     fontFamily: 'Anybody-Regular',
-    fontSize: 15,
+    fontSize: 18,
     color: Colors.DARK_TEAL,
   },
   previousPayment: {
     fontFamily: 'Anybody-Regular',
     fontSize: 18,
     color: Colors.DARK_TEAL,
+  },
+  timestamp: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 15,
+    color: Colors.MEDIUM_TEAL,
   },
 });
 

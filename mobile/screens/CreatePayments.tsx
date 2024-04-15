@@ -1,85 +1,16 @@
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React from 'react';
+import { ScrollView, StyleSheet, ToastAndroid, View } from 'react-native';
 import ChildInputWithPlayers from '../components/ChildInputWithPlayers';
 import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
-import { PlayerType } from '../types';
-
-const samplePlayersList: PlayerType[] = [
-  {
-    id: 1,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 2,
-    name: 'Robert Robinson',
-    mainRoll: 'bowler',
-    isWicketKeeper: true,
-    isCaptain: false,
-  },
-  {
-    id: 3,
-    name: 'Adonis Ross',
-    mainRoll: 'allRounder',
-    isWicketKeeper: false,
-    isCaptain: true,
-  },
-  {
-    id: 4,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: false,
-    isCaptain: false,
-  },
-  {
-    id: 5,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 6,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 7,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 8,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 9,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-  {
-    id: 10,
-    name: 'Adonis Ross',
-    mainRoll: 'batsman',
-    isWicketKeeper: true,
-    isCaptain: true,
-  },
-];
+import { Formik } from 'formik';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import { createPayments } from '../redux/slices/paymentSlice';
 
 const CreatePayments = ({ navigation }) => {
-  const [paymentDetails, setPaymentDetails] = useState([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const players = useSelector((state: RootState) => state.player.players);
 
   return (
     <View style={styles.container}>
@@ -89,34 +20,60 @@ const CreatePayments = ({ navigation }) => {
           alignItems: 'center',
           marginTop: 10,
         }}>
-        <ChildInputWithPlayers
-          players={samplePlayersList}
-          placeholder="Select Payers"
-          values={paymentDetails}
-          onChangeValues={(values) => {
-            console.log(values);
-            setPaymentDetails(values);
+        <Formik
+          initialValues={{
+            details: [],
           }}
-          itemProperties={[
-            { type: 'text', name: 'amount', placeholder: 'Paid Amount' },
-          ]}
-        />
-        <View style={{ marginTop: 40 }}>
-          <Button
-            length="long"
-            style="filled"
-            color={Colors.DEEP_TEAL}
-            text="Create"
-            onPress={() => console.log('create')}
-          />
-          <Button
-            length="long"
-            style="outlined"
-            color={Colors.DEEP_TEAL}
-            text="Cancel"
-            onPress={() => navigation.goBack()}
-          />
-        </View>
+          onSubmit={(values) =>
+            dispatch(createPayments(values))
+              .unwrap()
+              .then(() => {
+                navigation.goBack();
+                ToastAndroid.showWithGravity(
+                  'Player created successfully.',
+                  ToastAndroid.SHORT,
+                  ToastAndroid.BOTTOM
+                );
+              })
+              .catch((error) => {
+                ToastAndroid.showWithGravity(
+                  error,
+                  ToastAndroid.SHORT,
+                  ToastAndroid.BOTTOM
+                );
+              })
+          }>
+          {({ handleSubmit, setFieldValue, values, errors }) => (
+            <>
+              <ChildInputWithPlayers
+                players={players}
+                placeholder="Select Payers"
+                values={values.details}
+                errors={errors.details as { values: object }[]}
+                onChangeValues={(details) => setFieldValue('details', details)}
+                itemProperties={[
+                  { type: 'text', name: 'amount', placeholder: 'Paid Amount' },
+                ]}
+              />
+              <View style={{ marginTop: 40 }}>
+                <Button
+                  length="long"
+                  style="filled"
+                  color={Colors.DEEP_TEAL}
+                  text="Create"
+                  onPress={handleSubmit}
+                />
+                <Button
+                  length="long"
+                  style="outlined"
+                  color={Colors.DEEP_TEAL}
+                  text="Cancel"
+                  onPress={() => navigation.goBack()}
+                />
+              </View>
+            </>
+          )}
+        </Formik>
       </ScrollView>
     </View>
   );

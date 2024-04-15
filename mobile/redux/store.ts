@@ -4,6 +4,7 @@ import authReducer from './slices/authSlice';
 import playerReducer from './slices/playerSlice';
 import matchReducer from './slices/matchSlice';
 import teamReducer from './slices/teamSlice';
+import paymentReducer from './slices/paymentSlice';
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
     player: playerReducer,
     match: matchReducer,
     team: teamReducer,
+    payment: paymentReducer,
   },
 });
 

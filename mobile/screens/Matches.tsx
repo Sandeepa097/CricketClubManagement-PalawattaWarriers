@@ -29,8 +29,6 @@ const Matches = ({ navigation }) => {
   const ppls = useSelector((state: RootState) => state.match.ppls);
   const [searchText, setSearchText] = useState('');
   const [selectedTabItem, setSelectedTabItem] = useState('outdoor');
-  const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
-    useState(false);
 
   useEffect(() => {
     if (focused) {
@@ -91,15 +89,6 @@ const Matches = ({ navigation }) => {
         ListEmptyComponent={
           <EmptyListMessage visible={true} message="No matches found." />
         }
-      />
-      <ConfirmBox
-        visible={deleteConfirmationVisible}
-        title="Are you sure you want to delete this match?"
-        ok={{ text: 'Delete', onPress: () => console.log('delete') }}
-        cancel={{
-          text: 'Cancel',
-          onPress: () => setDeleteConfirmationVisible(false),
-        }}
       />
       {userType === UserTypes.ADMIN && (
         <Button
