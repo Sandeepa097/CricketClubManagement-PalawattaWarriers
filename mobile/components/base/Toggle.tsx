@@ -25,7 +25,7 @@ const width: number = Dimensions.get('window').width;
 const Toggle = (props: ToggleProps) => {
   const [isToggleLeft, setIsToggleLeft] = useState(true);
   useEffect(() => {
-    props.onPress(isToggleLeft ? props.right.id : props.left.id);
+    props.onPress(isToggleLeft ? props.left.id : props.right.id);
   }, []);
 
   return (
