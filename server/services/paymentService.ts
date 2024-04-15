@@ -311,6 +311,8 @@ export const calculateSinglePlayerProjectedTotal = async (
     totalFee += months * paymentPlans[i].fee;
   }
 
+  totalFee += paymentPlans[paymentPlans.length - 2].fee;
+
   return totalFee;
 };
 

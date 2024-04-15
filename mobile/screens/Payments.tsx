@@ -110,13 +110,7 @@ const Payments = ({ navigation }) => {
     }
   };
 
-  const getCollectionDetails = async (
-    collectionYear?: number,
-    collectionMonth?: number
-  ) => {
-    const year = collectionYear || currentDate.getFullYear();
-    const month = collectionMonth || currentDate.getMonth();
-
+  const getCollectionDetails = async (year: number, month: number) => {
     const response: any = await api.get(
       `/payments/projections?month=${month}&year=${year}`
     );
@@ -135,10 +129,6 @@ const Payments = ({ navigation }) => {
     getPendingPayments();
     getPreviousPayments();
   }, [focused]);
-
-  useEffect(() => {
-    getCollectionDetails();
-  }, []);
 
   return (
     <View style={styles.container}>

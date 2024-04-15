@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -45,6 +45,10 @@ const MonthlyPaymentSummery = (props: MonthlyPaymentSummaryProps) => {
       year: updatedDate.getFullYear(),
     });
   };
+
+  useEffect(() => {
+    onDateChange(date);
+  }, []);
 
   return (
     <View style={styles.container}>
