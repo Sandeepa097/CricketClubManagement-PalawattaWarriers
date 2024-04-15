@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, ToastAndroid } from 'react-native';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import { UserTypes } from '../constants/UserTypes';
 import {
+  deletePayment,
   getCollectionDetails,
   getPaymentPlans,
   getPendingPayments,
@@ -38,6 +39,9 @@ const Payments = ({ navigation }) => {
   const collectionDetails = useSelector(
     (state: RootState) => state.payment.collection
   );
+
+  const [deleteRequestedPaymentId, setDeleteRequestedPaymentId] =
+    useState(null);
   const [deletePlanConfirmationVisible, setDeletePlanConfirmationVisible] =
     useState(false);
   const [
@@ -163,8 +167,10 @@ const Payments = ({ navigation }) => {
             pending={false}
             {...(userType === UserTypes.ADMIN
               ? {
-                  onRequestDelete: () =>
-                    setDeletePaymentConfirmationVisible(true),
+                  onRequestDelete: () => {
+                    setDeleteRequestedPaymentId(item.id);
+                    setDeletePaymentConfirmationVisible(true);
+                  },
                   onRequestEdit: () =>
                     navigation.navigate(NavigationRoutes.CREATE_PAYMENTS),
                 }
@@ -178,16 +184,43 @@ const Payments = ({ navigation }) => {
         ok={{ text: 'Delete', onPress: () => console.log('delete') }}
         cancel={{
           text: 'Cancel',
-          onPress: () => setDeletePlanConfirmationVisible(false),
+          onPress: () => {
+            setDeletePlanConfirmationVisible(false);
+          },
         }}
       />
       <ConfirmBox
         visible={deletePaymentConfirmationVisible}
         title="Are you sure you want to delete this payment?"
-        ok={{ text: 'Delete', onPress: () => console.log('delete') }}
+        ok={{
+          text: 'Delete',
+          onPress: () => {
+            setDeletePaymentConfirmationVisible(false);
+            dispatch(deletePayment(deleteRequestedPaymentId))
+              .unwrap()
+              .then(() => {
+                ToastAndroid.showWithGravity(
+                  'Payment deleted successfully.',
+                  ToastAndroid.SHORT,
+                  ToastAndroid.BOTTOM
+                );
+              })
+              .catch((error) => {
+                ToastAndroid.showWithGravity(
+                  error,
+                  ToastAndroid.SHORT,
+                  ToastAndroid.BOTTOM
+                );
+              });
+            setDeleteRequestedPaymentId(null);
+          },
+        }}
         cancel={{
           text: 'Cancel',
-          onPress: () => setDeletePaymentConfirmationVisible(false),
+          onPress: () => {
+            setDeleteRequestedPaymentId(null);
+            setDeletePaymentConfirmationVisible(false);
+          },
         }}
       />
       {userType === UserTypes.ADMIN && (

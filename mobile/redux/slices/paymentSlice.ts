@@ -137,6 +137,20 @@ export const createPayments = createAsyncThunk(
   }
 );
 
+export const deletePayment = createAsyncThunk(
+  'payment/deletePayment',
+  async (payload: number | string, { dispatch, rejectWithValue }) => {
+    const response: any = await api.delete(`/payments/${payload}`);
+    if (response.ok) {
+      dispatch(getPendingPayments());
+      dispatch(getPreviousPayments());
+      return;
+    }
+
+    return rejectWithValue('Payment deletion failed.');
+  }
+);
+
 const initialState: PaymentSliceState = {
   pendingPayments: [],
   previousPayments: [],
