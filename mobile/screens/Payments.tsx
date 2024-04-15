@@ -21,6 +21,7 @@ import {
   getPendingPayments,
   getPreviousPayments,
 } from '../redux/slices/paymentSlice';
+import { setEditing } from '../redux/slices/statusSlice';
 
 const Payments = ({ navigation }) => {
   const focused = useIsFocused();
@@ -171,8 +172,10 @@ const Payments = ({ navigation }) => {
                     setDeleteRequestedPaymentId(item.id);
                     setDeletePaymentConfirmationVisible(true);
                   },
-                  onRequestEdit: () =>
-                    navigation.navigate(NavigationRoutes.CREATE_PAYMENTS),
+                  onRequestEdit: () => {
+                    dispatch(setEditing(true));
+                    navigation.navigate(NavigationRoutes.CREATE_PAYMENTS, item);
+                  },
                 }
               : {})}
           />

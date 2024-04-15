@@ -3,6 +3,7 @@ import { View, StyleSheet, FlatList, Dimensions, Text } from 'react-native';
 import Modal from 'react-native-modal';
 import PlayerItem from './PlayerItem';
 import { Colors } from '../constants/Colors';
+import { PlayerType } from '../types';
 
 const width: number = Dimensions.get('window').width;
 const height: number = Dimensions.get('window').height;

@@ -52,6 +52,11 @@ interface NewPayment {
   };
 }
 
+interface UpdatePayment {
+  id: number | string;
+  data: NewPayment;
+}
+
 export const getPendingPayments = createAsyncThunk(
   'payment/pending',
   async () => {
@@ -148,6 +153,21 @@ export const deletePayment = createAsyncThunk(
     }
 
     return rejectWithValue('Payment deletion failed.');
+  }
+);
+
+export const updatePayment = createAsyncThunk(
+  'payment/updatePayment',
+  async (payload: UpdatePayment, { rejectWithValue }) => {
+    const response: any = await api.put(`/payments/${payload.id}`, {
+      id: payload.data.id,
+      amount: payload.data.values.amount,
+    });
+    if (response.ok) {
+      return;
+    }
+
+    return rejectWithValue('Payment update failed.');
   }
 );
 

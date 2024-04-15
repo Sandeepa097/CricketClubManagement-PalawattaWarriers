@@ -158,6 +158,7 @@ const CreateMatch = ({ route, navigation }) => {
                   ToastAndroid.SHORT,
                   ToastAndroid.BOTTOM
                 );
+                dispatch(setEditing(false));
                 navigation.navigate(NavigationRoutes.MATCHES);
               })
               .catch((error) => {

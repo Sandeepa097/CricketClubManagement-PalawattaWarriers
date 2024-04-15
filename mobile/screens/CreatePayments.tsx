@@ -6,9 +6,11 @@ import { Colors } from '../constants/Colors';
 import { Formik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
-import { createPayments } from '../redux/slices/paymentSlice';
+import { createPayments, updatePayment } from '../redux/slices/paymentSlice';
+import { setEditing } from '../redux/slices/statusSlice';
 
-const CreatePayments = ({ navigation }) => {
+const CreatePayments = ({ route, navigation }) => {
+  const editPayment = route.params;
   const dispatch = useDispatch<AppDispatch>();
   const players = useSelector((state: RootState) => state.player.players);
 
@@ -22,15 +24,30 @@ const CreatePayments = ({ navigation }) => {
         }}>
         <Formik
           initialValues={{
-            details: [],
+            details: editPayment
+              ? [
+                  {
+                    id: editPayment.playerId,
+                    values: { amount: editPayment.amount },
+                  },
+                ]
+              : [],
           }}
           onSubmit={(values) =>
-            dispatch(createPayments(values))
+            (editPayment
+              ? dispatch(
+                  updatePayment({ id: editPayment.id, data: values.details[0] })
+                )
+              : dispatch(createPayments(values))
+            )
               .unwrap()
               .then(() => {
                 navigation.goBack();
+                dispatch(setEditing(false));
                 ToastAndroid.showWithGravity(
-                  'Player created successfully.',
+                  `Payment ${
+                    editPayment ? 'updated' : 'created'
+                  } successfully.`,
                   ToastAndroid.SHORT,
                   ToastAndroid.BOTTOM
                 );
@@ -48,6 +65,7 @@ const CreatePayments = ({ navigation }) => {
               <ChildInputWithPlayers
                 players={players}
                 placeholder="Select Payers"
+                playerChangeDisabled={editPayment}
                 values={values.details}
                 errors={errors.details as { values: object }[]}
                 onChangeValues={(details) => setFieldValue('details', details)}
@@ -60,7 +78,7 @@ const CreatePayments = ({ navigation }) => {
                   length="long"
                   style="filled"
                   color={Colors.DEEP_TEAL}
-                  text="Create"
+                  text={editPayment ? 'Save' : 'Create'}
                   onPress={handleSubmit}
                 />
                 <Button
@@ -68,7 +86,10 @@ const CreatePayments = ({ navigation }) => {
                   style="outlined"
                   color={Colors.DEEP_TEAL}
                   text="Cancel"
-                  onPress={() => navigation.goBack()}
+                  onPress={() => {
+                    navigation.goBack();
+                    dispatch(setEditing(false));
+                  }}
                 />
               </View>
             </>

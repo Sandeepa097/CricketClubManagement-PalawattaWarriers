@@ -12,6 +12,7 @@ import {
 } from '../types';
 
 interface ChildInputWithPlayersProps {
+  playerChangeDisabled?: boolean;
   players: PlayerType[];
   emptyMessage?: string;
   placeholder: string;
@@ -53,9 +54,13 @@ const ChildInputWithPlayers = (props: ChildInputWithPlayersProps) => {
           })
           .filter((playerName) => playerName)
           .join(', ')}
-        icon={() => (
-          <Entypo name="chevron-right" size={24} color={Colors.DEEP_TEAL} />
-        )}
+        icon={() =>
+          !props.playerChangeDisabled ? (
+            <Entypo name="chevron-right" size={24} color={Colors.DEEP_TEAL} />
+          ) : (
+            <></>
+          )
+        }
         errors={props.errors}
         items={selectedPlayerIds
           .map((id) => {
@@ -65,7 +70,7 @@ const ChildInputWithPlayers = (props: ChildInputWithPlayersProps) => {
           .filter((player) => player?.id)}
         itemProperties={props.itemProperties}
         itemValues={props.values}
-        onPress={() => setModalVisible(true)}
+        onPress={() => !props.playerChangeDisabled && setModalVisible(true)}
         onChange={(values) => onChangeValues(values)}
       />
       <PlayersSelectionModal
