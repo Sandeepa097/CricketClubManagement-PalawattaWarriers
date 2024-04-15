@@ -20,16 +20,29 @@ const ImagePicker = (props: ImagePickerProps) => {
 
   const pickImageAsync = async () => {
     setModalVisible(false);
-    const image = await ExpoImagePicker.launchImageLibraryAsync();
+    const image = await ExpoImagePicker.launchImageLibraryAsync({
+      base64: true,
+      quality: 0.5,
+      allowsEditing: true,
+      aspect: [10, 10],
+      mediaTypes: ExpoImagePicker.MediaTypeOptions.Images,
+    });
 
-    if (!image.canceled) props.onChange(image.assets[0].uri);
+    if (!image.canceled)
+      props.onChange('data:image/jpeg;base64,' + image.assets[0].base64);
   };
 
   const takePhotoAsync = async () => {
     setModalVisible(false);
-    const image = await ExpoImagePicker.launchCameraAsync();
+    const image = await ExpoImagePicker.launchCameraAsync({
+      base64: true,
+      quality: 0.5,
+      allowsEditing: true,
+      aspect: [10, 10],
+      mediaTypes: ExpoImagePicker.MediaTypeOptions.Images,
+    });
 
-    if (!image.canceled) props.onChange(image.assets[0].uri);
+    if (!image.canceled) props.onChange(image.assets[0].base64);
   };
 
   const removeImage = () => {

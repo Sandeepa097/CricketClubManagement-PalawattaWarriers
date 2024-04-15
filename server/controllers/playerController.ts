@@ -9,7 +9,7 @@ import {
   updatePlayer,
   getPlayerMatchesCount,
 } from '../services/playerService';
-import { isBase64, uploadFile } from '../services/fileService';
+import { uploadFile } from '../services/fileService';
 
 const create = async (req: Request, res: Response) => {
   const { avatar, name, mainRoll, isCaptain, isWicketKeeper, feesPayingSince } =
@@ -42,17 +42,17 @@ const update = async (req: Request, res: Response) => {
 
   let uploadedAvatarURL: string | null = null;
 
-  if (avatar && isBase64(avatar)) {
+  if (avatar) {
     uploadedAvatarURL = await uploadFile(avatar);
   }
 
   const updatedPlayer = await updatePlayer(playerId, {
+    avatar: uploadedAvatarURL,
     name,
     mainRoll,
     isCaptain,
     isWicketKeeper,
     feesPayingSince,
-    ...(uploadedAvatarURL ? { avatar: uploadedAvatarURL } : {}),
   });
 
   return res.status(StatusCodes.OK).json({

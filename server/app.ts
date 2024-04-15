@@ -32,7 +32,7 @@ cloudinary.config({
 });
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log('Method: ', req.method);
   console.log('Path: ', req.path);

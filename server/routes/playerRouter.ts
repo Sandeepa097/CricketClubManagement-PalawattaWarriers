@@ -40,32 +40,34 @@ playerRouter.post(
   '/',
   validatePermissions(UserTypes.ADMIN),
   validateRequest([
-    body('avatar')
-      .isBase64()
-      .withMessage('Avatar must be a base64 string.')
-      .custom(async (value) => {
-        if (!value) return true;
+    body('avatar').custom(async (value) => {
+      if (!value) return true;
 
-        const buffer = Buffer.from(value, 'base64');
-        const detectedType = await fileType.fromBuffer(buffer);
+      const base64Image: string = value;
 
-        if (
-          !detectedType ||
-          !detectedType.mime.startsWith(AllowedFileMimeTypes.PLAYER_AVATAR)
-        ) {
-          throw new Error('Avatar must be an image.');
-        }
+      const buffer = Buffer.from(
+        base64Image.replace(/^data:image\/[a-z]+;base64,/, ''),
+        'base64'
+      );
+      const detectedType = await fileType.fromBuffer(buffer);
 
-        if (buffer.length > AllowedFileByteSizes.PLAYER_AVATAR) {
-          throw new Error(
-            `Avatar is too large. Maximum size is ${
-              AllowedFileByteSizes.PLAYER_AVATAR / 1000
-            }KB.`
-          );
-        }
+      if (
+        !detectedType ||
+        !detectedType.mime.startsWith(AllowedFileMimeTypes.PLAYER_AVATAR)
+      ) {
+        throw new Error('Avatar must be an image.');
+      }
 
-        return true;
-      }),
+      if (buffer.length > AllowedFileByteSizes.PLAYER_AVATAR) {
+        throw new Error(
+          `Avatar is too large. Maximum size is ${
+            AllowedFileByteSizes.PLAYER_AVATAR / 1000
+          }KB.`
+        );
+      }
+
+      return true;
+    }),
     ...playerValidations,
   ]),
   playerController.create
