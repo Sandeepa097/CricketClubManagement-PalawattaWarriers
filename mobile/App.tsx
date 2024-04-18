@@ -7,13 +7,15 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BackgroundImage from './assets/BackgroundImage';
 import MainNavigationContainer from './navigation/MainNavigationContainer';
 import { Colors } from './constants/Colors';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from './redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from './redux/store';
 import { restoreAuth } from './redux/slices/authSlice';
+import LoadingIndicator from './components/LoadingIndicator';
 
 const App = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [appLoading, setAppLoading] = useState(true);
+  const processing = useSelector((state: RootState) => state.status.isLoading);
 
   useEffect(() => {
     const prepare = async () => {
@@ -40,7 +42,10 @@ const App = () => {
       <StatusBar backgroundColor={Colors.LIGHT_TEAL} />
       <BackgroundImage />
       <SafeAreaProvider onLayout={onLayoutRender}>
-        <MainNavigationContainer />
+        <>
+          <LoadingIndicator active={processing} />
+          <MainNavigationContainer />
+        </>
       </SafeAreaProvider>
     </>
   );

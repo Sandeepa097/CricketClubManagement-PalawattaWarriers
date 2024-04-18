@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import { create } from 'apisauce';
 import { API_URL } from '../../config/config';
 import { StatusCodes } from 'http-status-codes';
+import { setLoading } from './statusSlice';
 
 interface AuthState {
   userType: UserTypes | null;
@@ -27,6 +28,7 @@ const authApi = create({
 export const login = createAsyncThunk(
   'auth/login',
   async (payload: GuestLogin | AdminLogin, { dispatch, rejectWithValue }) => {
+    dispatch(setLoading(true));
     let data = {
       userType: payload.type,
       token: '',
@@ -39,6 +41,7 @@ export const login = createAsyncThunk(
       });
 
       if (!response.ok) {
+        dispatch(setLoading(false));
         return rejectWithValue(
           (response.status === StatusCodes.UNAUTHORIZED &&
             response.data?.message) ||
@@ -58,6 +61,7 @@ export const login = createAsyncThunk(
     dispatch(
       authSlice.actions.setUser({ userType: data.userType, token: data.token })
     );
+    dispatch(setLoading(false));
   }
 );
 

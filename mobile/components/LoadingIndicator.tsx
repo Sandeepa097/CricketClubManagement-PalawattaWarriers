@@ -4,11 +4,12 @@ import { View, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 const width: number = Dimensions.get('window').width;
 const height: number = Dimensions.get('window').height;
 
-const LoadingIndicator = () => (
-  <View style={styles.container}>
-    <ActivityIndicator size="large" />
-  </View>
-);
+const LoadingIndicator = ({ active }: { active: boolean }) =>
+  active && (
+    <View style={styles.container}>
+      <ActivityIndicator size="large" />
+    </View>
+  );
 
 const styles = StyleSheet.create({
   container: {
