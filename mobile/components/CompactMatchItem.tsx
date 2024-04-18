@@ -103,7 +103,7 @@ const BestPlayerContainer = (props: BestPlayerContainerProps) => {
         ) : (
           <Image
             source={{ uri: props.avatar }}
-            style={{ height: 30, width: 10, borderRadius: 15 }}
+            style={{ height: 40, width: 40, borderRadius: 20 }}
           />
         )}
       </View>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 import Logo from '../assets/Logo';
 import { Colors } from '../constants/Colors';
 import StrokedText from './base/StrokedText';
@@ -46,7 +46,14 @@ const ChildPaymentItem = (props: PaymentProps) => {
       }>
       <View style={styles.detailsContainer}>
         <View style={styles.avatarContainer}>
-          <Logo height={30} fill={Colors.DEEP_TEAL} />
+          {!props.avatar ? (
+            <Logo height={30} fill={Colors.DEEP_TEAL} />
+          ) : (
+            <Image
+              source={{ uri: props.avatar }}
+              style={{ height: 40, width: 40, borderRadius: 20 }}
+            />
+          )}
         </View>
         <View>
           <Text

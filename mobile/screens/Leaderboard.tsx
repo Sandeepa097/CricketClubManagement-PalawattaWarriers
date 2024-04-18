@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import TabBar from '../components/base/TabBar';
 import Toggle from '../components/base/Toggle';
 import PlayerRanking from '../components/PlayerRanking';

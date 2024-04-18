@@ -1,5 +1,12 @@
 import React from 'react';
-import { Dimensions, StyleSheet, Text, View, FlatList } from 'react-native';
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  Image,
+} from 'react-native';
 import Logo from '../assets/Logo';
 import { Colors } from '../constants/Colors';
 import StrokedText from './base/StrokedText';
@@ -42,7 +49,18 @@ const TopPlayerItem = (props: TopPlayerProps) => {
                 borderColor: props.color,
               },
             ]}>
-            <Logo height={topPlayerContainerWidth - 30} fill={props.color} />
+            {!props.avatar ? (
+              <Logo height={topPlayerContainerWidth - 30} fill={props.color} />
+            ) : (
+              <Image
+                source={{ uri: props.avatar }}
+                style={{
+                  height: topPlayerContainerWidth - 6,
+                  width: topPlayerContainerWidth - 6,
+                  borderRadius: (topPlayerContainerWidth - 6) / 2,
+                }}
+              />
+            )}
           </View>
         </View>
         <View
@@ -89,7 +107,14 @@ const PlayerItem = (props: PlayerProps) => {
       <View style={styles.playerDetailsContainer}>
         <Text style={styles.playerText}>{props.placement}</Text>
         <View style={styles.playerAvatarContainer}>
-          <Logo height={30} fill={Colors.DEEP_TEAL} />
+          {!props.avatar ? (
+            <Logo height={30} fill={Colors.DEEP_TEAL} />
+          ) : (
+            <Image
+              source={{ uri: props.avatar }}
+              style={{ height: 40, width: 40, borderRadius: 20 }}
+            />
+          )}
         </View>
         <Text style={styles.playerText}>{props.name}</Text>
       </View>
