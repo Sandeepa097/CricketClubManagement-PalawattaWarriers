@@ -16,12 +16,28 @@ import { AppDispatch, RootState } from '../redux/store';
 import { UserTypes } from '../constants/UserTypes';
 import {
   deletePayment,
+  deletePlan,
   getCollectionDetails,
   getPaymentPlans,
   getPendingPayments,
   getPreviousPayments,
 } from '../redux/slices/paymentSlice';
 import { setEditing } from '../redux/slices/statusSlice';
+
+const renderPaymentPlan = (paymentPlan: any) => (
+  <PaymentPlan
+    fee={paymentPlan.fee as number}
+    effective={`${new Intl.DateTimeFormat('en-US', {
+      month: 'long',
+    }).format(
+      new Date(
+        paymentPlan.effectiveFrom.year,
+        paymentPlan.effectiveFrom.month,
+        1
+      )
+    )}, ${paymentPlan.effectiveFrom.year}`}
+  />
+);
 
 const Payments = ({ navigation }) => {
   const focused = useIsFocused();
@@ -65,77 +81,56 @@ const Payments = ({ navigation }) => {
           paymentPlans.onGoing !== null &&
           (userType === UserTypes.ADMIN ? (
             <SwipeAction
-              onRequestEdit={() =>
+              onRequestEdit={() => {
+                dispatch(setEditing(true));
                 navigation.navigate(NavigationRoutes.CREATE_PAYMENT_PLAN, {
                   type: 'ongoing',
-                })
-              }>
-              <PaymentPlan
-                fee={paymentPlans.onGoing.fee}
-                effective={`${new Intl.DateTimeFormat('en-US', {
-                  month: 'long',
-                }).format(
-                  new Date(
-                    paymentPlans.onGoing.effectiveFrom.year,
-                    paymentPlans.onGoing.effectiveFrom.month,
-                    1
-                  )
-                )}, ${paymentPlans.onGoing.effectiveFrom.year}`}
-              />
+                  ...paymentPlans.onGoing,
+                });
+              }}>
+              {renderPaymentPlan(paymentPlans.onGoing)}
             </SwipeAction>
           ) : (
-            <PaymentPlan
-              fee={paymentPlans.onGoing.fee}
-              effective={`${new Intl.DateTimeFormat('en-US', {
-                month: 'long',
-              }).format(
-                new Date(
-                  paymentPlans.onGoing.effectiveFrom.year,
-                  paymentPlans.onGoing.effectiveFrom.month,
-                  1
-                )
-              )}, ${paymentPlans.onGoing.effectiveFrom.year}`}
-            />
+            renderPaymentPlan(paymentPlans.onGoing)
           ))}
 
-        <SectionTitle title="Future Plan" />
-        {paymentPlans.future &&
-          paymentPlans.future !== null &&
-          (userType === UserTypes.ADMIN ? (
-            <SwipeAction
-              onRequestEdit={() =>
-                navigation.navigate(NavigationRoutes.CREATE_PAYMENT_PLAN, {
-                  type: 'future',
-                })
-              }
-              onRequestDelete={() => setDeletePlanConfirmationVisible(true)}>
-              <PaymentPlan
-                fee={paymentPlans.future.fee}
-                effective={`${new Intl.DateTimeFormat('en-US', {
-                  month: 'long',
-                }).format(
-                  new Date(
-                    paymentPlans.future.effectiveFrom.year,
-                    paymentPlans.future.effectiveFrom.month,
-                    1
-                  )
-                )}, ${paymentPlans.future.effectiveFrom.year}`}
+        {paymentPlans.future && paymentPlans.future !== null ? (
+          <>
+            <SectionTitle title="Future Plan" />
+            {userType === UserTypes.ADMIN ? (
+              <SwipeAction
+                onRequestEdit={() => {
+                  dispatch(setEditing(true));
+                  navigation.navigate(NavigationRoutes.CREATE_PAYMENT_PLAN, {
+                    type: 'future',
+                    ...paymentPlans.future,
+                  });
+                }}
+                onRequestDelete={() => setDeletePlanConfirmationVisible(true)}>
+                {renderPaymentPlan(paymentPlans.future)}
+              </SwipeAction>
+            ) : (
+              renderPaymentPlan(paymentPlans.future)
+            )}
+          </>
+        ) : (
+          userType === UserTypes.ADMIN && (
+            <>
+              <SectionTitle title="Future Plan" />
+              <Button
+                length="long"
+                style="outlined"
+                color={Colors.DEEP_TEAL}
+                text="Create Future Plan"
+                onPress={() =>
+                  navigation.navigate(NavigationRoutes.CREATE_PAYMENT_PLAN, {
+                    type: 'future',
+                  })
+                }
               />
-            </SwipeAction>
-          ) : (
-            <PaymentPlan
-              fee={paymentPlans.future.fee}
-              effective={`${new Intl.DateTimeFormat('en-US', {
-                month: 'long',
-              }).format(
-                new Date(
-                  paymentPlans.future.effectiveFrom.year,
-                  paymentPlans.future.effectiveFrom.month,
-                  1
-                )
-              )}, ${paymentPlans.future.effectiveFrom.year}`}
-            />
-          ))}
+            </>
+          )
+        )}
 
         <SectionTitle title="Collection Details" />
         <MonthlyPaymentSummery
@@ -184,7 +179,13 @@ const Payments = ({ navigation }) => {
       <ConfirmBox
         visible={deletePlanConfirmationVisible}
         title="Are you sure you want to delete this plan?"
-        ok={{ text: 'Delete', onPress: () => console.log('delete') }}
+        ok={{
+          text: 'Delete',
+          onPress: () => {
+            dispatch(deletePlan(paymentPlans.future.id));
+            setDeletePlanConfirmationVisible(false);
+          },
+        }}
         cancel={{
           text: 'Cancel',
           onPress: () => {

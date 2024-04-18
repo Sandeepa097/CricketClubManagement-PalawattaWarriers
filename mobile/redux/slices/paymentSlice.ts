@@ -20,11 +20,12 @@ interface PreviousPaymentAttributes {
 }
 
 interface PaymentPlanAttributes {
+  id?: number | string;
   effectiveFrom: {
     year: number;
     month: number;
   };
-  fee: number;
+  fee: number | string;
 }
 
 interface PaymentPlans {
@@ -171,6 +172,52 @@ export const updatePayment = createAsyncThunk(
   }
 );
 
+export const createPlan = createAsyncThunk(
+  'payment/createPlan',
+  async (payload: PaymentPlanAttributes, { rejectWithValue }) => {
+    const response: any = await api.post('payments/plans', payload);
+    if (response.ok) {
+      return payload;
+    }
+
+    return rejectWithValue('Failed to create payment plan.');
+  }
+);
+
+export const updatePlan = createAsyncThunk(
+  'payment/updatePlan',
+  async (
+    payload: {
+      id: number | string;
+      type: 'ongoing' | 'future';
+      data: PaymentPlanAttributes;
+    },
+    { rejectWithValue }
+  ) => {
+    const response: any = await api.put(
+      `payments/plans/${payload.id}`,
+      payload.data
+    );
+    if (response.ok) {
+      return payload;
+    }
+
+    return rejectWithValue('Failed to update payment plan.');
+  }
+);
+
+export const deletePlan = createAsyncThunk(
+  'payment/deletePlan',
+  async (payload: number | string, { rejectWithValue }) => {
+    const response: any = await api.delete(`payments/plans/${payload}`);
+    if (response.ok) {
+      return;
+    }
+
+    return rejectWithValue('Failed to delete payment plan.');
+  }
+);
+
 const initialState: PaymentSliceState = {
   pendingPayments: [],
   previousPayments: [],
@@ -214,7 +261,28 @@ export const paymentSlice = createSlice({
         (state, action: PayloadAction<CollectionAttributes>) => {
           state.collection = action.payload;
         }
-      );
+      )
+      .addCase(
+        createPlan.fulfilled,
+        (state, action: PayloadAction<PaymentPlanAttributes>) => {
+          state.paymentPlans.future = action.payload;
+        }
+      )
+      .addCase(
+        updatePlan.fulfilled,
+        (
+          state,
+          action: PayloadAction<{
+            type: 'ongoing' | 'future';
+            data: PaymentPlanAttributes;
+          }>
+        ) => {
+          state.paymentPlans[action.payload.type] = action.payload.data;
+        }
+      )
+      .addCase(deletePlan.fulfilled, (state, _) => {
+        state.paymentPlans.future = null;
+      });
   },
 });
 
