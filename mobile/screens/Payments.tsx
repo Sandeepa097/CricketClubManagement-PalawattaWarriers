@@ -39,6 +39,14 @@ const renderPaymentPlan = (paymentPlan: any) => (
   />
 );
 
+const isScrollCloseToBottom = ({
+  layoutMeasurement,
+  contentOffset,
+  contentSize,
+}) => {
+  return layoutMeasurement.height + contentOffset.y >= contentSize.height - 50;
+};
+
 const Payments = ({ navigation }) => {
   const focused = useIsFocused();
   const dispatch = useDispatch<AppDispatch>();
@@ -49,6 +57,9 @@ const Payments = ({ navigation }) => {
   );
   const previousPayments = useSelector(
     (state: RootState) => state.payment.previousPayments
+  );
+  const totalPreviousPayments = useSelector(
+    (state: RootState) => state.payment.previousPaymentsTotal
   );
   const paymentPlans = useSelector(
     (state: RootState) => state.payment.paymentPlans
@@ -69,13 +80,26 @@ const Payments = ({ navigation }) => {
   useEffect(() => {
     dispatch(getPaymentPlans());
     dispatch(getPendingPayments());
-    dispatch(getPreviousPayments());
+    if (!previousPayments.length) {
+      dispatch(getPreviousPayments(0));
+    }
   }, [focused]);
+
+  const fetchMorePreviousPayments = () => {
+    if (previousPayments.length < totalPreviousPayments) {
+      dispatch(getPreviousPayments(previousPayments.length));
+    }
+  };
 
   return (
     <View style={styles.container}>
       <ScrollView
-        contentContainerStyle={{ display: 'flex', alignItems: 'center' }}>
+        contentContainerStyle={{ display: 'flex', alignItems: 'center' }}
+        onScroll={({ nativeEvent }) => {
+          if (isScrollCloseToBottom(nativeEvent)) {
+            fetchMorePreviousPayments();
+          }
+        }}>
         <SectionTitle title="Ongoing Plan" marginTop={10} />
         {paymentPlans.onGoing &&
           paymentPlans.onGoing !== null &&
@@ -151,9 +175,7 @@ const Payments = ({ navigation }) => {
           />
         ))}
 
-        <SectionTitle
-          title={`Previous Payments (${previousPayments.length})`}
-        />
+        <SectionTitle title={`Previous Payments (${totalPreviousPayments})`} />
         {previousPayments.map((item) => (
           <PaymentItem
             key={item.id}

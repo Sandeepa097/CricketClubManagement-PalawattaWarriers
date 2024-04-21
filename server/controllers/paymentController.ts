@@ -11,6 +11,7 @@ import {
   updatePaymentPlan,
   getProjectionsAndDues,
   createBulkPayments,
+  getPaymentsCount,
 } from '../services/paymentService';
 import { StatusCodes } from 'http-status-codes';
 
@@ -131,10 +132,14 @@ const getDues = async (req: Request, res: Response) => {
 };
 
 const getPreviousPayments = async (req: Request, res: Response) => {
-  const payments = await getPayments();
+  const totalCount = await getPaymentsCount();
+  const limit: number = Number(req.query.limit || totalCount);
+  const offset: number = Number(req.query.offset || 0);
+  const payments = await getPayments(offset, limit);
 
   return res.status(StatusCodes.OK).json({
     payments,
+    totalCount,
   });
 };
 

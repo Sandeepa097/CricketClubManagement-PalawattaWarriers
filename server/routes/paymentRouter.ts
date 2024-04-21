@@ -31,7 +31,20 @@ paymentRouter.post(
   paymentController.pay
 );
 
-paymentRouter.get('/', paymentController.getPreviousPayments);
+paymentRouter.get(
+  '/',
+  validateRequest([
+    query('limit')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('Limit must be an positive integer.'),
+    query('offset')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('Offset must be an positive integer.'),
+  ]),
+  paymentController.getPreviousPayments
+);
 
 paymentRouter.get(
   '/dues',

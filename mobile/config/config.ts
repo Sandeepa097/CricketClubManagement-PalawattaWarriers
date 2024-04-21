@@ -1,6 +1,4 @@
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
-const TOKEN_REFRESH_INTERVAL = Number(
-  process.env.EXPO_PUBLIC_TOKEN_REFRESH_INTERVAL
-);
+const PAGE_SIZE = Number(process.env.EXPO_PUBLIC_PAGE_SIZE);
 
-export { API_URL, TOKEN_REFRESH_INTERVAL };
+export { API_URL, PAGE_SIZE };

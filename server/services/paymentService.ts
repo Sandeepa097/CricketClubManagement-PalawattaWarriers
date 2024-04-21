@@ -57,14 +57,20 @@ export const findPayment = async (id: number | string) => {
   return await Payment.findByPk(id);
 };
 
-export const getPayments = async () => {
+export const getPayments = async (offset: number = 0, limit: number = 25) => {
   return await Payment.findAll({
     include: {
       model: Player,
       as: 'player',
     },
     order: [['id', 'DESC']],
+    limit: limit,
+    offset: offset,
   });
+};
+
+export const getPaymentsCount = async () => {
+  return await Payment.count();
 };
 
 export const getOngoingPlan = async (date: { month: number; year: number }) => {

@@ -1,5 +1,7 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import api from '../../api';
+import { RootState } from '../store';
+import { PAGE_SIZE } from '../../config/config';
 
 interface PaymentAttributes {
   id: string | number;
@@ -40,6 +42,7 @@ interface CollectionAttributes {
 }
 
 interface PaymentSliceState {
+  previousPaymentsTotal: number;
   pendingPayments: PendingPaymentAttributes[];
   previousPayments: PreviousPaymentAttributes[];
   paymentPlans: PaymentPlans;
@@ -77,13 +80,31 @@ export const getPendingPayments = createAsyncThunk(
 
 export const getPreviousPayments = createAsyncThunk(
   'payment/previous',
-  async () => {
-    const response: any = await api.get('/payments');
-    if (response.ok) {
-      return response.data?.payments || [];
+  async (offset: number, { getState, rejectWithValue }) => {
+    if (
+      !offset ||
+      (getState() as RootState).payment.previousPayments.length <
+        (getState() as RootState).payment.previousPaymentsTotal
+    ) {
+      const response: any = await api.get(
+        `/payments?limit=${PAGE_SIZE}&offset=${offset}`
+      );
+      if (response.ok) {
+        return {
+          payments: response.data?.payments || [],
+          offset,
+          total: response.data?.totalCount,
+        };
+      }
+
+      return {
+        payments: [],
+        offset,
+        total: (getState() as RootState).payment.previousPaymentsTotal,
+      };
     }
 
-    return [];
+    return rejectWithValue('End of the list reached.');
   }
 );
 
@@ -149,7 +170,7 @@ export const deletePayment = createAsyncThunk(
     const response: any = await api.delete(`/payments/${payload}`);
     if (response.ok) {
       dispatch(getPendingPayments());
-      dispatch(getPreviousPayments());
+      dispatch(getPreviousPayments(0));
       return;
     }
 
@@ -219,6 +240,7 @@ export const deletePlan = createAsyncThunk(
 );
 
 const initialState: PaymentSliceState = {
+  previousPaymentsTotal: 0,
   pendingPayments: [],
   previousPayments: [],
   paymentPlans: {
@@ -246,8 +268,23 @@ export const paymentSlice = createSlice({
       )
       .addCase(
         getPreviousPayments.fulfilled,
-        (state, action: PayloadAction<PreviousPaymentAttributes[]>) => {
-          state.previousPayments = action.payload;
+        (
+          state,
+          action: PayloadAction<{
+            payments: PreviousPaymentAttributes[];
+            offset: number;
+            total: number;
+          }>
+        ) => {
+          state.previousPaymentsTotal = action.payload.total;
+          if (!action.payload.offset) {
+            state.previousPayments = action.payload.payments;
+          } else {
+            state.previousPayments = [
+              ...state.previousPayments,
+              ...action.payload.payments,
+            ];
+          }
         }
       )
       .addCase(
