@@ -11,7 +11,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from './redux/store';
 import { restoreAuth } from './redux/slices/authSlice';
 import LoadingIndicator from './components/LoadingIndicator';
-import TokenRefresher from './components/TokenRefresher';
 
 const App = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -45,7 +44,6 @@ const App = () => {
       <SafeAreaProvider onLayout={onLayoutRender}>
         <>
           <LoadingIndicator active={processing} />
-          <TokenRefresher />
           <MainNavigationContainer />
         </>
       </SafeAreaProvider>

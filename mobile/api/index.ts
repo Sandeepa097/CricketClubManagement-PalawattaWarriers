@@ -1,8 +1,9 @@
 import { create } from 'apisauce';
 import { API_URL } from '../config/config';
 import { StatusCodes } from 'http-status-codes';
-import { logout } from '../redux/slices/authSlice';
+import { logout, restoreAuth } from '../redux/slices/authSlice';
 import { setLoading } from '../redux/slices/statusSlice';
+import * as SecureStore from 'expo-secure-store';
 
 let store: any;
 
@@ -18,12 +19,6 @@ api.addRequestTransform((req) => {
   const accessToken = store.getState().auth.token;
   if (!accessToken) return;
   req.headers['Authorization'] = 'Bearer ' + accessToken;
-});
-
-api.addResponseTransform((response) => {
-  if (response.status === StatusCodes.UNAUTHORIZED) {
-    store.dispatch(logout());
-  }
 });
 
 api.axiosInstance.interceptors.request.use(
@@ -42,10 +37,51 @@ api.axiosInstance.interceptors.response.use(
     store.dispatch(setLoading(false));
     return response;
   },
-  (error) => {
+  async (error) => {
+    if (error.response.status === StatusCodes.UNAUTHORIZED) {
+      try {
+        await refreshToken();
+        return api.any(error.config);
+      } catch (err) {
+        store.dispatch(logout());
+      }
+    }
     store.dispatch(setLoading(false));
     return Promise.reject(error);
   }
 );
+
+const refreshToken = async () => {
+  try {
+    const storedValues: string = await SecureStore.getItemAsync('auth');
+
+    if (storedValues) {
+      const parsedValues = JSON.parse(storedValues);
+
+      const response: any = await fetch(`${API_URL}/auth/access_token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken: parsedValues?.refreshToken }),
+      });
+      const data = await response.json();
+
+      if (response.status !== StatusCodes.UNAUTHORIZED && data.accessToken) {
+        const authDetails = JSON.stringify({
+          ...parsedValues,
+          token: data.accessToken,
+        });
+        await SecureStore.setItemAsync('auth', authDetails);
+        store.dispatch(restoreAuth());
+        return;
+      }
+
+      return Promise.reject(response);
+    }
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
 
 export default api;

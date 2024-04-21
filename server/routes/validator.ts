@@ -59,13 +59,13 @@ export const validateRefreshToken = async (
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.get('authorization');
-  if (!authHeader || !authHeader.toLowerCase().startsWith('bearer '))
+  const refreshToken = req.body.refreshToken;
+  if (!refreshToken)
     return res
       .status(StatusCodes.UNAUTHORIZED)
       .json({ message: 'Not authenticated.' });
 
-  const authUser = decodeRefreshToken(authHeader.substring(7));
+  const authUser = decodeRefreshToken(refreshToken);
 
   if (!authUser)
     return res.status(StatusCodes.UNAUTHORIZED).json({
