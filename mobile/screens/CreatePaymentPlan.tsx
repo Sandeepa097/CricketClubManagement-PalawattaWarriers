@@ -63,6 +63,7 @@ const CreatePaymentPlan = ({ navigation, route }) => {
             fee: fee ? fee.toString() : '',
             effectiveFrom: effectiveFrom || null,
           }}
+          validateOnBlur={false}
           validationSchema={paymentPlanValidationSchema}
           onSubmit={(values: any) =>
             (id
@@ -87,14 +88,22 @@ const CreatePaymentPlan = ({ navigation, route }) => {
                 );
               })
           }>
-          {({ handleSubmit, setFieldValue, values, errors }) => (
+          {({
+            handleSubmit,
+            setFieldValue,
+            setFieldTouched,
+            values,
+            errors,
+            touched,
+          }) => (
             <>
               <TextInput
                 length="long"
                 placeholder="Fee"
                 onChangeText={(text) => setFieldValue('fee', text)}
                 value={values.fee}
-                error={errors.fee as string}
+                onBlur={(event) => setFieldTouched('fee', true, true)}
+                error={touched.fee && (errors.fee as string)}
               />
               <MonthYearPicker
                 placeholder="Effective from"
@@ -109,6 +118,7 @@ const CreatePaymentPlan = ({ navigation, route }) => {
                     : undefined
                 }
                 error={errors.effectiveFrom}
+                onBlur={() => setFieldTouched('effectiveFrom', true, true)}
                 onSelect={(value) => setFieldValue('effectiveFrom', value)}
               />
               <View style={{ marginTop: 40 }}>

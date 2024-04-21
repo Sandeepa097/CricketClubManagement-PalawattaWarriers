@@ -16,6 +16,7 @@ interface RollsPickerProps {
   value: null | Selection;
   error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
   onChangeValue: (selection: Selection) => void;
+  onBlur?: () => void;
 }
 
 const getValueAsString = (value: Selection) => {
@@ -88,7 +89,10 @@ const RollsPicker = (props: RollsPickerProps) => {
       )}
       <Modal
         isVisible={modalVisible}
-        onBackdropPress={() => setModalVisible(false)}>
+        onBackdropPress={() => {
+          props.onBlur && props.onBlur();
+          setModalVisible(false);
+        }}>
         <View style={styles.container}>
           <Text style={styles.title}>Select Rolls</Text>
           <View style={styles.optionsContainer}>

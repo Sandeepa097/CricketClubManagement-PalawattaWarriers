@@ -12,6 +12,7 @@ interface PlayersPickerProps {
   players: PlayerType[];
   selected: (string | number)[];
   error?: string;
+  onBlur?: () => void;
   onChangeSelection: (values: (string | number)[]) => void;
 }
 
@@ -51,7 +52,10 @@ const PlayersPicker = (props: PlayersPickerProps) => {
         selected={props.selected}
         emptyMessage={props.emptyMessage}
         onPressItem={(id) => onPressItem(id)}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          props.onBlur && props.onBlur();
+          setModalVisible(false);
+        }}
       />
     </View>
   );

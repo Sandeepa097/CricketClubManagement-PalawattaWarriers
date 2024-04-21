@@ -145,6 +145,7 @@ const CreateMatch = ({ route, navigation }) => {
               })) || [],
           }}
           validationSchema={matchValidationSchema}
+          validateOnBlur={false}
           onSubmit={(values) =>
             dispatch(
               editMatch
@@ -169,42 +170,61 @@ const CreateMatch = ({ route, navigation }) => {
                 );
               })
           }>
-          {({ handleSubmit, setFieldValue, values, errors }) => (
+          {({
+            handleSubmit,
+            setFieldValue,
+            setFieldTouched,
+            values,
+            errors,
+            touched,
+          }) => (
             <>
               <SectionTitle title="Match Details" marginTop={10} />
               <SwitchInput
                 placeholder="Mark as PPL"
                 value={values.isPPL}
-                onChangeValue={() => setFieldValue('isPPL', !values.isPPL)}
+                onChangeValue={() => {
+                  if (!values.isPPL) {
+                    setFieldValue('oppositeTeamId', null);
+                    setFieldValue('result', null);
+                  }
+                  setFieldValue('isPPL', !values.isPPL);
+                }}
               />
               {!values.isPPL && (
                 <OppositeTeamPicker
                   placeholder="Opposite Team"
                   value={values.oppositeTeamId}
+                  onBlur={() => setFieldTouched('oppositeTeamId', true, true)}
                   onChange={(value) => setFieldValue('oppositeTeamId', value)}
-                  error={errors.oppositeTeamId as string}
+                  error={
+                    touched.oppositeTeamId && (errors.oppositeTeamId as string)
+                  }
                 />
               )}
               <DatePicker
                 placeholder="Date"
                 value={values.date}
                 onChange={(value) => setFieldValue('date', value)}
-                error={errors.date as string}
+                onBlur={() => setFieldTouched('date', true, true)}
+                error={touched.date && (errors.date as string)}
               />
               <TextInput
                 value={values.location}
                 onChangeText={(value) => setFieldValue('location', value)}
                 length="long"
                 placeholder="Location"
-                error={errors.location as string}
+                onBlur={(event) => setFieldTouched('location', true, true)}
+                error={touched.location && (errors.location as string)}
               />
               {!values.isPPL && (
                 <ResultsPicker
                   title="Select result"
                   placeholder="Results"
                   value={values.result}
+                  onBlur={() => setFieldTouched('result', true, true)}
                   onChangeValue={(value) => setFieldValue('result', value)}
-                  error={errors.result as string}
+                  error={touched.result && (errors.result as string)}
                 />
               )}
               <TextInput
@@ -214,14 +234,23 @@ const CreateMatch = ({ route, navigation }) => {
                 }
                 length="long"
                 placeholder="Number of deliveries per over"
-                error={errors.numberOfDeliveriesPerOver as string}
+                onBlur={(event) =>
+                  setFieldTouched('numberOfDeliveriesPerOver', true, true)
+                }
+                error={
+                  touched.numberOfDeliveriesPerOver &&
+                  (errors.numberOfDeliveriesPerOver as string)
+                }
               />
               <PlayersPicker
                 placeholder="Players of Your Team"
                 players={players}
                 emptyMessage="No players found."
                 selected={values.officialPlayers}
-                error={errors.officialPlayers as string}
+                error={
+                  touched.officialPlayers && (errors.officialPlayers as string)
+                }
+                onBlur={() => setFieldTouched('officialPlayers', true, true)}
                 onChangeSelection={(officialPlayers) => {
                   setFieldValue(
                     'battingStats',
@@ -252,7 +281,11 @@ const CreateMatch = ({ route, navigation }) => {
                   values.officialPlayers.includes(player.id)
                 )}
                 values={values.battingStats}
-                errors={errors.battingStats as { values: object }[]}
+                errors={
+                  touched.battingStats &&
+                  (errors.battingStats as { values: object }[])
+                }
+                onBlur={() => setFieldTouched('battingStats', true, true)}
                 onChangeValues={(battingStats) =>
                   setFieldValue('battingStats', battingStats)
                 }
@@ -281,7 +314,11 @@ const CreateMatch = ({ route, navigation }) => {
                   values.officialPlayers.includes(player.id)
                 )}
                 values={values.bowlingStats}
-                errors={errors.bowlingStats as { values: object }[]}
+                errors={
+                  touched.battingStats &&
+                  (errors.bowlingStats as { values: object }[])
+                }
+                onBlur={() => setFieldTouched('bowlingStats', true, true)}
                 onChangeValues={(bowlingStats) =>
                   setFieldValue('bowlingStats', bowlingStats)
                 }
@@ -300,7 +337,11 @@ const CreateMatch = ({ route, navigation }) => {
                   values.officialPlayers.includes(player.id)
                 )}
                 values={values.fieldingStats}
-                errors={errors.fieldingStats as { values: object }[]}
+                errors={
+                  touched.fieldingStats &&
+                  (errors.fieldingStats as { values: object }[])
+                }
+                onBlur={() => setFieldTouched('fieldingStats', true, true)}
                 onChangeValues={(fieldingStats) =>
                   setFieldValue('fieldingStats', fieldingStats)
                 }

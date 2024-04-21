@@ -12,6 +12,7 @@ interface DatePickerProps {
   placeholder: string;
   value: string;
   error?: string;
+  onBlur?: () => void;
   onChange: (value: string) => void;
 }
 
@@ -24,7 +25,10 @@ const DatePicker = (props: DatePickerProps) => {
     DateTimePickerAndroid.open({
       value: props.value ? new Date(props.value) : new Date(),
       mode: 'date',
-      onChange: (event, date) => onSelectDate(event, date),
+      onChange: (event, date) => {
+        props.onBlur && props.onBlur();
+        onSelectDate(event, date);
+      },
     });
   };
 

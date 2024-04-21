@@ -18,6 +18,7 @@ interface MonthYearPickerProps {
   max?: DateType;
   min?: DateType;
   error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
+  onBlur?: () => void;
   onSelect: (selectedDate: DateType) => void;
 }
 
@@ -122,6 +123,7 @@ const MonthYearPicker = (props: MonthYearPickerProps) => {
   };
 
   const onCancel = () => {
+    props.onBlur && props.onBlur();
     setModalVisible(false);
     props.onSelect({
       month: date.getMonth(),

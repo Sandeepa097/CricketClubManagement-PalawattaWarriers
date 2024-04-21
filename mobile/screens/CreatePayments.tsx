@@ -4,6 +4,7 @@ import ChildInputWithPlayers from '../components/ChildInputWithPlayers';
 import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
 import { Formik } from 'formik';
+import * as Yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import { createPayments, updatePayment } from '../redux/slices/paymentSlice';
@@ -13,6 +14,21 @@ const CreatePayments = ({ route, navigation }) => {
   const editPayment = route.params;
   const dispatch = useDispatch<AppDispatch>();
   const players = useSelector((state: RootState) => state.player.players);
+
+  const paymentValidationSchema = Yup.object().shape({
+    details: Yup.array()
+      .of(
+        Yup.object().shape({
+          values: Yup.object().shape({
+            amount: Yup.number()
+              .integer('Cents not allowed.')
+              .min(0, 'Amount is invalid.')
+              .required('Amount is required.'),
+          }),
+        })
+      )
+      .min(1, 'Payers are required.'),
+  });
 
   return (
     <View style={styles.container}>
@@ -33,6 +49,8 @@ const CreatePayments = ({ route, navigation }) => {
                 ]
               : [],
           }}
+          validationSchema={paymentValidationSchema}
+          validateOnBlur={false}
           onSubmit={(values) =>
             (editPayment
               ? dispatch(
@@ -60,14 +78,25 @@ const CreatePayments = ({ route, navigation }) => {
                 );
               })
           }>
-          {({ handleSubmit, setFieldValue, values, errors }) => (
+          {({
+            handleSubmit,
+            setFieldValue,
+            setFieldTouched,
+            values,
+            errors,
+            touched,
+          }) => (
             <>
               <ChildInputWithPlayers
                 players={players}
                 placeholder="Select Payers"
                 playerChangeDisabled={editPayment}
                 values={values.details}
-                errors={errors.details as { values: object }[]}
+                errors={
+                  touched.details &&
+                  (errors.details as { values: object }[] | string)
+                }
+                onBlur={() => setFieldTouched('details', true, true)}
                 onChangeValues={(details) => setFieldValue('details', details)}
                 itemProperties={[
                   { type: 'text', name: 'amount', placeholder: 'Paid Amount' },

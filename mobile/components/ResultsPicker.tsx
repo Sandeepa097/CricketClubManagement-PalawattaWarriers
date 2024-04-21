@@ -19,6 +19,7 @@ interface ResultsPickerProps {
   placeholder: string;
   value: ValueType | null;
   error?: string;
+  onBlur?: () => void;
   onChangeValue: (value: ValueType) => void;
 }
 
@@ -94,7 +95,10 @@ const ResultsPicker = (props: ResultsPickerProps) => {
       </View>
       <Modal
         isVisible={modalVisible}
-        onBackdropPress={() => setModalVisible(false)}>
+        onBackdropPress={() => {
+          props.onBlur && props.onBlur();
+          setModalVisible(false);
+        }}>
         <View style={styles.container}>
           <Text style={styles.title}>Select Result</Text>
           <FlatList

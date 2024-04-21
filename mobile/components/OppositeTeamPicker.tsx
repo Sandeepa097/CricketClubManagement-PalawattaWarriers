@@ -24,6 +24,7 @@ interface OppositeTeamPickerProps {
   emptyMessage?: string;
   error?: string;
   value: string | number | null;
+  onBlur?: () => void;
   onChange: (value: string | number) => void;
 }
 
@@ -101,7 +102,10 @@ const OppositeTeamPicker = (props: OppositeTeamPickerProps) => {
       <Modal
         isVisible={selectionModalVisible}
         style={styles.selectionModal}
-        onBackdropPress={() => setSelectionModalVisible(false)}>
+        onBackdropPress={() => {
+          props.onBlur && props.onBlur();
+          setSelectionModalVisible(false);
+        }}>
         <View style={styles.selectionContainer}>
           <TouchableOpacity
             style={styles.button}
@@ -136,7 +140,10 @@ const OppositeTeamPicker = (props: OppositeTeamPickerProps) => {
       <Modal
         isVisible={createModalVisible}
         style={styles.creationModal}
-        onBackdropPress={() => setCreateModalVisible(false)}>
+        onBackdropPress={() => {
+          props.onBlur && props.onBlur();
+          setCreateModalVisible(false);
+        }}>
         <View style={styles.creationContainer}>
           <Text style={styles.title}>Create new team</Text>
           <Formik

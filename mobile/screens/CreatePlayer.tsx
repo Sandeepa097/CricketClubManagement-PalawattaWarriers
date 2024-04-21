@@ -108,7 +108,6 @@ const CreatePlayer = ({ navigation, route }) => {
                 }
           }
           validateOnBlur={false}
-          validateOnChange={false}
           validationSchema={playerValidationSchema}
           onSubmit={(values) => {
             const formattedValues = {
@@ -132,7 +131,14 @@ const CreatePlayer = ({ navigation, route }) => {
               );
             }
           }}>
-          {({ handleSubmit, setFieldValue, values, errors }) => (
+          {({
+            handleSubmit,
+            setFieldValue,
+            setFieldTouched,
+            values,
+            errors,
+            touched,
+          }) => (
             <>
               <ImagePicker
                 value={values.avatar}
@@ -142,23 +148,27 @@ const CreatePlayer = ({ navigation, route }) => {
                 length="long"
                 placeholder="Name"
                 onChangeText={(text) => setFieldValue('name', text)}
+                onBlur={(event) => setFieldTouched('name', true, true)}
                 value={values.name}
-                error={errors.name as string}
+                error={touched.name && (errors.name as string)}
               />
               <RollsPicker
                 value={values.rolls}
                 error={
-                  typeof errors.rolls === 'object'
+                  touched.rolls &&
+                  (typeof errors.rolls === 'object'
                     ? (errors.rolls as any)?.mainRoll
-                    : errors.rolls
+                    : errors.rolls)
                 }
+                onBlur={() => setFieldTouched('rolls', true, true)}
                 onChangeValue={(selection) => setFieldValue('rolls', selection)}
               />
               <MonthYearPicker
                 placeholder="Fees Paying Since"
                 title="Fees Paying Since"
                 value={values.feesPayingSince}
-                error={errors.feesPayingSince}
+                error={touched.feesPayingSince && errors.feesPayingSince}
+                onBlur={() => setFieldTouched('feesPayingSince', true, true)}
                 onSelect={(value) => setFieldValue('feesPayingSince', value)}
               />
               <View style={{ marginTop: 40 }}>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import ClickableChildrenInput from './base/ClickableChildrenInput';
 import { Entypo } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
@@ -18,7 +18,8 @@ interface ChildInputWithPlayersProps {
   placeholder: string;
   itemProperties: (ChildPropertyText | ChildPropertySwitch)[];
   values: ChildItemValues[];
-  errors?: Array<{ values: object }>;
+  errors?: Array<{ values: object }> | string;
+  onBlur?: () => void;
   onChangeValues: (values: ChildItemValues[]) => void;
 }
 
@@ -75,7 +76,10 @@ const ChildInputWithPlayers = (props: ChildInputWithPlayersProps) => {
       />
       <PlayersSelectionModal
         isVisible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          props.onBlur && props.onBlur();
+          setModalVisible(false);
+        }}
         players={props.players}
         emptyMessage={props.emptyMessage}
         selected={selectedPlayerIds}
