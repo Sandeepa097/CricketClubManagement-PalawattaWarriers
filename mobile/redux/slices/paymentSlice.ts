@@ -154,10 +154,15 @@ export const getCollectionDetails = createAsyncThunk(
 
 export const createPayments = createAsyncThunk(
   'payment/createPayment',
-  async (payload: { details: NewPayment[] }, { rejectWithValue }) => {
-    const response = await api.post('/payments', payload);
+  async (payload: { details: NewPayment[] }, { rejectWithValue, getState }) => {
+    const response: any = await api.post('/payments', payload);
     if (response.ok) {
-      return;
+      return response.data.payment.map((payment: any) => ({
+        ...payment,
+        player: (getState() as RootState).player.players.find(
+          (player) => player.id === payment.playerId
+        ),
+      }));
     }
 
     return rejectWithValue('Payments creation failed.');
@@ -171,7 +176,7 @@ export const deletePayment = createAsyncThunk(
     if (response.ok) {
       dispatch(getPendingPayments());
       dispatch(getPreviousPayments(0));
-      return;
+      return payload;
     }
 
     return rejectWithValue('Payment deletion failed.');
@@ -186,7 +191,7 @@ export const updatePayment = createAsyncThunk(
       amount: payload.data.values.amount,
     });
     if (response.ok) {
-      return;
+      return payload;
     }
 
     return rejectWithValue('Payment update failed.');
@@ -285,6 +290,37 @@ export const paymentSlice = createSlice({
               ...action.payload.payments,
             ];
           }
+        }
+      )
+      .addCase(
+        createPayments.fulfilled,
+        (state, action: PayloadAction<PreviousPaymentAttributes[]>) => {
+          state.previousPayments = [
+            ...action.payload,
+            ...state.previousPayments,
+          ];
+        }
+      )
+      .addCase(
+        updatePayment.fulfilled,
+        (state, action: PayloadAction<UpdatePayment>) => {
+          state.previousPayments = state.previousPayments.map((payment) => {
+            if (payment.id === action.payload.id)
+              return {
+                ...payment,
+                amount: Number(action.payload.data.values.amount),
+              };
+            return payment;
+          });
+        }
+      )
+      .addCase(
+        deletePayment.fulfilled,
+        (state, action: PayloadAction<number | string>) => {
+          state.previousPayments = state.previousPayments.filter(
+            (payment) => payment.id === action.payload
+          );
+          state.previousPaymentsTotal--;
         }
       )
       .addCase(
