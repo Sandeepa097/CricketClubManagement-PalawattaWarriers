@@ -23,6 +23,7 @@ import {
   getPreviousPayments,
 } from '../redux/slices/paymentSlice';
 import { setEditing } from '../redux/slices/statusSlice';
+import Draggable from '../components/base/Draggable';
 
 const renderPaymentPlan = (paymentPlan: any) => (
   <PaymentPlan
@@ -250,22 +251,26 @@ const Payments = ({ navigation }) => {
         }}
       />
       {userType === UserTypes.ADMIN && (
-        <Button
-          sticky={true}
-          position={{ bottom: 10, right: 10 }}
-          shape="square"
-          size={52}
-          color={Colors.DEEP_TEAL}
-          style="filled"
-          icon={() => (
-            <FontAwesome5
-              name="money-check-alt"
-              size={24}
-              color={Colors.OFF_WHITE}
-            />
-          )}
-          onPress={() => navigation.navigate(NavigationRoutes.CREATE_PAYMENTS)}
-        />
+        <Draggable>
+          <Button
+            sticky={true}
+            position={{ bottom: 10, right: 10 }}
+            shape="square"
+            size={52}
+            color={Colors.DEEP_TEAL}
+            style="filled"
+            icon={() => (
+              <FontAwesome5
+                name="money-check-alt"
+                size={24}
+                color={Colors.OFF_WHITE}
+              />
+            )}
+            onPress={() =>
+              navigation.navigate(NavigationRoutes.CREATE_PAYMENTS)
+            }
+          />
+        </Draggable>
       )}
     </View>
   );

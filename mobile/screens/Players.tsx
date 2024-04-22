@@ -14,6 +14,7 @@ import EmptyListMessage from '../components/base/EmptyListMessage';
 import { setEditing } from '../redux/slices/statusSlice';
 import { useIsFocused } from '@react-navigation/native';
 import { UserTypes } from '../constants/UserTypes';
+import Draggable from '../components/base/Draggable';
 
 const Players = ({ navigation }) => {
   const focused = useIsFocused();
@@ -105,18 +106,20 @@ const Players = ({ navigation }) => {
         }}
       />
       {userType === UserTypes.ADMIN && (
-        <Button
-          sticky={true}
-          position={{ bottom: 10, right: 10 }}
-          shape="square"
-          size={52}
-          color={Colors.DEEP_TEAL}
-          style="filled"
-          icon={() => (
-            <AntDesign name="adduser" size={24} color={Colors.OFF_WHITE} />
-          )}
-          onPress={() => navigation.navigate(NavigationRoutes.CREATE_PLAYER)}
-        />
+        <Draggable>
+          <Button
+            sticky={true}
+            position={{ bottom: 10, right: 10 }}
+            shape="square"
+            size={52}
+            color={Colors.DEEP_TEAL}
+            style="filled"
+            icon={() => (
+              <AntDesign name="adduser" size={24} color={Colors.OFF_WHITE} />
+            )}
+            onPress={() => navigation.navigate(NavigationRoutes.CREATE_PLAYER)}
+          />
+        </Draggable>
       )}
     </View>
   );

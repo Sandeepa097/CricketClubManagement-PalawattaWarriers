@@ -20,6 +20,7 @@ import {
 } from '../redux/slices/matchSlice';
 import { retrieveTeams } from '../redux/slices/teamSlice';
 import { retrievePlayers } from '../redux/slices/playerSlice';
+import Draggable from '../components/base/Draggable';
 
 const Matches = ({ navigation }) => {
   const focused = useIsFocused();
@@ -91,18 +92,24 @@ const Matches = ({ navigation }) => {
         }
       />
       {userType === UserTypes.ADMIN && (
-        <Button
-          sticky={true}
-          position={{ bottom: 10, right: 10 }}
-          shape="square"
-          size={52}
-          color={Colors.DEEP_TEAL}
-          style="filled"
-          icon={() => (
-            <MaterialIcons name="post-add" size={24} color={Colors.OFF_WHITE} />
-          )}
-          onPress={() => navigation.navigate(NavigationRoutes.CREATE_MATCH)}
-        />
+        <Draggable>
+          <Button
+            sticky={true}
+            position={{ bottom: 10, right: 10 }}
+            shape="square"
+            size={52}
+            color={Colors.DEEP_TEAL}
+            style="filled"
+            icon={() => (
+              <MaterialIcons
+                name="post-add"
+                size={24}
+                color={Colors.OFF_WHITE}
+              />
+            )}
+            onPress={() => navigation.navigate(NavigationRoutes.CREATE_MATCH)}
+          />
+        </Draggable>
       )}
     </View>
   );

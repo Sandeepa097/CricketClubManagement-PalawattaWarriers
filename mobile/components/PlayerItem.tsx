@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Animated,
   Dimensions,
   Image,
   Pressable,
