@@ -57,6 +57,7 @@ export const getPPLMatches = async () => {
         include: [{ model: Player, as: 'player' }],
       },
     ],
+    order: [['id', 'DESC']],
   });
 };
 
@@ -88,6 +89,7 @@ export const getOutdoorMatches = async () => {
         include: [{ model: Player, as: 'player' }],
       },
     ],
+    order: [['id', 'DESC']],
   });
 };
 
