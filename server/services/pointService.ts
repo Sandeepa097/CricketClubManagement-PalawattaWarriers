@@ -53,11 +53,12 @@ export const calculateBattingPoints = ({
   if (isOut && !score) totalPoints -= 10;
 
   // Points for strike rate
-  const strikeRate: number = ((score || 0) / balls) * 100;
-  if (strikeRate < 50) totalPoints -= 10;
+  const strikeRate: number = ((score || 0) / (balls || 1)) * 100;
+  if (strikeRate < 50 && (isOut || balls)) totalPoints -= 10;
 
   // Points for strike rate if scored more than 10 runs
-  if ((score || 0) < 10) return { totalPoints, strikeRate };
+  if ((score || 0) < 10)
+    return { totalPoints, strikeRate: Number(strikeRate.toFixed(3)) };
 
   if (strikeRate >= 100 && strikeRate < 125) totalPoints += 10;
   else if (strikeRate >= 125 && strikeRate < 150) totalPoints += 20;
@@ -73,7 +74,7 @@ export const calculateBattingPoints = ({
   if ((score || 0) >= 50) totalPoints += 50;
   if ((score || 0) > 50) totalPoints += (score || 0) * 2;
 
-  return { totalPoints, strikeRate };
+  return { totalPoints, strikeRate: Number(strikeRate.toFixed(3)) };
 };
 
 export const calculateBowlingPoints = ({
@@ -102,19 +103,21 @@ export const calculateBowlingPoints = ({
   const oversIfSixDeliveriesPerOver =
     Math.floor(totalNumberOfBalls / 6) + (totalNumberOfBalls % 6) / 10;
 
-  // Points for economy if bowled at least 2 overs
-  const economy = (conceded || 0) / oversIfSixDeliveriesPerOver;
-  if (oversIfSixDeliveriesPerOver < 2) return { totalPoints, economy };
+  // Points reducing for higher economy
+  const economy = (conceded || 0) / (oversIfSixDeliveriesPerOver || 1);
+  if (economy < 10 && economy >= 8) totalPoints -= 10;
+  else if (economy < 12 && economy >= 10) totalPoints -= 20;
+  else if (economy >= 12) totalPoints -= 30;
+  if (oversIfSixDeliveriesPerOver < 2)
+    return { totalPoints, economy: Number(economy.toFixed(3)) };
 
+  // Points for economy if bowled at least 2 overs
   if (economy < 2) totalPoints += 30;
   else if (economy < 4) totalPoints += 20;
   else if (economy < 6) totalPoints += 10;
   else if (economy < 8) totalPoints += 0;
-  else if (economy < 10) totalPoints -= 10;
-  else if (economy < 12) totalPoints -= 20;
-  else if (economy >= 12) totalPoints -= 30;
 
-  return { totalPoints, economy };
+  return { totalPoints, economy: Number(economy.toFixed(3)) };
 };
 
 export const calculateFieldingPoints = ({

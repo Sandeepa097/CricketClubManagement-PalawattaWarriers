@@ -13,7 +13,8 @@ describe('calculateBattingPoints', () => {
       fours: 5,
       isOut: false,
     };
-    expect(calculateBattingPoints(battingStats)).toBe(140);
+    expect(calculateBattingPoints(battingStats).totalPoints).toBe(140);
+    expect(calculateBattingPoints(battingStats).strikeRate).toBe(150);
   });
 
   it('should correctly calculate points for a batsman who scored a duck', () => {
@@ -24,7 +25,20 @@ describe('calculateBattingPoints', () => {
       fours: 0,
       isOut: true,
     };
-    expect(calculateBattingPoints(battingStats)).toBe(-20);
+    expect(calculateBattingPoints(battingStats).totalPoints).toBe(-20);
+    expect(calculateBattingPoints(battingStats).strikeRate).toBe(0);
+  });
+
+  it('should correctly calculate points for a batsman who scored a diamond duck', () => {
+    const battingStats = {
+      score: 0,
+      balls: 0,
+      sixes: 0,
+      fours: 0,
+      isOut: true,
+    };
+    expect(calculateBattingPoints(battingStats).totalPoints).toBe(-20);
+    expect(calculateBattingPoints(battingStats).strikeRate).toBe(0);
   });
 
   it('should correctly calculate points for a batsman with strike rate above 200', () => {
@@ -35,7 +49,20 @@ describe('calculateBattingPoints', () => {
       fours: 8,
       isOut: false,
     };
-    expect(calculateBattingPoints(battingStats)).toBe(367);
+    expect(calculateBattingPoints(battingStats).totalPoints).toBe(367);
+    expect(calculateBattingPoints(battingStats).strikeRate).toBe(300);
+  });
+
+  it('should correctly calculate points for a batsman who stayed non striker end all the time', () => {
+    const battingStats = {
+      score: 0,
+      balls: 0,
+      sixes: 0,
+      fours: 0,
+      isOut: false,
+    };
+    expect(calculateBattingPoints(battingStats).totalPoints).toBe(0);
+    expect(calculateBattingPoints(battingStats).strikeRate).toBe(0);
   });
 });
 
@@ -48,7 +75,8 @@ describe('calculateBowlingPoints', () => {
       maidens: 1,
       numberOfDeliveriesPerOver: 6,
     };
-    expect(calculateBowlingPoints(bowlingStats)).toBe(100);
+    expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(100);
+    expect(calculateBowlingPoints(bowlingStats).economy).toBe(4.444);
   });
 
   it('should correctly calculate points for a bowler who bowled maidens', () => {
@@ -59,7 +87,8 @@ describe('calculateBowlingPoints', () => {
       maidens: 2,
       numberOfDeliveriesPerOver: 6,
     };
-    expect(calculateBowlingPoints(bowlingStats)).toBe(50);
+    expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(50);
+    expect(calculateBowlingPoints(bowlingStats).economy).toBe(5);
   });
 
   it('should correctly calculate points for a bowler who bowled less than 2 overs', () => {
@@ -70,7 +99,32 @@ describe('calculateBowlingPoints', () => {
       maidens: 0,
       numberOfDeliveriesPerOver: 6,
     };
-    expect(calculateBowlingPoints(bowlingStats)).toBe(20);
+    expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(20);
+    expect(calculateBowlingPoints(bowlingStats).economy).toBe(7.143);
+  });
+
+  it('should correctly calculate points for a bowler who bowled illegal bowls only', () => {
+    const bowlingStats = {
+      wickets: 0,
+      overs: 0,
+      conceded: 10,
+      maidens: 0,
+      numberOfDeliveriesPerOver: 6,
+    };
+    expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(-20);
+    expect(calculateBowlingPoints(bowlingStats).economy).toBe(10);
+  });
+
+  it('should correctly calculate points for a bowler who did not bowled', () => {
+    const bowlingStats = {
+      wickets: 0,
+      overs: 0,
+      conceded: 0,
+      maidens: 0,
+      numberOfDeliveriesPerOver: 6,
+    };
+    expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(0);
+    expect(calculateBowlingPoints(bowlingStats).economy).toBe(0);
   });
 });
 

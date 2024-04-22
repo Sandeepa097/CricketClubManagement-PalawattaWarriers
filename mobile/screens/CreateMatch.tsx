@@ -58,9 +58,7 @@ const CreateMatch = ({ route, navigation }) => {
     battingStats: Yup.array().of(
       Yup.object().shape({
         values: Yup.object().shape({
-          balls: yupPositiveIntegerSchema('Number of balls').required(
-            'Number of balls is required.'
-          ),
+          balls: yupPositiveIntegerSchema('Number of balls'),
           score: yupPositiveIntegerSchema('Score'),
           fours: yupPositiveIntegerSchema('Number of fours'),
           sixes: yupPositiveIntegerSchema('Number of sixes'),
@@ -78,8 +76,7 @@ const CreateMatch = ({ route, navigation }) => {
             .test('is-decimal', 'Number of overs is invalid.', (val: any) => {
               if (val) return /^(0|[1-9]\d*)(\.[012345])?$/.test(val);
               return true;
-            })
-            .required('Number of overs are required.'),
+            }),
           conceded: yupPositiveIntegerSchema('Number of runs conceded'),
           maidens: yupPositiveIntegerSchema('Number of maidens'),
         }),

@@ -66,11 +66,9 @@ const MatchValidations = [
     .toInt()
     .withMessage('Score must be an unsigned integer.'),
   body('battingStats.*.values.balls')
-    .notEmpty()
-    .withMessage('Number of balls is required.')
-    .isInt({ min: 1 })
+    .isInt({ min: 0 })
     .toInt()
-    .withMessage('Must have faced at least one ball.'),
+    .withMessage('Balls must be an unsigned integer.'),
   body('battingStats.*.values.sixes')
     .isInt({ min: 0 })
     .toInt()
@@ -102,9 +100,7 @@ const MatchValidations = [
     .toInt()
     .withMessage('Number of wickets must be an unsigned integer.'),
   body('bowlingStats.*.values.overs')
-    .notEmpty()
-    .withMessage('Number of overs is required.')
-    .isFloat({ min: 0.1 })
+    .isFloat({ min: 0 })
     .toFloat()
     .withMessage('Number of overs must be an unsigned decimal.'),
   body('bowlingStats.*.values.conceded')

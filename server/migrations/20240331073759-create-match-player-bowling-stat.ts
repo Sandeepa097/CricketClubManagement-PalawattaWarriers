@@ -35,6 +35,7 @@ export = {
       overs: {
         allowNull: false,
         type: Sequelize.DECIMAL(3, 1).UNSIGNED,
+        defaultValue: 0,
       },
       conceded: {
         allowNull: false,

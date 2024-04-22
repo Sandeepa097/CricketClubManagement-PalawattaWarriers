@@ -35,6 +35,7 @@ export = {
       balls: {
         allowNull: false,
         type: Sequelize.INTEGER.UNSIGNED,
+        defaultValue: 0,
       },
       sixes: {
         allowNull: false,
