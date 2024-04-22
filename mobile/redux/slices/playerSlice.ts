@@ -38,7 +38,8 @@ export const createPlayer = createAsyncThunk(
     if (response.ok) {
       return { ...response.data.player };
     }
-    return rejectWithValue('Something went wrong.');
+
+    return rejectWithValue(response.data?.message);
   }
 );
 
@@ -49,7 +50,7 @@ export const updatePlayer = createAsyncThunk(
     if (response.ok) {
       return payload;
     }
-    return rejectWithValue('Something went wrong.');
+    return rejectWithValue(response.data?.message);
   }
 );
 
@@ -60,7 +61,7 @@ export const deletePlayer = createAsyncThunk(
     if (response.ok) {
       return payload;
     }
-    return rejectWithValue('Something went wrong.');
+    return rejectWithValue(response.data?.message);
   }
 );
 

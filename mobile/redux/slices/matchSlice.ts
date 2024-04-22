@@ -280,7 +280,7 @@ export const createMatch = createAsyncThunk(
       dispatch(retrievePPLMatches());
       return;
     }
-    return rejectWithValue('Match creation failed.');
+    return rejectWithValue(response.data?.message);
   }
 );
 
@@ -293,7 +293,7 @@ export const updateMatch = createAsyncThunk(
       dispatch(retrievePPLMatches());
       return;
     }
-    return rejectWithValue('Failed to update match.');
+    return rejectWithValue(response.data?.message);
   }
 );
 
@@ -304,7 +304,7 @@ export const deleteMatch = createAsyncThunk(
     if (response.ok) {
       return payload;
     }
-    return rejectWithValue('Failed to delete match.');
+    return rejectWithValue(response.data?.message);
   }
 );
 

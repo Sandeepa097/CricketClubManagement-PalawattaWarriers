@@ -8,8 +8,9 @@ import {
   removePlayer,
   updatePlayer,
   getPlayerMatchesCount,
+  findPlayer,
 } from '../services/playerService';
-import { uploadFile } from '../services/fileService';
+import { deleteFile, uploadFile } from '../services/fileService';
 
 const create = async (req: Request, res: Response) => {
   const { avatar, name, mainRoll, isCaptain, isWicketKeeper, feesPayingSince } =
@@ -42,6 +43,12 @@ const update = async (req: Request, res: Response) => {
 
   let uploadedAvatarURL: string | null = null;
 
+  const player = await findPlayer(playerId);
+
+  if (player?.dataValues.avatar && player?.dataValues.avatar !== avatar) {
+    await deleteFile(player.dataValues.avatar);
+  }
+
   if (avatar) {
     uploadedAvatarURL = await uploadFile(avatar);
   }
@@ -62,6 +69,10 @@ const update = async (req: Request, res: Response) => {
 
 const remove = async (req: Request, res: Response) => {
   const playerId = Number(req.params.id);
+  const player = await findPlayer(playerId);
+  if (player?.dataValues.avatar) {
+    await deleteFile(player.dataValues.avatar);
+  }
   await removePlayer(playerId);
 
   return res

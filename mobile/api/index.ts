@@ -21,6 +21,16 @@ api.addRequestTransform((req) => {
   req.headers['Authorization'] = 'Bearer ' + accessToken;
 });
 
+api.addResponseTransform((response) => {
+  if (!response.ok) {
+    if (response.data?.errors) {
+      response.data.message = response.data?.errors[0].msg;
+    } else if (!response.data?.message) {
+      response.data.message = 'Something went wrong.';
+    }
+  }
+});
+
 api.axiosInstance.interceptors.request.use(
   (config) => {
     store.dispatch(setLoading(true));

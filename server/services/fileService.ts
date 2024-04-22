@@ -16,8 +16,20 @@ export const uploadFile = async (base64: string) => {
 
     return uploadResponse.url;
   } catch (err) {
-    console.log('err ', err);
     return null;
+  }
+};
+
+export const deleteFile = async (url: string) => {
+  try {
+    const fileName = url.split('/').pop() || '';
+    const publicId = CLOUDINARY_PRESET + '/' + fileName.split('.')[0];
+    const response: { result: string } = await cloudinary.uploader.destroy(
+      publicId
+    );
+    return response.result.toLowerCase() === 'ok';
+  } catch (err) {
+    return false;
   }
 };
 

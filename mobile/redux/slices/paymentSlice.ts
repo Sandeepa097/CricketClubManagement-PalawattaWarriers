@@ -165,7 +165,7 @@ export const createPayments = createAsyncThunk(
       }));
     }
 
-    return rejectWithValue('Payments creation failed.');
+    return rejectWithValue(response.data?.message);
   }
 );
 
@@ -179,7 +179,7 @@ export const deletePayment = createAsyncThunk(
       return payload;
     }
 
-    return rejectWithValue('Payment deletion failed.');
+    return rejectWithValue(response.data?.message);
   }
 );
 
@@ -194,7 +194,7 @@ export const updatePayment = createAsyncThunk(
       return payload;
     }
 
-    return rejectWithValue('Payment update failed.');
+    return rejectWithValue(response.data?.message);
   }
 );
 
@@ -206,7 +206,7 @@ export const createPlan = createAsyncThunk(
       return payload;
     }
 
-    return rejectWithValue('Failed to create payment plan.');
+    return rejectWithValue(response.data?.message);
   }
 );
 
@@ -228,7 +228,7 @@ export const updatePlan = createAsyncThunk(
       return payload;
     }
 
-    return rejectWithValue('Failed to update payment plan.');
+    return rejectWithValue(response.data?.message);
   }
 );
 
@@ -240,7 +240,7 @@ export const deletePlan = createAsyncThunk(
       return;
     }
 
-    return rejectWithValue('Failed to delete payment plan.');
+    return rejectWithValue(response.data?.message);
   }
 );
 
