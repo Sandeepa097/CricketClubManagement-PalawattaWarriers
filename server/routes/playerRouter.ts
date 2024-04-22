@@ -62,7 +62,7 @@ playerRouter.post(
         throw new Error(
           `Avatar is too large. Maximum size is ${
             AllowedFileByteSizes.PLAYER_AVATAR / 1000
-          }KB.`
+          }MB.`
         );
       }
 
@@ -105,7 +105,7 @@ playerRouter.put(
           throw new Error(
             `Avatar is too large. Maximum size is ${
               AllowedFileByteSizes.PLAYER_AVATAR / 1000
-            }KB.`
+            }MB.`
           );
         }
       }
