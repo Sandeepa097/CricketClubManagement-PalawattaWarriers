@@ -30,7 +30,7 @@ const Welcome = ({ navigation }) => {
         length="short"
         style="outlined"
         color={Colors.DEEP_TEAL}
-        text="Admin Portal"
+        text="Admin Port"
         onPress={() => navigation.navigate(NavigationRoutes.LOGIN)}
       />
     </View>
