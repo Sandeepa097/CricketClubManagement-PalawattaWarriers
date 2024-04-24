@@ -1,5 +1,6 @@
 import express, { Application, NextFunction, Request, Response } from 'express';
 const cors = require('cors');
+import rateLimit from 'express-rate-limit';
 import * as bodyParser from 'body-parser';
 import { StatusCodes } from 'http-status-codes';
 import {
@@ -12,6 +13,13 @@ import router from './routes';
 import sequelizeConnection from './config/sequelizeConnection';
 
 const cloudinary = require('cloudinary').v2;
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  message: 'Too many requests',
+  statusCode: StatusCodes.TOO_MANY_REQUESTS,
+});
 
 const app: Application = express();
 
@@ -33,6 +41,7 @@ cloudinary.config({
 
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
+app.use(limiter);
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log('Method: ', req.method);
   console.log('Path: ', req.path);
