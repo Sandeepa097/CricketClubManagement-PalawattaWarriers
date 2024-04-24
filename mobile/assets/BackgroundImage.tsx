@@ -2,15 +2,15 @@ import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-const width: number = Dimensions.get('window').width;
-const height: number = Dimensions.get('window').height;
+const width: number = Dimensions.get('screen').width;
+const height: number = Dimensions.get('screen').height;
 
 const BackgroundImage = () => (
   <View style={styles.container}>
     <Svg
       width="100%"
       height="100%"
-      viewBox={`0 0 ${width} ${height}`}
+      viewBox={`0 0 360 800`}
       preserveAspectRatio="xMidYMid meet"
       fill="none">
       <Path
