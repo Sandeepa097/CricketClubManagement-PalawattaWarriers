@@ -10,7 +10,7 @@ const BackgroundImage = () => (
     <Svg
       width="100%"
       height="100%"
-      viewBox="0 0 360 800"
+      viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="xMidYMid meet"
       fill="none">
       <Path
