@@ -22,6 +22,7 @@ api.addRequestTransform((req) => {
 });
 
 api.addResponseTransform((response) => {
+  store.dispatch(setLoading(false));
   if (!response.ok) {
     if (response.data?.errors) {
       response.data.message = response.data?.errors[0].msg;
@@ -53,6 +54,7 @@ api.axiosInstance.interceptors.response.use(
         await refreshToken();
         return api.any(error.config);
       } catch (err) {
+        store.dispatch(setLoading(false));
         store.dispatch(logout());
       }
     }
