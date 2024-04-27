@@ -103,6 +103,7 @@ const CreatePaymentPlan = ({ navigation, route }) => {
                 onChangeText={(text) => setFieldValue('fee', text)}
                 value={values.fee}
                 onBlur={(event) => setFieldTouched('fee', true, true)}
+                keyboardType="number-pad"
                 error={touched.fee && (errors.fee as string)}
               />
               <MonthYearPicker

@@ -99,7 +99,12 @@ const CreatePayments = ({ route, navigation }) => {
                 onBlur={() => setFieldTouched('details', true, true)}
                 onChangeValues={(details) => setFieldValue('details', details)}
                 itemProperties={[
-                  { type: 'text', name: 'amount', placeholder: 'Paid Amount' },
+                  {
+                    type: 'text',
+                    name: 'amount',
+                    placeholder: 'Paid Amount',
+                    keyboardType: 'number-pad',
+                  },
                 ]}
               />
               <View style={{ marginTop: 40 }}>

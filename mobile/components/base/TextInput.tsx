@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import ReactNative, { View, Dimensions, StyleSheet, Text } from 'react-native';
+import ReactNative, {
+  View,
+  Dimensions,
+  StyleSheet,
+  Text,
+  KeyboardType,
+} from 'react-native';
 import { Colors } from '../../constants/Colors';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -15,6 +21,7 @@ interface TextInputProps {
   value: string | null;
   maxLength?: number;
   error?: string;
+  keyboardType?: KeyboardType;
   onChangeText: (text: string) => void;
   onBlur?: (event: any) => void;
 }

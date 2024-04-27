@@ -234,6 +234,7 @@ const CreateMatch = ({ route, navigation }) => {
                 onBlur={(event) =>
                   setFieldTouched('numberOfDeliveriesPerOver', true, true)
                 }
+                keyboardType="number-pad"
                 error={
                   touched.numberOfDeliveriesPerOver &&
                   (errors.numberOfDeliveriesPerOver as string)
@@ -293,9 +294,24 @@ const CreateMatch = ({ route, navigation }) => {
                     placeholder: 'Score',
                     keyboardType: 'number-pad',
                   },
-                  { type: 'text', name: 'balls', placeholder: 'Balls' },
-                  { type: 'text', name: 'fours', placeholder: '4s' },
-                  { type: 'text', name: 'sixes', placeholder: '6s' },
+                  {
+                    type: 'text',
+                    name: 'balls',
+                    placeholder: 'Balls',
+                    keyboardType: 'number-pad',
+                  },
+                  {
+                    type: 'text',
+                    name: 'fours',
+                    placeholder: '4s',
+                    keyboardType: 'number-pad',
+                  },
+                  {
+                    type: 'text',
+                    name: 'sixes',
+                    placeholder: '6s',
+                    keyboardType: 'number-pad',
+                  },
                   {
                     type: 'switch',
                     name: 'isOut',
@@ -320,10 +336,30 @@ const CreateMatch = ({ route, navigation }) => {
                   setFieldValue('bowlingStats', bowlingStats)
                 }
                 itemProperties={[
-                  { type: 'text', name: 'wickets', placeholder: 'Wickets' },
-                  { type: 'text', name: 'overs', placeholder: 'Overs' },
-                  { type: 'text', name: 'conceded', placeholder: 'Conceded' },
-                  { type: 'text', name: 'maidens', placeholder: 'Maidens' },
+                  {
+                    type: 'text',
+                    name: 'wickets',
+                    placeholder: 'Wickets',
+                    keyboardType: 'number-pad',
+                  },
+                  {
+                    type: 'text',
+                    name: 'overs',
+                    placeholder: 'Overs',
+                    keyboardType: 'decimal-pad',
+                  },
+                  {
+                    type: 'text',
+                    name: 'conceded',
+                    placeholder: 'Conceded',
+                    keyboardType: 'number-pad',
+                  },
+                  {
+                    type: 'text',
+                    name: 'maidens',
+                    placeholder: 'Maidens',
+                    keyboardType: 'number-pad',
+                  },
                 ]}
               />
               <SectionTitle title="Fielding Details" />
@@ -343,17 +379,29 @@ const CreateMatch = ({ route, navigation }) => {
                   setFieldValue('fieldingStats', fieldingStats)
                 }
                 itemProperties={[
-                  { type: 'text', name: 'catches', placeholder: 'Catches' },
-                  { type: 'text', name: 'stumps', placeholder: 'Stumps' },
+                  {
+                    type: 'text',
+                    name: 'catches',
+                    placeholder: 'Catches',
+                    keyboardType: 'number-pad',
+                  },
+                  {
+                    type: 'text',
+                    name: 'stumps',
+                    placeholder: 'Stumps',
+                    keyboardType: 'number-pad',
+                  },
                   {
                     type: 'text',
                     name: 'directHits',
                     placeholder: 'Direct Hits',
+                    keyboardType: 'number-pad',
                   },
                   {
                     type: 'text',
                     name: 'indirectHits',
                     placeholder: 'Indirect Hits',
+                    keyboardType: 'number-pad',
                   },
                 ]}
               />
