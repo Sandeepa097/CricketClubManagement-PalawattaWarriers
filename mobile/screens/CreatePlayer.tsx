@@ -60,7 +60,9 @@ const CreatePlayer = ({ navigation, route }) => {
 
   const playerValidationSchema = Yup.object().shape({
     avatar: Yup.string().nullable(),
-    name: Yup.string().required('Name is required.'),
+    name: Yup.string()
+      .max(255, 'Name is too long.')
+      .required('Name is required.'),
     rolls: Yup.object({
       mainRoll: Yup.string()
         .oneOf(

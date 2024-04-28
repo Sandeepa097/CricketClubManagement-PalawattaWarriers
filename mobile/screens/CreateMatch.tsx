@@ -31,13 +31,17 @@ const CreateMatch = ({ route, navigation }) => {
 
   const matchValidationSchema = Yup.object().shape({
     isPPL: Yup.boolean(),
-    title: Yup.string().required('Title is required.'),
+    title: Yup.string()
+      .max(255, 'Title is too long.')
+      .required('Title is required.'),
     oppositeTeamId: Yup.number().when('isPPL', (isPPL, schema) => {
       if (!isPPL[0]) return schema.required('Opposite Team is required.');
       return schema.notRequired();
     }),
     date: Yup.string().required('Date is required.'),
-    location: Yup.string().required('Location is required.'),
+    location: Yup.string()
+      .max(255, 'Location is too long.')
+      .required('Location is required.'),
     result: Yup.string().when('isPPL', (isPPL, schema) => {
       if (!isPPL[0]) return schema.required('Result is required.');
       return schema.notRequired();

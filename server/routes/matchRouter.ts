@@ -9,7 +9,11 @@ import { findMatch } from '../services/matchService';
 
 const MatchValidations = [
   body('isPPL').toBoolean().isBoolean(),
-  body('title').notEmpty().withMessage('Match title is required.'),
+  body('title')
+    .notEmpty()
+    .withMessage('Match title is required.')
+    .isLength({ max: 255 })
+    .withMessage('Title is too long.'),
   body('oppositeTeamId')
     .if(({ req }) => {
       return !req.body.isPPL;
@@ -22,7 +26,11 @@ const MatchValidations = [
       return true;
     }),
   body('date').notEmpty().withMessage('Date is required.'),
-  body('location').notEmpty().withMessage('Location is required.'),
+  body('location')
+    .notEmpty()
+    .withMessage('Location is required.')
+    .isLength({ max: 255 })
+    .withMessage('Location is too long.'),
   body('result')
     .if(({ req }) => {
       return !req.body.isPPL;

@@ -11,7 +11,11 @@ import { findPlayer } from '../services/playerService';
 import fileType = require('file-type');
 
 const playerValidations = [
-  body('name').notEmpty().withMessage('Name is required.'),
+  body('name')
+    .notEmpty()
+    .withMessage('Name is required.')
+    .isLength({ max: 255 })
+    .withMessage('Name is too long.'),
   body('mainRoll')
     .notEmpty()
     .withMessage('Main roll is required.')
