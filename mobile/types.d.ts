@@ -40,6 +40,7 @@ export interface BestPlayer {
 
 export interface SingleMatch {
   id: string | number;
+  title: string;
   date: string;
   location: string;
 }

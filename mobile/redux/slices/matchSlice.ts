@@ -42,6 +42,7 @@ interface NewMatch {
   isPPL: boolean;
   oppositeTeamId: string | number | null | undefined;
   date: string;
+  title: string;
   location: string;
   result: 'won' | 'lost' | 'draw' | null | undefined;
   numberOfDeliveriesPerOver: number;

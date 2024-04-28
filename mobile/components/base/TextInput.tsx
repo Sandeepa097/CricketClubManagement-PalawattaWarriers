@@ -54,6 +54,7 @@ const TextInput = (props: TextInputProps) => {
           onBlur={props.onBlur}
           value={props.value}
           placeholder={props.placeholder}
+          keyboardType={props.keyboardType}
         />
         {props.type === 'password' && (
           <ReactNative.Pressable

@@ -7,6 +7,7 @@ import SwipeAction from './SwipeAction';
 const width: number = Dimensions.get('window').width;
 
 interface OppositeMatchItemProps {
+  title: string;
   date: string;
   location: string;
   result?: 'won' | 'lost' | 'draw';
@@ -56,6 +57,7 @@ const PressableOppositeMatchItem = (props: OppositeMatchItemProps) => {
       onPress={() => props.onPress()}>
       <View style={styles.container}>
         <View>
+          <Text style={styles.title}>{props.title}</Text>
           <Text style={styles.date}>{props.date}</Text>
           <Text style={styles.location}>{props.location}</Text>
         </View>
@@ -95,13 +97,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  date: {
+  title: {
     color: Colors.DEEP_TEAL,
     fontSize: 20,
     fontFamily: 'Anybody-Regular',
     fontWeight: 'bold',
   },
   location: {
+    color: Colors.BLACK,
+    fontSize: 15,
+    fontFamily: 'Anybody-Regular',
+    opacity: 0.5,
+    marginTop: 0,
+  },
+  date: {
     color: Colors.BLACK,
     fontSize: 15,
     fontFamily: 'Anybody-Regular',

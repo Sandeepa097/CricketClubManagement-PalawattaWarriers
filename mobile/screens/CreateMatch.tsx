@@ -31,6 +31,7 @@ const CreateMatch = ({ route, navigation }) => {
 
   const matchValidationSchema = Yup.object().shape({
     isPPL: Yup.boolean(),
+    title: Yup.string().required('Title is required.'),
     oppositeTeamId: Yup.number().when('isPPL', (isPPL, schema) => {
       if (!isPPL[0]) return schema.required('Opposite Team is required.');
       return schema.notRequired();
@@ -101,6 +102,7 @@ const CreateMatch = ({ route, navigation }) => {
         <Formik
           initialValues={{
             isPPL: editMatch ? !editMatch.oppositeTeamId : false,
+            title: '',
             oppositeTeamId: editMatch?.oppositeTeamId || null,
             date: editMatch?.date || '',
             location: editMatch?.location || '',
@@ -187,6 +189,14 @@ const CreateMatch = ({ route, navigation }) => {
                   }
                   setFieldValue('isPPL', !values.isPPL);
                 }}
+              />
+              <TextInput
+                value={values.title}
+                onChangeText={(value) => setFieldValue('title', value)}
+                length="long"
+                placeholder="Title"
+                onBlur={(event) => setFieldTouched('title', true, true)}
+                error={touched.location && (errors.title as string)}
               />
               {!values.isPPL && (
                 <OppositeTeamPicker
