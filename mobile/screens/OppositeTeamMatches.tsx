@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import { setEditing } from '../redux/slices/statusSlice';
 import { deleteMatch } from '../redux/slices/matchSlice';
+import { UserTypes } from '../constants/UserTypes';
 
 const OppositeTeamMatches = ({ route, navigation }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -60,7 +61,7 @@ const OppositeTeamMatches = ({ route, navigation }) => {
               onPress={() =>
                 navigation.navigate(NavigationRoutes.SCORECARD, item)
               }
-              {...(userType === 'admin'
+              {...(userType === UserTypes.ADMIN
                 ? {
                     onRequestDelete: () => {
                       setDeleteRequestedMatch({

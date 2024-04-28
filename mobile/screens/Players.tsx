@@ -55,14 +55,20 @@ const Players = ({ navigation }) => {
             onPress={() =>
               navigation.navigate(NavigationRoutes.OVERVIEW_PLAYER, item)
             }
-            onRequestEdit={() => {
-              dispatch(setEditing(true));
-              navigation.navigate(NavigationRoutes.CREATE_PLAYER, { ...item });
-            }}
-            onRequestDelete={() => {
-              setDeleteRequestedId(item.id);
-              setDeleteConfirmationVisible(true);
-            }}
+            {...(userType === UserTypes.ADMIN
+              ? {
+                  onRequestEdit: () => {
+                    dispatch(setEditing(true));
+                    navigation.navigate(NavigationRoutes.CREATE_PLAYER, {
+                      ...item,
+                    });
+                  },
+                  onRequestDelete: () => {
+                    setDeleteRequestedId(item.id);
+                    setDeleteConfirmationVisible(true);
+                  },
+                }
+              : {})}
           />
         )}
         ListEmptyComponent={
