@@ -14,7 +14,7 @@ export const uploadFile = async (base64: string) => {
       }
     );
 
-    return uploadResponse.url;
+    return uploadResponse.secure_url || uploadResponse.url;
   } catch (err) {
     return null;
   }
