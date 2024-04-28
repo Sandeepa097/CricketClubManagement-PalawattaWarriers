@@ -9,6 +9,10 @@ export = {
         primaryKey: true,
         type: Sequelize.INTEGER.UNSIGNED,
       },
+      title: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
       oppositeTeamId: {
         allowNull: true,
         defaultValue: null,

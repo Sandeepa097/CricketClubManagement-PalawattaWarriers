@@ -11,6 +11,7 @@ import {
 import { findPlayers } from './playerService';
 
 interface CreateMatchAttributes {
+  title: string;
   oppositeTeamId: number | null;
   date: string;
   location: string;

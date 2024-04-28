@@ -6,6 +6,7 @@ import MatchPlayerBowlingStat from './MatchPlayerBowlingStat';
 import MatchPlayerFieldingStat from './MatchPlayerFieldingStat';
 
 interface MatchInstance extends Model {
+  title: string;
   oppositeTeamId?: number | null;
   date: string;
   location: string;
@@ -14,6 +15,7 @@ interface MatchInstance extends Model {
 }
 
 class Match extends Model implements MatchInstance {
+  public title!: string;
   public oppositeTeamId?: number | null | undefined;
   public date!: string;
   public location!: string;
@@ -44,6 +46,7 @@ class Match extends Model implements MatchInstance {
 
 Match.init(
   {
+    title: DataTypes.STRING,
     oppositeTeamId: DataTypes.INTEGER.UNSIGNED,
     date: DataTypes.STRING,
     location: DataTypes.STRING,

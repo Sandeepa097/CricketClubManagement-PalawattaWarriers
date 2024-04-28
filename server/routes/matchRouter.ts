@@ -9,6 +9,7 @@ import { findMatch } from '../services/matchService';
 
 const MatchValidations = [
   body('isPPL').toBoolean().isBoolean(),
+  body('title').notEmpty().withMessage('Match title is required.'),
   body('oppositeTeamId')
     .if(({ req }) => {
       return !req.body.isPPL;

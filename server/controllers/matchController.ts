@@ -51,6 +51,7 @@ interface FieldingStatsInterface {
 
 const create = async (req: Request, res: Response) => {
   const {
+    title,
     oppositeTeamId,
     date,
     location,
@@ -63,6 +64,7 @@ const create = async (req: Request, res: Response) => {
   } = req.body;
 
   const createdMatch = await createMatch({
+    title,
     oppositeTeamId,
     date,
     location,
@@ -121,6 +123,7 @@ const create = async (req: Request, res: Response) => {
 const update = async (req: Request, res: Response) => {
   const matchId = Number(req.params.id);
   const {
+    title,
     oppositeTeamId,
     date,
     location,
@@ -133,6 +136,7 @@ const update = async (req: Request, res: Response) => {
   } = req.body;
 
   await updateMatch(matchId, {
+    title,
     oppositeTeamId,
     date,
     location,
