@@ -9,6 +9,7 @@
     "dev": "nodemon dist/index.js",
     "ts:check": "tsc",
     "user:create": "node ./dist/commands/createUser.js",
+    "user:password:reset": "node ./dist/commands/resetUserPassword.js",
     "migrate": "npx sequelize-cli db:migrate",
     "migrate:undo": "npx sequelize-cli db:migrate:undo",
     "migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",

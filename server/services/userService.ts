@@ -17,6 +17,12 @@ interface CreateUserAttributes {
   passwordHash: string;
 }
 
+interface UpdateUserAttributes {
+  username?: string;
+  userType?: string;
+  passwordHash?: string;
+}
+
 export const createUser = async (user: CreateUserAttributes) => {
   return await User.create({ ...user });
 };
@@ -28,5 +34,16 @@ export const findUser = async (
     where: (payload as FindUserByIdAttributes).id
       ? { id: (payload as FindUserByIdAttributes).id }
       : { username: (payload as FindUserByUsernameAttributes).username },
+  });
+};
+
+export const updateUser = async (
+  param: FindUserByIdAttributes | FindUserByUsernameAttributes,
+  user: UpdateUserAttributes
+) => {
+  return await User.update(user, {
+    where: (param as FindUserByIdAttributes).id
+      ? { id: (param as FindUserByIdAttributes).id }
+      : { username: (param as FindUserByUsernameAttributes).username },
   });
 };
