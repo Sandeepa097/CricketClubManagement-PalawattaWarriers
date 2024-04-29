@@ -10,7 +10,7 @@ const paymentRouter = Router();
 
 paymentRouter.post(
   '/',
-  validatePermissions(UserTypes.ADMIN),
+  validatePermissions([UserTypes.ADMIN, UserTypes.TREASURER]),
   validateRequest([
     body('details').isArray().withMessage('Payment details must be an array.'),
     body('details.*.id')
@@ -82,7 +82,7 @@ paymentRouter.get(
 
 paymentRouter.post(
   '/plans',
-  validatePermissions(UserTypes.ADMIN),
+  validatePermissions([UserTypes.ADMIN, UserTypes.TREASURER]),
   validateRequest([
     body('fee')
       .notEmpty()
@@ -108,7 +108,7 @@ paymentRouter.post(
 
 paymentRouter.put(
   '/plans/:id',
-  validatePermissions(UserTypes.ADMIN),
+  validatePermissions([UserTypes.ADMIN, UserTypes.TREASURER]),
   validateRequest([
     param('id')
       .exists()
@@ -142,7 +142,7 @@ paymentRouter.put(
 
 paymentRouter.delete(
   '/plans/:id',
-  validatePermissions(UserTypes.ADMIN),
+  validatePermissions([UserTypes.ADMIN, UserTypes.TREASURER]),
   validateRequest([
     param('id')
       .exists()
@@ -175,7 +175,7 @@ paymentRouter.get(
 
 paymentRouter.put(
   '/:id',
-  validatePermissions(UserTypes.ADMIN),
+  validatePermissions([UserTypes.ADMIN, UserTypes.TREASURER]),
   validateRequest([
     param('id')
       .exists()
@@ -205,7 +205,7 @@ paymentRouter.put(
 
 paymentRouter.delete(
   '/:id',
-  validatePermissions(UserTypes.ADMIN),
+  validatePermissions([UserTypes.ADMIN, UserTypes.TREASURER]),
   validateRequest([
     param('id')
       .exists()

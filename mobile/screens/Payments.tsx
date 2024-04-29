@@ -104,7 +104,7 @@ const Payments = ({ navigation }) => {
         <SectionTitle title="Ongoing Plan" marginTop={10} />
         {paymentPlans.onGoing &&
           paymentPlans.onGoing !== null &&
-          (userType === UserTypes.ADMIN ? (
+          (userType === UserTypes.ADMIN || userType === UserTypes.TREASURER ? (
             <SwipeAction
               onRequestEdit={() => {
                 dispatch(setEditing(true));
@@ -122,7 +122,8 @@ const Payments = ({ navigation }) => {
         {paymentPlans.future && paymentPlans.future !== null ? (
           <>
             <SectionTitle title="Future Plan" />
-            {userType === UserTypes.ADMIN ? (
+            {userType === UserTypes.ADMIN ||
+            userType === UserTypes.TREASURER ? (
               <SwipeAction
                 onRequestEdit={() => {
                   dispatch(setEditing(true));
@@ -139,7 +140,8 @@ const Payments = ({ navigation }) => {
             )}
           </>
         ) : (
-          userType === UserTypes.ADMIN && (
+          (userType === UserTypes.ADMIN ||
+            userType === UserTypes.TREASURER) && (
             <>
               <SectionTitle title="Future Plan" />
               <Button
@@ -184,7 +186,8 @@ const Payments = ({ navigation }) => {
             payment={item.amount}
             timestamp={new Date(item.createdAt)}
             pending={false}
-            {...(userType === UserTypes.ADMIN
+            {...(userType === UserTypes.ADMIN ||
+            userType === UserTypes.TREASURER
               ? {
                   onRequestDelete: () => {
                     setDeleteRequestedPaymentId(item.id);
@@ -250,7 +253,7 @@ const Payments = ({ navigation }) => {
           },
         }}
       />
-      {userType === UserTypes.ADMIN && (
+      {(userType === UserTypes.ADMIN || userType === UserTypes.TREASURER) && (
         <Draggable>
           <Button
             sticky={true}
