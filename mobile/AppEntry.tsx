@@ -7,8 +7,8 @@ import { registerRootComponent } from 'expo';
 import { injectStore } from './api';
 
 function AppEntry() {
-  injectStore(store);
   SplashScreen.preventAutoHideAsync();
+  injectStore(store);
   return (
     <Provider store={store}>
       <App />

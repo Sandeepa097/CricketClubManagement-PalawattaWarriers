@@ -13,6 +13,8 @@ import { restoreAuth } from './redux/slices/authSlice';
 import LoadingIndicator from './components/LoadingIndicator';
 import OfflineNotice from './components/OfflineNotice';
 
+SplashScreen.preventAutoHideAsync();
+
 const App = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [appLoading, setAppLoading] = useState(true);
