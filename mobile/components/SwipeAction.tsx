@@ -5,7 +5,7 @@ import { RectButton, Swipeable } from 'react-native-gesture-handler';
 import { Colors } from '../constants/Colors';
 
 interface SwipeActionProps {
-  onRequestEdit: () => void;
+  onRequestEdit?: () => void;
   onRequestDelete?: () => void;
   children: React.ReactNode;
 }
@@ -56,8 +56,10 @@ const SwipeAction = (props: SwipeActionProps) => {
           ? (progress, dragX) => renderActions(progress, dragX, 'left')
           : undefined
       }
-      renderRightActions={(progress, dragX) =>
-        renderActions(progress, dragX, 'right')
+      renderRightActions={
+        props.onRequestEdit !== undefined
+          ? (progress, dragX) => renderActions(progress, dragX, 'right')
+          : undefined
       }
       onSwipeableOpen={onSwipe}>
       {props.children}
