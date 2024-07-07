@@ -44,7 +44,7 @@ const OppositeTeamMatches = ({ route, navigation }) => {
       ) : (
         <></>
       )}
-      <View style={{ marginTop: 15 }}>
+      <View style={{ flex: 1 }}>
         <FlatList
           data={
             selectedTabItem === 'all'
