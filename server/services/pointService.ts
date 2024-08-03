@@ -49,30 +49,35 @@ export const calculateBattingPoints = ({
   // 1 point per four off one ball
   totalPoints += fours || 0;
 
-  // Minus 10 points if dismissed for duck
-  if (isOut && !score) totalPoints -= 10;
+  // Minus 2 points if dismissed for duck
+  if (isOut && !score) totalPoints -= 2;
 
   // Points for strike rate
   const strikeRate: number = ((score || 0) / (balls || 1)) * 100;
-  if (strikeRate < 50 && (isOut || balls)) totalPoints -= 10;
+  if (strikeRate < 50 && (isOut || balls)) totalPoints -= 6;
 
-  // Points for strike rate if scored more than 10 runs
   if ((score || 0) < 10)
     return { totalPoints, strikeRate: Number(strikeRate.toFixed(3)) };
 
-  if (strikeRate >= 100 && strikeRate < 125) totalPoints += 10;
-  else if (strikeRate >= 125 && strikeRate < 150) totalPoints += 20;
-  else if (strikeRate >= 150 && strikeRate < 175) totalPoints += 30;
-  else if (strikeRate >= 175 && strikeRate < 200) totalPoints += 40;
-  else if (strikeRate >= 200) totalPoints += 50;
+  // Points for strike rate if scored more than 10 runs
+  if (strikeRate >= 50 && strikeRate < 75) totalPoints -= 4;
+  else if (strikeRate >= 75 && strikeRate < 100) totalPoints -= 2;
+  else if (strikeRate >= 100 && strikeRate < 125) totalPoints += 1;
+  else if (strikeRate >= 125 && strikeRate < 150) totalPoints += 3;
+  else if (strikeRate >= 150 && strikeRate < 175) totalPoints += 5;
+  else if (strikeRate >= 175 && strikeRate < 200) totalPoints += 7;
+  else if (strikeRate >= 200) totalPoints += 9;
 
   // Points for every 10 runs
-  if ((score || 0) >= 10) totalPoints += 10;
-  if ((score || 0) >= 20) totalPoints += 20;
-  if ((score || 0) >= 30) totalPoints += 30;
-  if ((score || 0) >= 40) totalPoints += 40;
-  if ((score || 0) >= 50) totalPoints += 50;
-  if ((score || 0) > 50) totalPoints += (score || 0) * 2;
+  if ((score || 0) >= 50) totalPoints += 8;
+  else if ((score || 0) >= 40) totalPoints += 6;
+  else if ((score || 0) >= 30) totalPoints += 4;
+  else if ((score || 0) >= 20) totalPoints += 2;
+  else if ((score || 0) >= 10) totalPoints += 1;
+
+  // Half century or century bonus
+  if ((score || 0) >= 50 && (score || 0) < 100) totalPoints += 8;
+  else if ((score || 0) >= 100) totalPoints += 20;
 
   return { totalPoints, strikeRate: Number(strikeRate.toFixed(3)) };
 };
@@ -86,15 +91,17 @@ export const calculateBowlingPoints = ({
 }: BowlingStatsInterface) => {
   let totalPoints: number = 0;
 
-  // 40 points if maidens bowled
-  if ((maidens || 0) > 0) totalPoints += 40;
+  // 15 points if maidens bowled
+  if ((maidens || 0) > 0) totalPoints += (maidens || 0) * 15;
 
-  // Points for every wicket
+  // 20 points if a wicket taken
   if ((wickets || 0) >= 1) totalPoints += 20;
-  if ((wickets || 0) >= 2) totalPoints += 10;
-  if ((wickets || 0) >= 3) totalPoints += 20;
-  if ((wickets || 0) >= 4) totalPoints += 40;
-  if ((wickets || 0) >= 5) totalPoints += 80;
+
+  // Points for wickets
+  if ((wickets || 0) >= 5) totalPoints += 12;
+  else if ((wickets || 0) >= 4) totalPoints += 8;
+  else if ((wickets || 0) >= 3) totalPoints += 5;
+  else if ((wickets || 0) >= 2) totalPoints += 3;
 
   // Calculate total number of overs bowled if six deliveries in an over
   const totalNumberOfBalls =
@@ -103,19 +110,19 @@ export const calculateBowlingPoints = ({
   const oversIfSixDeliveriesPerOver =
     Math.floor(totalNumberOfBalls / 6) + (totalNumberOfBalls % 6) / 10;
 
-  // Points reducing for higher economy
+  // Calculate economy
   const economy = (conceded || 0) / (oversIfSixDeliveriesPerOver || 1);
-  if (economy < 10 && economy >= 8) totalPoints -= 10;
-  else if (economy < 12 && economy >= 10) totalPoints -= 20;
-  else if (economy >= 12) totalPoints -= 30;
-  if (oversIfSixDeliveriesPerOver < 2)
+  if ((overs || 0) < 1)
     return { totalPoints, economy: Number(economy.toFixed(3)) };
 
-  // Points for economy if bowled at least 2 overs
-  if (economy < 2) totalPoints += 30;
-  else if (economy < 4) totalPoints += 20;
-  else if (economy < 6) totalPoints += 10;
-  else if (economy < 8) totalPoints += 0;
+  // Points for economy if bowled at least 1 over
+  if (economy < 2) totalPoints += 10;
+  else if (economy < 4) totalPoints += 7;
+  else if (economy < 6) totalPoints += 5;
+  else if (economy < 8) totalPoints += 2;
+  else if (economy < 10) totalPoints -= 1;
+  else if (economy < 12) totalPoints -= 3;
+  else if (economy >= 12) totalPoints -= 5;
 
   return { totalPoints, economy: Number(economy.toFixed(3)) };
 };
@@ -126,14 +133,110 @@ export const calculateFieldingPoints = ({
   directHits,
   indirectHits,
 }: FieldingStatsInterface) => {
-  let totalPoints: number = 50; // Always getting 50 points if an official player of the match
+  let totalPoints: number = 0;
 
-  totalPoints += 10 * (catches || 0);
-  totalPoints += 20 * (stumps || 0);
-  totalPoints += 20 * (directHits || 0);
-  totalPoints += 10 * (indirectHits || 0);
+  // 8 points for each catch taken
+  totalPoints += (catches || 0) * 8;
+
+  // 3 catch bonus
+  if ((catches || 0) >= 3) totalPoints += 4;
+
+  // 12 points for each stump and direct run out taken
+  totalPoints += (stumps || 0) * 12;
+  totalPoints += (directHits || 0) * 12;
+
+  // 6 points for each indirect run out taken
+  totalPoints += (indirectHits || 0) * 6;
 
   return totalPoints;
+};
+
+export const recalculateBattingPoints = async () => {
+  try {
+    const records = await MatchPlayerBattingStat.findAll();
+
+    for (const record of records) {
+      const { balls, score, sixes, fours, isOut } = record;
+
+      const newResults = calculateBattingPoints({
+        score,
+        balls,
+        sixes,
+        fours,
+        isOut,
+      });
+
+      await record.update({
+        points: newResults.totalPoints,
+        strikeRate: newResults.strikeRate,
+      });
+
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
+};
+
+export const recalculateBowlingPoints = async () => {
+  try {
+    const records: any = await MatchPlayerBowlingStat.findAll({
+      include: [
+        {
+          model: Match,
+          as: 'match',
+          attributes: ['id', 'numberOfDeliveriesPerOver'],
+        },
+      ],
+    });
+
+    for (const record of records) {
+      const { wickets, overs, conceded, maidens } = record;
+      const numberOfDeliveriesPerOver = record.match.numberOfDeliveriesPerOver;
+
+      const newResults = calculateBowlingPoints({
+        wickets,
+        overs,
+        conceded,
+        maidens,
+        numberOfDeliveriesPerOver,
+      });
+
+      await record.update({
+        points: newResults.totalPoints,
+        economy: newResults.economy,
+      });
+
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
+};
+
+export const recalculateFieldingPoints = async () => {
+  try {
+    const records = await MatchPlayerFieldingStat.findAll();
+
+    for (const record of records) {
+      const { catches, stumps, directHits, indirectHits } = record;
+
+      const newPoints = calculateFieldingPoints({
+        catches,
+        stumps,
+        directHits,
+        indirectHits,
+      });
+
+      await record.update({
+        points: newPoints,
+      });
+
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
 };
 
 export const getBattingRankings = async (matchType: 'outdoor' | 'ppl') => {
