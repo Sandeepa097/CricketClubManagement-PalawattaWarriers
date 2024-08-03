@@ -106,7 +106,7 @@ const CreateMatch = ({ route, navigation }) => {
         <Formik
           initialValues={{
             isPPL: editMatch ? !editMatch.oppositeTeamId : false,
-            title: '',
+            title: editMatch ? editMatch?.title : '',
             oppositeTeamId: editMatch?.oppositeTeamId || null,
             date: editMatch?.date || '',
             location: editMatch?.location || '',
