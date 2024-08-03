@@ -34,10 +34,12 @@ api.addResponseTransform((response) => {
 
 api.axiosInstance.interceptors.request.use(
   (config) => {
+    console.log('config', config);
     store.dispatch(setLoading(true));
     return config;
   },
   (error) => {
+    console.log('req error', error);
     store.dispatch(setLoading(false));
     return Promise.reject(error);
   }
@@ -49,6 +51,7 @@ api.axiosInstance.interceptors.response.use(
     return response;
   },
   async (error) => {
+    console.log('res error', error);
     if (error.response.status === StatusCodes.UNAUTHORIZED) {
       try {
         await refreshToken();

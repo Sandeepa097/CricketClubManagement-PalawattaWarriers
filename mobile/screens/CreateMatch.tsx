@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, ScrollView, ToastAndroid } from 'react-native';
 import SectionTitle from '../components/base/SectionTitle';
 import TextInput from '../components/base/TextInput';
@@ -17,12 +17,23 @@ import { AppDispatch, RootState } from '../redux/store';
 import { createMatch, updateMatch } from '../redux/slices/matchSlice';
 import { setEditing } from '../redux/slices/statusSlice';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
+import { useIsFocused } from '@react-navigation/native';
+import { retrieveTeams } from '../redux/slices/teamSlice';
+import { retrievePlayers } from '../redux/slices/playerSlice';
 
 const CreateMatch = ({ route, navigation }) => {
+  const focused = useIsFocused();
   const dispatch = useDispatch<AppDispatch>();
   const emptyPlayersMessage = 'No players found in the team';
   const players = useSelector((state: RootState) => state.player.players);
   const editMatch = route.params;
+
+  useEffect(() => {
+    if (focused) {
+      dispatch(retrieveTeams());
+      dispatch(retrievePlayers());
+    }
+  }, [focused]);
 
   const yupPositiveIntegerSchema = (filedName: string) => {
     const message = `${filedName} should be a positive integer.`;

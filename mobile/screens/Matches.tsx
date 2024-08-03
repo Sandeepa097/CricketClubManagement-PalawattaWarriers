@@ -7,7 +7,6 @@ import SearchField from '../components/base/SearchField';
 import TabBar from '../components/base/TabBar';
 import CompactMatchItem from '../components/CompactMatchItem';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
-import ConfirmBox from '../components/base/ConfirmBox';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import { PPLMatch } from '../types';
@@ -33,12 +32,10 @@ const Matches = ({ navigation }) => {
 
   useEffect(() => {
     if (focused) {
-      dispatch(retrieveOutdoorMatches());
-      dispatch(retrievePPLMatches());
-      dispatch(retrieveTeams());
-      dispatch(retrievePlayers());
+      if (selectedTabItem === 'outdoor') dispatch(retrieveOutdoorMatches());
+      else dispatch(retrievePPLMatches());
     }
-  }, [focused]);
+  }, [focused, selectedTabItem]);
 
   return (
     <View style={styles.container}>
