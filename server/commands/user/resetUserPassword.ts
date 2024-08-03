@@ -1,18 +1,16 @@
-import { hashPassword } from '../services/authService';
-import { createUser } from '../services/userService';
+import { hashPassword } from '../../services/authService';
+import { updateUser } from '../../services/userService';
 
-type argumentTypes = 'username' | 'password' | 'userType';
+type argumentTypes = 'username' | 'password';
 interface UserDetails {
   username: string | undefined;
   password: string | undefined;
-  userType: string | undefined;
 }
 
 const getUser = () => {
   const user: UserDetails = {
     username: undefined,
     password: undefined,
-    userType: undefined,
   };
 
   process.argv.forEach((arg: string) => {
@@ -27,20 +25,15 @@ const getUser = () => {
   return user;
 };
 
-const createUserOnDB = async (user: UserDetails) => {
+const updateUserOnDB = async (user: UserDetails) => {
   if (!user.username) return console.error('\nUsername is required.');
-  if (!user.userType) return console.error('\nUser Type is required.');
   if (!user.password) return console.error('\nPassword is required.');
 
   const hashedPassword = await hashPassword(user.password);
-  createUser({
-    username: user.username,
-    userType: user.userType,
-    passwordHash: hashedPassword,
-  });
+  updateUser({ username: user.username }, { passwordHash: hashedPassword });
 
-  console.log('User is created successfully.');
+  console.log('User is updated successfully.');
 };
 
 const user = getUser();
-createUserOnDB(user);
+updateUserOnDB(user);
