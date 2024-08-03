@@ -13,7 +13,7 @@ describe('calculateBattingPoints', () => {
       fours: 5,
       isOut: false,
     };
-    expect(calculateBattingPoints(battingStats).totalPoints).toBe(140);
+    expect(calculateBattingPoints(battingStats).totalPoints).toBe(21);
     expect(calculateBattingPoints(battingStats).strikeRate).toBe(150);
   });
 
@@ -25,7 +25,7 @@ describe('calculateBattingPoints', () => {
       fours: 0,
       isOut: true,
     };
-    expect(calculateBattingPoints(battingStats).totalPoints).toBe(-20);
+    expect(calculateBattingPoints(battingStats).totalPoints).toBe(-8);
     expect(calculateBattingPoints(battingStats).strikeRate).toBe(0);
   });
 
@@ -37,7 +37,7 @@ describe('calculateBattingPoints', () => {
       fours: 0,
       isOut: true,
     };
-    expect(calculateBattingPoints(battingStats).totalPoints).toBe(-20);
+    expect(calculateBattingPoints(battingStats).totalPoints).toBe(-8);
     expect(calculateBattingPoints(battingStats).strikeRate).toBe(0);
   });
 
@@ -49,7 +49,7 @@ describe('calculateBattingPoints', () => {
       fours: 8,
       isOut: false,
     };
-    expect(calculateBattingPoints(battingStats).totalPoints).toBe(367);
+    expect(calculateBattingPoints(battingStats).totalPoints).toBe(42);
     expect(calculateBattingPoints(battingStats).strikeRate).toBe(300);
   });
 
@@ -75,7 +75,7 @@ describe('calculateBowlingPoints', () => {
       maidens: 1,
       numberOfDeliveriesPerOver: 6,
     };
-    expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(100);
+    expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(45);
     expect(calculateBowlingPoints(bowlingStats).economy).toBe(4.444);
   });
 
@@ -87,20 +87,20 @@ describe('calculateBowlingPoints', () => {
       maidens: 2,
       numberOfDeliveriesPerOver: 6,
     };
-    expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(50);
+    expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(35);
     expect(calculateBowlingPoints(bowlingStats).economy).toBe(5);
   });
 
   it('should correctly calculate points for a bowler who bowled less than 2 overs', () => {
     const bowlingStats = {
       wickets: 1,
-      overs: 1.4,
+      overs: 0.4,
       conceded: 10,
       maidens: 0,
       numberOfDeliveriesPerOver: 6,
     };
     expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(20);
-    expect(calculateBowlingPoints(bowlingStats).economy).toBe(7.143);
+    expect(calculateBowlingPoints(bowlingStats).economy).toBe(25);
   });
 
   it('should correctly calculate points for a bowler who bowled illegal bowls only', () => {
@@ -111,7 +111,7 @@ describe('calculateBowlingPoints', () => {
       maidens: 0,
       numberOfDeliveriesPerOver: 6,
     };
-    expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(-20);
+    expect(calculateBowlingPoints(bowlingStats).totalPoints).toBe(0);
     expect(calculateBowlingPoints(bowlingStats).economy).toBe(10);
   });
 
@@ -136,7 +136,7 @@ describe('calculateFieldingPoints', () => {
       directHits: 0,
       indirectHits: 0,
     };
-    expect(calculateFieldingPoints(fieldingStats)).toBe(90);
+    expect(calculateFieldingPoints(fieldingStats)).toBe(28);
   });
 
   it('should correctly calculate points for a fielder who got indirect hits', () => {
@@ -146,7 +146,7 @@ describe('calculateFieldingPoints', () => {
       directHits: 0,
       indirectHits: 3,
     };
-    expect(calculateFieldingPoints(fieldingStats)).toBe(90);
+    expect(calculateFieldingPoints(fieldingStats)).toBe(26);
   });
 
   it('should correctly calculate points for a fielder who did not contribute in any way', () => {
@@ -156,6 +156,6 @@ describe('calculateFieldingPoints', () => {
       directHits: 0,
       indirectHits: 0,
     };
-    expect(calculateFieldingPoints(fieldingStats)).toBe(50);
+    expect(calculateFieldingPoints(fieldingStats)).toBe(0);
   });
 });

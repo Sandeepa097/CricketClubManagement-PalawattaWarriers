@@ -170,9 +170,9 @@ export const recalculateBattingPoints = async () => {
         points: newResults.totalPoints,
         strikeRate: newResults.strikeRate,
       });
-
-      return true;
     }
+
+    return true;
   } catch (error) {
     return false;
   }
@@ -206,9 +206,9 @@ export const recalculateBowlingPoints = async () => {
         points: newResults.totalPoints,
         economy: newResults.economy,
       });
-
-      return true;
     }
+
+    return true;
   } catch (error) {
     return false;
   }
@@ -231,9 +231,9 @@ export const recalculateFieldingPoints = async () => {
       await record.update({
         points: newPoints,
       });
-
-      return true;
     }
+
+    return true;
   } catch (error) {
     return false;
   }
