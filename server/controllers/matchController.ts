@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import {
   createMatch,
   findMatch,
+  getGroupMatchesCount,
+  getMatches,
+  getMatchesCount,
   getOutdoorMatches,
   getPPLMatches,
   removeMatch,
@@ -201,11 +204,61 @@ const update = async (req: Request, res: Response) => {
 };
 
 const get = async (req: Request, res: Response) => {
+  const limit: any = req.query.limit;
+  const offset: number = Number(req.query.offset || 0);
   const matchType = req.query.type as 'outdoor' | 'ppl' | null | undefined;
-  const matches =
-    matchType === 'outdoor' ? await getOutdoorMatches() : await getPPLMatches();
+  const matchDate = req.query.date as string | null | undefined;
+  const matchOppositeTeamId = req.query.opposite as
+    | string
+    | number
+    | null
+    | undefined;
+  const matchResult = req.query.result as
+    | 'won'
+    | 'lost'
+    | 'draw'
+    | null
+    | undefined;
 
-  return res.status(StatusCodes.OK).json({ matches });
+  let totalCount = 0;
+  let matches = [];
+  let tabCounts = null;
+
+  if (matchType) {
+    totalCount = await getGroupMatchesCount(matchType || 'ppl');
+    matches =
+      matchType === 'outdoor'
+        ? await getOutdoorMatches(offset, Number(limit || totalCount))
+        : await getPPLMatches(offset, Number(limit || totalCount));
+  } else {
+    const where = matchDate
+      ? { date: matchDate }
+      : {
+          oppositeTeamId: matchOppositeTeamId || null,
+          ...(matchResult ? { result: matchResult } : {}),
+        };
+    totalCount = await getMatchesCount(where);
+    matches = await getMatches(where, offset, Number(limit | totalCount));
+    if (matchOppositeTeamId && !matchResult) {
+      tabCounts = {
+        all: await getMatchesCount({ oppositeTeamId: matchOppositeTeamId }),
+        won: await getMatchesCount({
+          oppositeTeamId: matchOppositeTeamId,
+          result: 'won',
+        }),
+        lost: await getMatchesCount({
+          oppositeTeamId: matchOppositeTeamId,
+          result: 'lost',
+        }),
+        draw: await getMatchesCount({
+          oppositeTeamId: matchOppositeTeamId,
+          result: 'draw',
+        }),
+      };
+    }
+  }
+
+  return res.status(StatusCodes.OK).json({ matches, totalCount, tabCounts });
 };
 
 const remove = async (req: Request, res: Response) => {

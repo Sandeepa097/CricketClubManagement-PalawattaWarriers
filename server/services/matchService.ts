@@ -5,10 +5,9 @@ import {
   MatchPlayerBattingStat,
   MatchPlayerBowlingStat,
   MatchPlayerFieldingStat,
-  OppositeTeam,
-  Player,
 } from '../models';
 import { findPlayers } from './playerService';
+import sequelizeConnection from '../config/sequelizeConnection';
 
 interface CreateMatchAttributes {
   title: string;
@@ -34,63 +33,264 @@ export const removeMatch = async (id: number) => {
   return await Match.destroy({ where: { id } });
 };
 
-export const getPPLMatches = async () => {
-  return await Match.findAll({
+export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
+  const ppls: any = await Match.findAll({
     where: { oppositeTeamId: { [Op.is]: null } },
-    include: [
-      {
-        model: Player,
-        as: 'officialPlayers',
-      },
-      {
-        model: MatchPlayerBattingStat,
-        as: 'battingStats',
-        include: [{ model: Player, as: 'player' }],
-      },
-      {
-        model: MatchPlayerBowlingStat,
-        as: 'bowlingStats',
-        include: [{ model: Player, as: 'player' }],
-      },
-      {
-        model: MatchPlayerFieldingStat,
-        as: 'fieldingStats',
-        include: [{ model: Player, as: 'player' }],
-      },
-    ],
+    group: ['date'],
     order: [['id', 'DESC']],
+    limit: limit,
+    offset: offset,
+    raw: true,
+  });
+
+  const dates = ppls.map((ppl: any) => ppl.date);
+
+  const matchIds = await Match.findAll({
+    where: { date: { [Op.in]: dates } },
+    attributes: ['id', 'date'],
+    raw: true,
+  });
+
+  const matchIdsByDate = matchIds.reduce((acc: any, match: any) => {
+    if (!acc[match.date]) acc[match.date] = [];
+    acc[match.date].push(match.id);
+    return acc;
+  }, {});
+
+  const allStats = await Promise.all([
+    MatchPlayerBattingStat.findAll({
+      where: {
+        matchId: {
+          [Op.in]: matchIds.map((m: any) => m.id),
+        },
+      },
+      attributes: [
+        'playerId',
+        'matchId',
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('points')),
+          'totalPoints',
+        ],
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('score')),
+          'totalScore',
+        ],
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('balls')),
+          'totalBalls',
+        ],
+      ],
+      group: ['playerId', 'matchId'],
+      raw: true,
+    }),
+    MatchPlayerBowlingStat.findAll({
+      where: {
+        matchId: {
+          [Op.in]: matchIds.map((m: any) => m.id),
+        },
+      },
+      attributes: [
+        'playerId',
+        'matchId',
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('points')),
+          'totalPoints',
+        ],
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('wickets')),
+          'totalWickets',
+        ],
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('conceded')),
+          'totalConceded',
+        ],
+      ],
+      group: ['playerId', 'matchId'],
+      raw: true,
+    }),
+  ]);
+
+  const [battingStats, bowlingStats] = allStats;
+
+  ppls.forEach((ppl: any) => {
+    const matchIdsForDate = matchIdsByDate[ppl.date] || [];
+
+    const relevantBattingStats = battingStats.filter((stat: any) =>
+      matchIdsForDate.includes(stat.matchId)
+    );
+    const relevantBowlingStats = bowlingStats.filter((stat: any) =>
+      matchIdsForDate.includes(stat.matchId)
+    );
+
+    const bestBatter = relevantBattingStats.length
+      ? relevantBattingStats.reduce((prevPlayer: any, currentPlayer: any) =>
+          prevPlayer.totalPoints < currentPlayer.totalPoints
+            ? currentPlayer
+            : prevPlayer
+        )
+      : null;
+
+    const bestBowler = relevantBowlingStats.length
+      ? relevantBowlingStats.reduce((prevPlayer: any, currentPlayer: any) =>
+          prevPlayer.totalPoints < currentPlayer.totalPoints
+            ? currentPlayer
+            : prevPlayer
+        )
+      : null;
+
+    ppl.bestBatter = bestBatter;
+    ppl.bestBowler = bestBowler;
+  });
+
+  return ppls;
+};
+
+export const getOutdoorMatches = async (
+  offset: number = 0,
+  limit: number = 10
+) => {
+  const outdoors: any = await Match.findAll({
+    where: { oppositeTeamId: { [Op.not]: null } },
+    group: ['oppositeTeamId'],
+    order: [['id', 'DESC']],
+    limit: limit,
+    offset: offset,
+    raw: true,
+  });
+
+  const oppositeTeamIds = outdoors.map(
+    (outdoor: any) => outdoor.oppositeTeamId
+  );
+
+  const matchIds = await Match.findAll({
+    where: { oppositeTeamId: { [Op.in]: oppositeTeamIds } },
+    attributes: ['id', 'oppositeTeamId'],
+    raw: true,
+  });
+
+  const matchIdsByOppositeTeamId = matchIds.reduce((acc: any, match: any) => {
+    if (!acc[match.oppositeTeamId]) acc[match.oppositeTeamId] = [];
+    acc[match.oppositeTeamId].push(match.id);
+    return acc;
+  }, {});
+
+  const allStats = await Promise.all([
+    MatchPlayerBattingStat.findAll({
+      where: {
+        matchId: {
+          [Op.in]: matchIds.map((m: any) => m.id),
+        },
+      },
+      attributes: [
+        'playerId',
+        'matchId',
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('points')),
+          'totalPoints',
+        ],
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('score')),
+          'totalScore',
+        ],
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('balls')),
+          'totalBalls',
+        ],
+      ],
+      group: ['playerId', 'matchId'],
+      raw: true,
+    }),
+    MatchPlayerBowlingStat.findAll({
+      where: {
+        matchId: {
+          [Op.in]: matchIds.map((m: any) => m.id),
+        },
+      },
+      attributes: [
+        'playerId',
+        'matchId',
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('points')),
+          'totalPoints',
+        ],
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('wickets')),
+          'totalWickets',
+        ],
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('conceded')),
+          'totalConceded',
+        ],
+      ],
+      group: ['playerId', 'matchId'],
+      raw: true,
+    }),
+  ]);
+
+  const [battingStats, bowlingStats] = allStats;
+
+  outdoors.forEach((outdoor: any) => {
+    const matchIdsForOppositeTeamId =
+      matchIdsByOppositeTeamId[outdoor.oppositeTeamId] || [];
+
+    const relevantBattingStats = battingStats.filter((stat: any) =>
+      matchIdsForOppositeTeamId.includes(stat.matchId)
+    );
+    const relevantBowlingStats = bowlingStats.filter((stat: any) =>
+      matchIdsForOppositeTeamId.includes(stat.matchId)
+    );
+
+    const bestBatter = relevantBattingStats.length
+      ? relevantBattingStats.reduce((prevPlayer: any, currentPlayer: any) =>
+          prevPlayer.totalPoints < currentPlayer.totalPoints
+            ? currentPlayer
+            : prevPlayer
+        )
+      : null;
+
+    const bestBowler = relevantBowlingStats.length
+      ? relevantBowlingStats.reduce((prevPlayer: any, currentPlayer: any) =>
+          prevPlayer.totalPoints < currentPlayer.totalPoints
+            ? currentPlayer
+            : prevPlayer
+        )
+      : null;
+
+    outdoor.bestBatter = bestBatter;
+    outdoor.bestBowler = bestBowler;
+  });
+
+  return outdoors;
+};
+
+export const getMatches = async (
+  where: object,
+  offset: number = 0,
+  limit: number = 0
+) => {
+  return Match.findAll({
+    where: { ...where },
+    order: [['id', 'DESC']],
+    limit: limit,
+    offset: offset,
   });
 };
 
-export const getOutdoorMatches = async () => {
-  return await Match.findAll({
-    where: { oppositeTeamId: { [Op.not]: null } },
-    include: [
-      {
-        model: OppositeTeam,
-        as: 'oppositeTeam',
+export const getMatchesCount = async (where: object) => {
+  return await Match.count({
+    where: { ...where },
+  });
+};
+
+export const getGroupMatchesCount = async (type: 'ppl' | 'outdoor') => {
+  return await Match.count({
+    distinct: true,
+    where: {
+      oppositeTeamId: {
+        [type === 'ppl' ? Op.is : Op.not]: null,
       },
-      {
-        model: Player,
-        as: 'officialPlayers',
-      },
-      {
-        model: MatchPlayerBattingStat,
-        as: 'battingStats',
-        include: [{ model: Player, as: 'player' }],
-      },
-      {
-        model: MatchPlayerBowlingStat,
-        as: 'bowlingStats',
-        include: [{ model: Player, as: 'player' }],
-      },
-      {
-        model: MatchPlayerFieldingStat,
-        as: 'fieldingStats',
-        include: [{ model: Player, as: 'player' }],
-      },
-    ],
-    order: [['id', 'DESC']],
+    },
+    col: type === 'ppl' ? 'date' : 'oppositeTeamId',
   });
 };
 
