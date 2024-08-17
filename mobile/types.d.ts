@@ -61,16 +61,7 @@ export interface OutdoorMatch extends CompactMatch {
     id: number | string;
     name: string;
   };
-  counts: {
-    all: number;
-    won: number;
-    lost: number;
-    draw: number;
-  };
   winningPercentage: number;
-  matches: CompactSingleMatch[];
 }
 
-export interface PPLMatch extends CompactMatch {
-  matches: SingleMatch[];
-}
+export interface PPLMatch extends CompactMatch {}

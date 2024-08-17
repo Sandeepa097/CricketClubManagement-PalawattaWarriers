@@ -27,15 +27,40 @@ const Matches = ({ navigation }) => {
   const userType = useSelector((state: RootState) => state.auth.userType);
   const outdoors = useSelector((state: RootState) => state.match.outdoors);
   const ppls = useSelector((state: RootState) => state.match.ppls);
+  const totalOutdoors = useSelector(
+    (state: RootState) => state.match.outdoorsTotal
+  );
+  const totalPPLs = useSelector((state: RootState) => state.match.pplsTotal);
   const [searchText, setSearchText] = useState('');
   const [selectedTabItem, setSelectedTabItem] = useState('outdoor');
 
   useEffect(() => {
     if (focused) {
-      if (selectedTabItem === 'outdoor') dispatch(retrieveOutdoorMatches());
-      else dispatch(retrievePPLMatches());
+      dispatch(retrieveTeams())
+        .unwrap()
+        .then(() => {
+          dispatch(retrievePlayers())
+            .unwrap()
+            .then(() => {
+              if (selectedTabItem === 'outdoor')
+                dispatch(retrieveOutdoorMatches(0));
+              else dispatch(retrievePPLMatches(0));
+            });
+        });
     }
   }, [focused, selectedTabItem]);
+
+  const fetchMoreMatches = () => {
+    if (selectedTabItem === 'outdoor') {
+      if (outdoors.length < totalOutdoors) {
+        dispatch(retrieveOutdoorMatches(outdoors.length));
+      }
+    } else {
+      if (ppls.length < totalPPLs) {
+        dispatch(retrievePPLMatches(ppls.length));
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -87,6 +112,8 @@ const Matches = ({ navigation }) => {
         ListEmptyComponent={
           <EmptyListMessage visible={true} message="No matches found." />
         }
+        onEndReachedThreshold={0.5}
+        onEndReached={fetchMoreMatches}
       />
       {userType === UserTypes.ADMIN && (
         <Draggable>

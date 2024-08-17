@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, ToastAndroid, View } from 'react-native';
 import SectionTitle from '../components/base/SectionTitle';
 import TabBar from '../components/base/TabBar';
@@ -9,28 +9,54 @@ import { CompactSingleMatch } from '../types';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import { setEditing } from '../redux/slices/statusSlice';
-import { deleteMatch } from '../redux/slices/matchSlice';
+import { deleteMatch, getMatches } from '../redux/slices/matchSlice';
 import { UserTypes } from '../constants/UserTypes';
 
 const OppositeTeamMatches = ({ route, navigation }) => {
   const dispatch = useDispatch<AppDispatch>();
   const userType = useSelector((state: RootState) => state.auth.userType);
+  const renderedMatches = useSelector(
+    (state: RootState) => state.match.renderedMatches
+  );
 
-  const [matchesDetails, setMatchesDetails] = useState(route.params);
   const [selectedTabItem, setSelectedTabItem] = useState('all');
   const [deleteConfirmationVisible, setDeleteConfirmationVisible] =
     useState(false);
   const [deleteRequestedMatch, setDeleteRequestedMatch] = useState(null);
 
   const getTabName = (id: 'all' | 'won' | 'lost' | 'draw', name: string) => {
-    const count = matchesDetails.counts[id] || 0;
+    const count = renderedMatches.tabCounts[id] || 0;
     return `${name} (${count})`;
+  };
+
+  const retrieveMatches = (offset: number) => {
+    dispatch(
+      getMatches({
+        offset,
+        ...(route.params.oppositeTeam
+          ? {
+              oppositeTeamId: route.params.oppositeTeam.id,
+              result: selectedTabItem === 'all' ? '' : selectedTabItem,
+            }
+          : { date: route.params.title }),
+      })
+    );
+  };
+
+  useEffect(() => {
+    retrieveMatches(0);
+  }, [selectedTabItem]);
+
+  const fetchMoreMatches = () => {
+    if (renderedMatches.matches.length < renderedMatches.total) {
+      retrieveMatches(renderedMatches.matches.length);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <SectionTitle title={matchesDetails.title} marginTop={10} />
-      {matchesDetails.counts ? (
+      <SectionTitle title={route.params.title} marginTop={10} />
+      {renderedMatches.tabCounts ? (
         <TabBar
           selected={selectedTabItem}
           items={[
@@ -48,8 +74,8 @@ const OppositeTeamMatches = ({ route, navigation }) => {
         <FlatList
           data={
             selectedTabItem === 'all'
-              ? matchesDetails.matches
-              : matchesDetails.matches.filter(
+              ? renderedMatches.matches
+              : renderedMatches.matches.filter(
                   (match: CompactSingleMatch) =>
                     match.result === selectedTabItem
                 )
@@ -79,6 +105,8 @@ const OppositeTeamMatches = ({ route, navigation }) => {
                 : {})}
             />
           )}
+          onEndReachedThreshold={0.5}
+          onEndReached={fetchMoreMatches}
         />
       </View>
       <ConfirmBox
@@ -92,21 +120,6 @@ const OppositeTeamMatches = ({ route, navigation }) => {
             dispatch(deleteMatch(deleteRequestedMatch))
               .unwrap()
               .then(() => {
-                setMatchesDetails({
-                  ...matchesDetails,
-                  matches: matchesDetails.matches.filter(
-                    (match: any) => match.id !== deleteRequestedMatch.id
-                  ),
-                  counts: deleteRequestedMatch.oppositeTeamId
-                    ? {
-                        ...matchesDetails.counts,
-                        all: matchesDetails.counts.all - 1,
-                        [deleteRequestedMatch.result]:
-                          matchesDetails.counts[deleteRequestedMatch.result] -
-                          1,
-                      }
-                    : undefined,
-                });
                 ToastAndroid.showWithGravity(
                   'Match deleted successfully.',
                   ToastAndroid.SHORT,

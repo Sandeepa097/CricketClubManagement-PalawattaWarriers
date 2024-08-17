@@ -162,7 +162,10 @@ const Scorecard = ({ route }) => {
           alignItems: 'center',
           paddingBottom: 10,
         }}>
-        <SectionTitle title="Match Details" marginTop={10} />
+        <SectionTitle
+          title={route.params.title || 'Match Details'}
+          marginTop={10}
+        />
         <MatchStats
           vs={matchDetails.vs}
           on={matchDetails.on}
