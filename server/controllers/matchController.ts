@@ -203,7 +203,7 @@ const update = async (req: Request, res: Response) => {
   });
 };
 
-const get = async (req: Request, res: Response) => {
+const index = async (req: Request, res: Response) => {
   const limit: any = req.query.limit;
   const offset: number = Number(req.query.offset || 0);
   const matchType = req.query.type as 'outdoor' | 'ppl' | null | undefined;
@@ -238,7 +238,7 @@ const get = async (req: Request, res: Response) => {
           ...(matchResult ? { result: matchResult } : {}),
         };
     totalCount = await getMatchesCount(where);
-    matches = await getMatches(where, offset, Number(limit | totalCount));
+    matches = await getMatches(where, offset, Number(limit || totalCount));
     if (matchOppositeTeamId && !matchResult) {
       tabCounts = {
         all: await getMatchesCount({ oppositeTeamId: matchOppositeTeamId }),
@@ -270,4 +270,4 @@ const remove = async (req: Request, res: Response) => {
     .json({ message: 'Match removed successfully.' });
 };
 
-export default { create, update, remove, get };
+export default { create, update, remove, index };

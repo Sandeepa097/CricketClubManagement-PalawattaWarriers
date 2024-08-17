@@ -172,7 +172,7 @@ matchRouter.post(
   matchController.create
 );
 
-matchRouter.get('/', matchController.get);
+matchRouter.get('/', matchController.index);
 
 matchRouter.put(
   '/:id',

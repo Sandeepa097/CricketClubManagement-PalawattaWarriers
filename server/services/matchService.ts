@@ -5,6 +5,8 @@ import {
   MatchPlayerBattingStat,
   MatchPlayerBowlingStat,
   MatchPlayerFieldingStat,
+  OppositeTeam,
+  Player,
 } from '../models';
 import { findPlayers } from './playerService';
 import sequelizeConnection from '../config/sequelizeConnection';
@@ -26,7 +28,9 @@ export const updateMatch = async (id: number, match: CreateMatchAttributes) => {
 };
 
 export const findMatch = async (id: number) => {
-  return await Match.findOne({ where: { id } });
+  return await Match.findOne({
+    where: { id },
+  });
 };
 
 export const removeMatch = async (id: number) => {
@@ -270,6 +274,50 @@ export const getMatches = async (
 ) => {
   return Match.findAll({
     where: { ...where },
+    include: [
+      {
+        model: OppositeTeam,
+        as: 'oppositeTeam',
+      },
+      {
+        model: Player,
+        attributes: ['id', 'name', 'avatar'],
+        as: 'officialPlayers',
+      },
+      {
+        model: MatchPlayerBattingStat,
+        as: 'battingStats',
+        include: [
+          {
+            model: Player,
+            attributes: ['id', 'name', 'avatar'],
+            as: 'player',
+          },
+        ],
+      },
+      {
+        model: MatchPlayerBowlingStat,
+        as: 'bowlingStats',
+        include: [
+          {
+            model: Player,
+            attributes: ['id', 'name', 'avatar'],
+            as: 'player',
+          },
+        ],
+      },
+      {
+        model: MatchPlayerFieldingStat,
+        as: 'fieldingStats',
+        include: [
+          {
+            model: Player,
+            attributes: ['id', 'name', 'avatar'],
+            as: 'player',
+          },
+        ],
+      },
+    ],
     order: [['id', 'DESC']],
     limit: limit,
     offset: offset,
