@@ -415,6 +415,7 @@ export const matchSlice = createSlice({
           state.renderedMatches.tabCounts = action.payload.result
             ? {
                 ...state.renderedMatches.tabCounts,
+                all: state.renderedMatches.tabCounts.all - 1,
                 [action.payload.result]:
                   state.renderedMatches.tabCounts[action.payload.result] - 1,
               }
