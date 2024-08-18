@@ -146,7 +146,9 @@ export const retrieveOutdoorMatches = createAsyncThunk(
             id: oppositeTeam?.id,
             name: oppositeTeam?.name,
           },
-          winningPercentage: null,
+          winningPercentage: Math.round(
+            response.data.matches[i].winningPercentage
+          ),
           title: oppositeTeam?.name,
           bestBatsman: bestBatsman
             ? {

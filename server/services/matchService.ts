@@ -40,8 +40,15 @@ export const removeMatch = async (id: number) => {
 export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
   const ppls: any = await Match.findAll({
     where: { oppositeTeamId: { [Op.is]: null } },
+    attributes: [
+      'date',
+      [
+        sequelizeConnection.fn('max', sequelizeConnection.col('id')),
+        'latestMatchId',
+      ],
+    ],
     group: ['date'],
-    order: [['id', 'DESC']],
+    order: [['latestMatchId', 'DESC']],
     limit: limit,
     offset: offset,
     raw: true,
@@ -126,19 +133,53 @@ export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
       matchIdsForDate.includes(stat.matchId)
     );
 
-    const bestBatter = relevantBattingStats.length
-      ? relevantBattingStats.reduce((prevPlayer: any, currentPlayer: any) =>
-          prevPlayer.totalPoints < currentPlayer.totalPoints
-            ? currentPlayer
-            : prevPlayer
+    const aggregatedBattingStats = relevantBattingStats.reduce(
+      (acc: any, stat: any) => {
+        if (!acc[stat.playerId]) {
+          acc[stat.playerId] = {
+            playerId: stat.playerId,
+            totalPoints: 0,
+            totalScore: 0,
+            totalBalls: 0,
+          };
+        }
+        acc[stat.playerId].totalPoints += stat.totalPoints;
+        acc[stat.playerId].totalScore += stat.totalScore;
+        acc[stat.playerId].totalBalls += stat.totalBalls;
+        return acc;
+      },
+      {}
+    );
+
+    const aggregatedBowlingStats = relevantBowlingStats.reduce(
+      (acc: any, stat: any) => {
+        if (!acc[stat.playerId]) {
+          acc[stat.playerId] = {
+            playerId: stat.playerId,
+            totalPoints: 0,
+            totalWickets: 0,
+            totalConceded: 0,
+          };
+        }
+        acc[stat.playerId].totalPoints += stat.totalPoints;
+        acc[stat.playerId].totalWickets += stat.totalWickets;
+        acc[stat.playerId].totalConceded += stat.totalConceded;
+        return acc;
+      },
+      {}
+    );
+
+    const bestBatter = Object.keys(aggregatedBattingStats).length
+      ? Object.values(aggregatedBattingStats).reduce(
+          (prev: any, current: any) =>
+            prev.totalPoints > current.totalPoints ? prev : current
         )
       : null;
 
-    const bestBowler = relevantBowlingStats.length
-      ? relevantBowlingStats.reduce((prevPlayer: any, currentPlayer: any) =>
-          prevPlayer.totalPoints < currentPlayer.totalPoints
-            ? currentPlayer
-            : prevPlayer
+    const bestBowler = Object.keys(aggregatedBowlingStats).length
+      ? Object.values(aggregatedBowlingStats).reduce(
+          (prev: any, current: any) =>
+            prev.totalPoints > current.totalPoints ? prev : current
         )
       : null;
 
@@ -153,10 +194,17 @@ export const getOutdoorMatches = async (
   offset: number = 0,
   limit: number = 10
 ) => {
-  const outdoors: any = await Match.findAll({
+  const outdoors: any[] = await Match.findAll({
     where: { oppositeTeamId: { [Op.not]: null } },
+    attributes: [
+      'oppositeTeamId',
+      [
+        sequelizeConnection.fn('max', sequelizeConnection.col('id')),
+        'latestMatchId',
+      ],
+    ],
     group: ['oppositeTeamId'],
-    order: [['id', 'DESC']],
+    order: [['latestMatchId', 'DESC']],
     limit: limit,
     offset: offset,
     raw: true,
@@ -166,23 +214,26 @@ export const getOutdoorMatches = async (
     (outdoor: any) => outdoor.oppositeTeamId
   );
 
-  const matchIds = await Match.findAll({
+  const matchDetails = await Match.findAll({
     where: { oppositeTeamId: { [Op.in]: oppositeTeamIds } },
-    attributes: ['id', 'oppositeTeamId'],
+    attributes: ['id', 'oppositeTeamId', 'result'],
     raw: true,
   });
 
-  const matchIdsByOppositeTeamId = matchIds.reduce((acc: any, match: any) => {
-    if (!acc[match.oppositeTeamId]) acc[match.oppositeTeamId] = [];
-    acc[match.oppositeTeamId].push(match.id);
-    return acc;
-  }, {});
+  const matchIdsByOppositeTeamId = matchDetails.reduce(
+    (acc: any, match: any) => {
+      if (!acc[match.oppositeTeamId]) acc[match.oppositeTeamId] = [];
+      acc[match.oppositeTeamId].push(match);
+      return acc;
+    },
+    {}
+  );
 
   const allStats = await Promise.all([
     MatchPlayerBattingStat.findAll({
       where: {
         matchId: {
-          [Op.in]: matchIds.map((m: any) => m.id),
+          [Op.in]: matchDetails.map((m: any) => m.id),
         },
       },
       attributes: [
@@ -207,7 +258,7 @@ export const getOutdoorMatches = async (
     MatchPlayerBowlingStat.findAll({
       where: {
         matchId: {
-          [Op.in]: matchIds.map((m: any) => m.id),
+          [Op.in]: matchDetails.map((m: any) => m.id),
         },
       },
       attributes: [
@@ -234,34 +285,76 @@ export const getOutdoorMatches = async (
   const [battingStats, bowlingStats] = allStats;
 
   outdoors.forEach((outdoor: any) => {
-    const matchIdsForOppositeTeamId =
+    const matchesForOppositeTeam =
       matchIdsByOppositeTeamId[outdoor.oppositeTeamId] || [];
 
     const relevantBattingStats = battingStats.filter((stat: any) =>
-      matchIdsForOppositeTeamId.includes(stat.matchId)
+      matchesForOppositeTeam.some((match: any) => match.id === stat.matchId)
     );
     const relevantBowlingStats = bowlingStats.filter((stat: any) =>
-      matchIdsForOppositeTeamId.includes(stat.matchId)
+      matchesForOppositeTeam.some((match: any) => match.id === stat.matchId)
     );
 
-    const bestBatter = relevantBattingStats.length
-      ? relevantBattingStats.reduce((prevPlayer: any, currentPlayer: any) =>
-          prevPlayer.totalPoints < currentPlayer.totalPoints
-            ? currentPlayer
-            : prevPlayer
+    const aggregatedBattingStats = relevantBattingStats.reduce(
+      (acc: any, stat: any) => {
+        if (!acc[stat.playerId]) {
+          acc[stat.playerId] = {
+            playerId: stat.playerId,
+            totalPoints: 0,
+            totalScore: 0,
+            totalBalls: 0,
+          };
+        }
+        acc[stat.playerId].totalPoints += stat.totalPoints;
+        acc[stat.playerId].totalScore += stat.totalScore;
+        acc[stat.playerId].totalBalls += stat.totalBalls;
+        return acc;
+      },
+      {}
+    );
+
+    const aggregatedBowlingStats = relevantBowlingStats.reduce(
+      (acc: any, stat: any) => {
+        if (!acc[stat.playerId]) {
+          acc[stat.playerId] = {
+            playerId: stat.playerId,
+            totalPoints: 0,
+            totalWickets: 0,
+            totalConceded: 0,
+          };
+        }
+        acc[stat.playerId].totalPoints += stat.totalPoints;
+        acc[stat.playerId].totalWickets += stat.totalWickets;
+        acc[stat.playerId].totalConceded += stat.totalConceded;
+        return acc;
+      },
+      {}
+    );
+
+    const bestBatter = Object.keys(aggregatedBattingStats).length
+      ? Object.values(aggregatedBattingStats).reduce(
+          (prev: any, current: any) =>
+            prev.totalPoints > current.totalPoints ? prev : current
         )
       : null;
 
-    const bestBowler = relevantBowlingStats.length
-      ? relevantBowlingStats.reduce((prevPlayer: any, currentPlayer: any) =>
-          prevPlayer.totalPoints < currentPlayer.totalPoints
-            ? currentPlayer
-            : prevPlayer
+    const bestBowler = Object.keys(aggregatedBowlingStats).length
+      ? Object.values(aggregatedBowlingStats).reduce(
+          (prev: any, current: any) =>
+            prev.totalPoints > current.totalPoints ? prev : current
         )
       : null;
+
+    const totalMatches = matchesForOppositeTeam.length;
+    const wonMatches = matchesForOppositeTeam.filter(
+      (match: any) => match.result === 'won'
+    ).length;
+    const winningPercentage =
+      totalMatches > 0 ? (wonMatches / totalMatches) * 100 : 0;
 
     outdoor.bestBatter = bestBatter;
     outdoor.bestBowler = bestBowler;
+    outdoor.winningPercentage = winningPercentage;
   });
 
   return outdoors;
