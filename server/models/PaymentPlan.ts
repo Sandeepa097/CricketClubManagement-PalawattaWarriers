@@ -2,12 +2,14 @@ import { Model, DataTypes } from 'sequelize';
 import sequelizeConnection from '../config/sequelizeConnection';
 
 interface PaymentPlanInstance extends Model {
+  playerId: number;
   fee: number;
   effectiveMonth: number;
   effectiveYear: number;
 }
 
 class PaymentPlan extends Model implements PaymentPlanInstance {
+  public playerId!: number;
   public fee!: number;
   public effectiveMonth!: number;
   public effectiveYear!: number;
@@ -19,6 +21,7 @@ class PaymentPlan extends Model implements PaymentPlanInstance {
 
 PaymentPlan.init(
   {
+    playerId: DataTypes.INTEGER.UNSIGNED,
     fee: DataTypes.INTEGER.UNSIGNED,
     effectiveMonth: DataTypes.INTEGER,
     effectiveYear: DataTypes.INTEGER,
