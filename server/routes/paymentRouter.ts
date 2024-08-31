@@ -90,6 +90,14 @@ paymentRouter.post(
       .isInt({ min: 1 })
       .toInt()
       .withMessage('Fee must be at least one rupee.'),
+    body('playerId')
+      .exists()
+      .toInt()
+      .custom(async (value) => {
+        const player = await findPlayer(value);
+        if (!player) throw Error('Player id is invalid.');
+        return true;
+      }),
     body('effectiveFrom.month')
       .notEmpty()
       .withMessage('Effective month is required.')
@@ -104,6 +112,40 @@ paymentRouter.post(
       .withMessage('Effective year must be positive integer.'),
   ]),
   paymentController.createPlan
+);
+
+paymentRouter.get(
+  '/plans/ongoing',
+  validateRequest([
+    query('month')
+      .notEmpty()
+      .withMessage('Month is required.')
+      .isInt({ min: 0, max: 11 })
+      .withMessage('Month must be an integer between 0 and 11.'),
+    query('year')
+      .notEmpty()
+      .withMessage('Year is required.')
+      .isInt({ min: 1 })
+      .withMessage('Year must be a positive integer.'),
+  ]),
+  paymentController.getOngoingPaymentPlans
+);
+
+paymentRouter.get(
+  '/plans/future',
+  validateRequest([
+    query('month')
+      .notEmpty()
+      .withMessage('Month is required.')
+      .isInt({ min: 0, max: 11 })
+      .withMessage('Month must be an integer between 0 and 11.'),
+    query('year')
+      .notEmpty()
+      .withMessage('Year is required.')
+      .isInt({ min: 1 })
+      .withMessage('Year must be a positive integer.'),
+  ]),
+  paymentController.getFuturePaymentPlans
 );
 
 paymentRouter.put(
@@ -124,6 +166,14 @@ paymentRouter.put(
       .isInt({ min: 1 })
       .toInt()
       .withMessage('Fee must be at least one rupee.'),
+    body('playerId')
+      .exists()
+      .toInt()
+      .custom(async (value) => {
+        const player = await findPlayer(value);
+        if (!player) throw Error('Player id is invalid.');
+        return true;
+      }),
     body('effectiveFrom.month')
       .notEmpty()
       .withMessage('Effective month is required.')
@@ -154,23 +204,6 @@ paymentRouter.delete(
       }),
   ]),
   paymentController.removePlan
-);
-
-paymentRouter.get(
-  '/plans',
-  validateRequest([
-    query('month')
-      .notEmpty()
-      .withMessage('Month is required.')
-      .isInt({ min: 0, max: 11 })
-      .withMessage('Month must be an integer between 0 and 11.'),
-    query('year')
-      .notEmpty()
-      .withMessage('Year is required.')
-      .isInt({ min: 1 })
-      .withMessage('Year must be a positive integer.'),
-  ]),
-  paymentController.getPaymentPlans
 );
 
 paymentRouter.put(

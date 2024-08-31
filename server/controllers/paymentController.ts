@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import {
   createPaymentPlan,
-  getNearestFuturePlan,
-  getOngoingPlan,
+  getNearestFuturePlans,
+  getOngoingPlans,
   getPayments,
   getDuePayments,
   removePayment,
@@ -57,11 +57,17 @@ const createPlan = async (req: Request, res: Response) => {
   const {
     fee,
     effectiveFrom,
-  }: { fee: number; effectiveFrom: { month: number; year: number } } = req.body;
+    playerId,
+  }: {
+    fee: number;
+    effectiveFrom: { month: number; year: number };
+    playerId: number;
+  } = req.body;
 
   const createdPaymentPlan = await createPaymentPlan({
     fee,
     effectiveFrom,
+    playerId,
   });
 
   return res.status(StatusCodes.CREATED).json({
@@ -72,11 +78,12 @@ const createPlan = async (req: Request, res: Response) => {
 
 const updatePlan = async (req: Request, res: Response) => {
   const id: string = req.params.id;
-  const { fee, effectiveFrom } = req.body;
+  const { fee, effectiveFrom, playerId } = req.body;
 
   const updatedPlan = await updatePaymentPlan(id, {
     fee,
     effectiveFrom,
+    playerId,
   });
 
   return res.status(StatusCodes.OK).json({
@@ -94,17 +101,27 @@ const removePlan = async (req: Request, res: Response) => {
   });
 };
 
-const getPaymentPlans = async (req: Request, res: Response) => {
+const getOngoingPaymentPlans = async (req: Request, res: Response) => {
   const month: number = Number(req.query.month);
   const year: number = Number(req.query.year);
   Number;
 
-  const onGoingPlan = await getOngoingPlan({ month, year });
-  const futurePlan = await getNearestFuturePlan({ month, year });
+  const onGoingPlans = await getOngoingPlans({ month, year });
 
   return res.status(StatusCodes.OK).json({
-    onGoingPlan,
-    futurePlan,
+    onGoingPlans,
+  });
+};
+
+const getFuturePaymentPlans = async (req: Request, res: Response) => {
+  const month: number = Number(req.query.month);
+  const year: number = Number(req.query.year);
+  Number;
+
+  const futurePlans = await getNearestFuturePlans({ month, year });
+
+  return res.status(StatusCodes.OK).json({
+    futurePlans,
   });
 };
 
@@ -150,7 +167,8 @@ export default {
   createPlan,
   updatePlan,
   removePlan,
-  getPaymentPlans,
+  getOngoingPaymentPlans,
+  getFuturePaymentPlans,
   getDues,
   getProjections,
   getPreviousPayments,
