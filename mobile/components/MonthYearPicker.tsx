@@ -17,6 +17,7 @@ interface MonthYearPickerProps {
   value: DateType | null;
   max?: DateType;
   min?: DateType;
+  disabled?: boolean;
   error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
   onBlur?: () => void;
   onSelect: (selectedDate: DateType) => void;
@@ -136,6 +137,7 @@ const MonthYearPicker = (props: MonthYearPickerProps) => {
       <ClickableInput
         containerStyle={{ marginBottom: props.error ? 0 : 10 }}
         placeholder={props.placeholder}
+        disabled={props.disabled}
         value={
           props.value
             ? `${new Intl.DateTimeFormat('en-US', { month: 'long' }).format(
@@ -150,7 +152,7 @@ const MonthYearPicker = (props: MonthYearPickerProps) => {
             color={Colors.DEEP_TEAL}
           />
         )}
-        onPress={() => setModalVisible(true)}
+        onPress={() => (!props.disabled ? setModalVisible(true) : {})}
       />
       {props.error && true && (
         <Text style={styles.error}>{props.error?.toString()}</Text>

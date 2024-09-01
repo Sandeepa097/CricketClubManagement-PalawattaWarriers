@@ -14,6 +14,7 @@ interface ClickableInputProps {
   containerStyle?: ViewStyle;
   placeholder: string;
   value: string;
+  disabled?: boolean;
   onPress: () => void;
   icon?: React.FC;
 }
@@ -24,6 +25,7 @@ const ClickableInput = (props: ClickableInputProps) => {
       style={[
         styles.container,
         props.containerStyle ? { ...props.containerStyle } : {},
+        props.disabled ? { ...styles.disabled } : {},
       ]}
       activeOpacity={1}
       onPress={props.onPress}>
@@ -52,6 +54,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: width - 20,
+  },
+  disabled: {
+    backgroundColor: 'transparent',
   },
   text: {
     flex: 1,
