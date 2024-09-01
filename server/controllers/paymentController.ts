@@ -106,10 +106,10 @@ const getOngoingPaymentPlans = async (req: Request, res: Response) => {
   const year: number = Number(req.query.year);
   Number;
 
-  const onGoingPlans = await getOngoingPlans({ month, year });
+  const ongoingPlans = await getOngoingPlans({ month, year });
 
   return res.status(StatusCodes.OK).json({
-    onGoingPlans,
+    ongoingPlans,
   });
 };
 
