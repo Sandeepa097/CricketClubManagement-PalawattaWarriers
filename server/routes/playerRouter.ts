@@ -72,6 +72,12 @@ playerRouter.post(
 
       return true;
     }),
+    body('fee')
+      .notEmpty()
+      .withMessage('Fee is required.')
+      .isInt({ min: 0 })
+      .toInt()
+      .withMessage('Negative values are not allowed.'),
     ...playerValidations,
   ]),
   playerController.create

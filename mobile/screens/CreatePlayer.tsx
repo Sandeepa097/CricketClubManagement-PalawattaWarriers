@@ -73,6 +73,14 @@ const CreatePlayer = ({ navigation, route }) => {
       isCaptain: Yup.boolean().notRequired(),
       isWicketKeeper: Yup.boolean().notRequired(),
     }).required('Rolls are required.'),
+    ...(!editPlayer
+      ? {
+          fee: Yup.number()
+            .integer('Cents are not allowed.')
+            .min(0, 'Negative values are not allowed.')
+            .required('Fee is required.'),
+        }
+      : {}),
     feesPayingSince: Yup.object()
       .required('Fees paying since is required.')
       .shape({
@@ -98,6 +106,7 @@ const CreatePlayer = ({ navigation, route }) => {
                   avatar: '',
                   name: '',
                   rolls: null,
+                  ...(!editPlayer ? { fee: '' } : {}),
                   feesPayingSince: null,
                 }
               : {
@@ -165,6 +174,17 @@ const CreatePlayer = ({ navigation, route }) => {
                 onBlur={() => setFieldTouched('rolls', true, true)}
                 onChangeValue={(selection) => setFieldValue('rolls', selection)}
               />
+              {!editPlayer && (
+                <TextInput
+                  length="long"
+                  placeholder="Fee"
+                  onChangeText={(text) => setFieldValue('fee', text)}
+                  value={values.fee}
+                  onBlur={(event) => setFieldTouched('fee', true, true)}
+                  keyboardType="number-pad"
+                  error={touched.fee && (errors.fee as string)}
+                />
+              )}
               <MonthYearPicker
                 placeholder="Fees Paying Since"
                 title="Fees Paying Since"

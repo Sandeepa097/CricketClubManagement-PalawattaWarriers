@@ -46,7 +46,7 @@ const CreatePaymentPlan = ({ navigation, route }) => {
     playerId: Yup.number().required('Player is required.'),
     fee: Yup.number()
       .integer('Cents are not allowed.')
-      .min(1, 'Fee must be at least an rupee.')
+      .min(0, 'Negative values are not allowed.')
       .required('Fee is required.'),
     effectiveFrom: Yup.object()
       .required('Effective date is required.')

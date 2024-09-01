@@ -87,9 +87,9 @@ paymentRouter.post(
     body('fee')
       .notEmpty()
       .withMessage('Fee is required.')
-      .isInt({ min: 1 })
+      .isInt({ min: 0 })
       .toInt()
-      .withMessage('Fee must be at least one rupee.'),
+      .withMessage('Negative values are not allowed.'),
     body('playerId')
       .exists()
       .toInt()
@@ -163,9 +163,9 @@ paymentRouter.put(
     body('fee')
       .notEmpty()
       .withMessage('Fee is required.')
-      .isInt({ min: 1 })
+      .isInt({ min: 0 })
       .toInt()
-      .withMessage('Fee must be at least one rupee.'),
+      .withMessage('Negative values are not allowed.'),
     body('playerId')
       .exists()
       .toInt()
