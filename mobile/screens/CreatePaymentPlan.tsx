@@ -147,7 +147,9 @@ const CreatePaymentPlan = ({ navigation, route }) => {
                     ? { year: date.getFullYear(), month: date.getMonth() }
                     : undefined
                 }
-                error={errors.effectiveFrom}
+                error={
+                  touched.effectiveFrom && (errors.effectiveFrom as string)
+                }
                 onBlur={() => setFieldTouched('effectiveFrom', true, true)}
                 onSelect={(value) => setFieldValue('effectiveFrom', value)}
               />
