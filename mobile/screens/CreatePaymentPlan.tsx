@@ -109,7 +109,7 @@ const CreatePaymentPlan = ({ navigation, route }) => {
               <PlayersPicker
                 placeholder="Player"
                 players={
-                  type === 'ongoing'
+                  id
                     ? players
                     : players.filter(
                         (player) =>

@@ -151,7 +151,7 @@ const PaymentPlans = ({ route, navigation }) => {
         (userType === UserTypes.ADMIN || userType === UserTypes.TREASURER) &&
         players.filter(
           (player) => !futurePlans.find((plan) => plan.playerId === player.id)
-        ).length && (
+        ).length > 0 && (
           <Draggable>
             <Button
               sticky={true}
