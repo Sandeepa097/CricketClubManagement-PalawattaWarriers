@@ -383,7 +383,7 @@ export const paymentSlice = createSlice({
         deletePlan.fulfilled,
         (state, action: PayloadAction<number | string>) => {
           state.paymentPlans.future = state.paymentPlans.future.filter(
-            (plan) => plan.id === action.payload
+            (plan) => plan.id !== action.payload
           );
         }
       );
