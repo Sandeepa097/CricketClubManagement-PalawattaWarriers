@@ -1,11 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  ToastAndroid,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, ToastAndroid, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { deletePlan, getPaymentPlans } from '../redux/slices/paymentSlice';
 import { AppDispatch, RootState } from '../redux/store';
@@ -18,7 +12,7 @@ import PaymentPlan from '../components/PaymentPlan';
 import SearchField from '../components/base/SearchField';
 import Draggable from '../components/base/Draggable';
 import Button from '../components/base/Button';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import ConfirmBox from '../components/base/ConfirmBox';
 
@@ -161,8 +155,8 @@ const PaymentPlans = ({ route, navigation }) => {
               color={Colors.DEEP_TEAL}
               style="filled"
               icon={() => (
-                <FontAwesome5
-                  name="money-check-alt"
+                <MaterialIcons
+                  name="pending-actions"
                   size={24}
                   color={Colors.OFF_WHITE}
                 />
