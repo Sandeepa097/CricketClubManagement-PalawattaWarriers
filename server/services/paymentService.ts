@@ -27,6 +27,38 @@ export const updatePaymentPlan = async (
   return await PaymentPlan.update(paymentPlan, { where: { id } });
 };
 
+export const updatePaymentPlanOnPlayerUpdate = async (
+  playerId: number,
+  effectiveFrom: {
+    month: number;
+    year: number;
+  }
+) => {
+  const oldestPlan = await PaymentPlan.findOne({
+    where: { playerId },
+    order: [
+      ['effectiveYear', 'ASC'],
+      ['effectiveMonth', 'ASC'],
+    ],
+  });
+
+  if (
+    oldestPlan &&
+    (oldestPlan.dataValues.effectiveYear > effectiveFrom.year ||
+      (oldestPlan.dataValues.effectiveYear == effectiveFrom.year &&
+        oldestPlan.dataValues.effectiveMonth > effectiveFrom.month))
+  ) {
+    await updatePaymentPlan(oldestPlan.dataValues.id, {
+      fee: oldestPlan.dataValues.fee,
+      effectiveFrom,
+      playerId,
+    });
+    return true;
+  }
+
+  return false;
+};
+
 export const removePaymentPlan = async (id: number | string) => {
   return await PaymentPlan.destroy({ where: { id } });
 };
