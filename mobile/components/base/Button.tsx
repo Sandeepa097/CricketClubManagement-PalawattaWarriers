@@ -30,6 +30,7 @@ interface BasicButtonProps {
   icon?: React.FC;
   style: ButtonStyle;
   borderRadius?: number;
+  upperCase?: boolean;
 }
 
 interface RectangleButtonProps extends BasicButtonProps {
@@ -126,7 +127,11 @@ const Button = (props: RectangleButtonProps | CircleButtonProps) => {
       activeOpacity={0.5}
       onPress={props.onPress}>
       {props.text && !props.icon && (
-        <Text style={textStyle}>{props.text.toLocaleUpperCase()}</Text>
+        <Text style={textStyle}>
+          {props.upperCase === false
+            ? props.text
+            : props.text.toLocaleUpperCase()}
+        </Text>
       )}
       {props.icon && !props.text && <props.icon />}
     </TouchableOpacity>

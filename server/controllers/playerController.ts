@@ -11,10 +11,21 @@ import {
   findPlayer,
 } from '../services/playerService';
 import { deleteFile, uploadFile } from '../services/fileService';
+import {
+  createPaymentPlan,
+  updatePaymentPlanOnPlayerUpdate,
+} from '../services/paymentService';
 
 const create = async (req: Request, res: Response) => {
-  const { avatar, name, mainRoll, isCaptain, isWicketKeeper, feesPayingSince } =
-    req.body;
+  const {
+    avatar,
+    name,
+    mainRoll,
+    isCaptain,
+    isWicketKeeper,
+    feesPayingSince,
+    fee,
+  } = req.body;
 
   let uploadedAvatarURL: string | null = null;
 
@@ -29,6 +40,12 @@ const create = async (req: Request, res: Response) => {
     isCaptain,
     isWicketKeeper,
     feesPayingSince,
+  });
+
+  createPaymentPlan({
+    playerId: createdPlayer.dataValues.id,
+    fee,
+    effectiveFrom: feesPayingSince,
   });
 
   res
@@ -53,7 +70,7 @@ const update = async (req: Request, res: Response) => {
     uploadedAvatarURL = await uploadFile(avatar);
   }
 
-  const updatedPlayer = await updatePlayer(playerId, {
+  await updatePlayer(playerId, {
     avatar: uploadedAvatarURL,
     name,
     mainRoll,
@@ -61,6 +78,8 @@ const update = async (req: Request, res: Response) => {
     isWicketKeeper,
     feesPayingSince,
   });
+
+  updatePaymentPlanOnPlayerUpdate(playerId, feesPayingSince);
 
   return res.status(StatusCodes.OK).json({
     message: 'Player updated successfully.',

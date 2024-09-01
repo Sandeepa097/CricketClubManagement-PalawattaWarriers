@@ -16,4 +16,5 @@ export enum NavigationRoutes {
 
   CREATE_PAYMENTS = 'CreatePaymentsScreen',
   CREATE_PAYMENT_PLAN = 'CreatePaymentPlanScreen',
+  PAYMENT_PLANS = 'PaymentPlansScreen',
 }

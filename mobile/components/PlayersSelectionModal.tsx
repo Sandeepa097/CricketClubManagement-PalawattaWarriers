@@ -12,7 +12,7 @@ interface PlayersSelectionModalProps {
   isVisible: boolean;
   players: PlayerType[];
   emptyMessage?: string;
-  selected: (string | number)[];
+  selected: string | number | (string | number)[];
   onPressItem: (id: string | number) => void;
   onRequestClose: () => void;
 }
@@ -31,7 +31,11 @@ const PlayersSelectionModal = (props: PlayersSelectionModalProps) => {
               <PlayerItem
                 key={item.id}
                 {...item}
-                flat={props.selected.includes(item.id)}
+                flat={
+                  Array.isArray(props.selected)
+                    ? props.selected.includes(item.id)
+                    : item.id === props.selected
+                }
                 width={width - 50}
                 onPress={(id) => props.onPressItem(id)}
               />

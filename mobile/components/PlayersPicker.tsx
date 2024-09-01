@@ -10,20 +10,29 @@ interface PlayersPickerProps {
   placeholder: string;
   emptyMessage?: string;
   players: PlayerType[];
-  selected: (string | number)[];
+  selected: string | number | (string | number)[];
   error?: string;
+  disabled?: boolean;
   onBlur?: () => void;
-  onChangeSelection: (values: (string | number)[]) => void;
+  onChangeSelection: (values: string | number | (string | number)[]) => void;
 }
 
 const PlayersPicker = (props: PlayersPickerProps) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const onPressItem = (id: string | number) => {
-    if (props.selected.includes(id)) {
-      props.onChangeSelection(props.selected.filter((itemId) => itemId !== id));
+    if (Array.isArray(props.selected)) {
+      if (props.selected.includes(id)) {
+        props.onChangeSelection(
+          props.selected.filter((itemId) => itemId !== id)
+        );
+      } else {
+        props.onChangeSelection([...props.selected, id]);
+      }
     } else {
-      props.onChangeSelection([...props.selected, id]);
+      props.onBlur && props.onBlur();
+      setModalVisible(false);
+      props.onChangeSelection(id);
     }
   };
 
@@ -33,16 +42,24 @@ const PlayersPicker = (props: PlayersPickerProps) => {
         <ClickableInput
           containerStyle={{ marginBottom: 0 }}
           placeholder={props.placeholder}
-          value={props.selected
-            .map((id) => {
-              const player = props.players.find((player) => player.id === id);
-              return player.name;
-            })
-            .join(', ')}
+          disabled={props.disabled}
+          value={
+            Array.isArray(props.selected)
+              ? props.selected
+                  .map((id) => {
+                    const player = props.players.find(
+                      (player) => player.id === id
+                    );
+                    return player.name;
+                  })
+                  .join(', ')
+              : props.players.find((player) => player.id === props.selected)
+                  ?.name
+          }
           icon={() => (
             <Entypo name="chevron-right" size={24} color={Colors.DEEP_TEAL} />
           )}
-          onPress={() => setModalVisible(true)}
+          onPress={() => (!props.disabled ? setModalVisible(true) : {})}
         />
         {props.error && true && <Text style={styles.error}>{props.error}</Text>}
       </View>
