@@ -33,6 +33,7 @@ const MonthlyPaymentSummery = (props: MonthlyPaymentSummaryProps) => {
   const [date, setDate] = useState(new Date());
 
   const handleDateChange = (direction: 'next' | 'back') => {
+    manipulator.setDate(1);
     manipulator.setFullYear(date.getFullYear());
     manipulator.setMonth(date.getMonth() + (direction === 'next' ? 1 : -1));
     setDate(manipulator);
