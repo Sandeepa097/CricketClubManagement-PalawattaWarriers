@@ -30,6 +30,8 @@ const PlayersPicker = (props: PlayersPickerProps) => {
         props.onChangeSelection([...props.selected, id]);
       }
     } else {
+      props.onBlur && props.onBlur();
+      setModalVisible(false);
       props.onChangeSelection(id);
     }
   };

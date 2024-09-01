@@ -123,9 +123,7 @@ const CreatePaymentPlan = ({ navigation, route }) => {
                 selected={values.playerId}
                 error={touched.playerId && (errors.playerId as string)}
                 onBlur={() => setFieldTouched('playerId', true, true)}
-                onChangeSelection={(playerId) => {
-                  setFieldValue('playerId', playerId);
-                }}
+                onChangeSelection={(value) => setFieldValue('playerId', value)}
               />
               <TextInput
                 length="long"

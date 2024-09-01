@@ -37,12 +37,7 @@ const PlayersSelectionModal = (props: PlayersSelectionModalProps) => {
                     : item.id === props.selected
                 }
                 width={width - 50}
-                onPress={(id) => {
-                  props.onPressItem(id);
-                  if (!Array.isArray(props.selected)) {
-                    props.onRequestClose();
-                  }
-                }}
+                onPress={(id) => props.onPressItem(id)}
               />
             )}
             ListEmptyComponent={() => (
