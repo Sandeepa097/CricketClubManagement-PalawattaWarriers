@@ -5,40 +5,21 @@ import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
 import { FontAwesome5 } from '@expo/vector-icons';
 import SectionTitle from '../components/base/SectionTitle';
-import PaymentPlan from '../components/PaymentPlan';
 import PaymentItem from '../components/PaymentItem';
 import MonthlyPaymentSummery from '../components/MonthlyPaymentSummary';
 import ConfirmBox from '../components/base/ConfirmBox';
-import SwipeAction from '../components/SwipeAction';
 import { useIsFocused } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import { UserTypes } from '../constants/UserTypes';
 import {
   deletePayment,
-  deletePlan,
   getCollectionDetails,
-  getPaymentPlans,
   getPendingPayments,
   getPreviousPayments,
 } from '../redux/slices/paymentSlice';
 import { setEditing } from '../redux/slices/statusSlice';
 import Draggable from '../components/base/Draggable';
-
-const renderPaymentPlan = (paymentPlan: any) => (
-  <PaymentPlan
-    fee={paymentPlan.fee as number}
-    effective={`${new Intl.DateTimeFormat('en-US', {
-      month: 'long',
-    }).format(
-      new Date(
-        paymentPlan.effectiveFrom.year,
-        paymentPlan.effectiveFrom.month,
-        1
-      )
-    )}, ${paymentPlan.effectiveFrom.year}`}
-  />
-);
 
 const isScrollCloseToBottom = ({
   layoutMeasurement,
@@ -62,24 +43,18 @@ const Payments = ({ navigation }) => {
   const totalPreviousPayments = useSelector(
     (state: RootState) => state.payment.previousPaymentsTotal
   );
-  const paymentPlans = useSelector(
-    (state: RootState) => state.payment.paymentPlans
-  );
   const collectionDetails = useSelector(
     (state: RootState) => state.payment.collection
   );
 
   const [deleteRequestedPaymentId, setDeleteRequestedPaymentId] =
     useState(null);
-  const [deletePlanConfirmationVisible, setDeletePlanConfirmationVisible] =
-    useState(false);
   const [
     deletePaymentConfirmationVisible,
     setDeletePaymentConfirmationVisible,
   ] = useState(false);
 
   useEffect(() => {
-    dispatch(getPaymentPlans());
     dispatch(getPendingPayments());
     if (!previousPayments.length) {
       dispatch(getPreviousPayments(0));
@@ -101,65 +76,37 @@ const Payments = ({ navigation }) => {
             fetchMorePreviousPayments();
           }
         }}>
-        <SectionTitle title="Ongoing Plan" marginTop={10} />
-        {paymentPlans.onGoing &&
-          paymentPlans.onGoing !== null &&
-          (userType === UserTypes.ADMIN || userType === UserTypes.TREASURER ? (
-            <SwipeAction
-              onRequestEdit={() => {
-                dispatch(setEditing(true));
-                navigation.navigate(NavigationRoutes.CREATE_PAYMENT_PLAN, {
-                  type: 'ongoing',
-                  ...paymentPlans.onGoing,
-                });
-              }}>
-              {renderPaymentPlan(paymentPlans.onGoing)}
-            </SwipeAction>
-          ) : (
-            renderPaymentPlan(paymentPlans.onGoing)
-          ))}
-
-        {paymentPlans.future && paymentPlans.future !== null ? (
+        {(userType === UserTypes.ADMIN || userType === UserTypes.TREASURER) && (
           <>
-            <SectionTitle title="Future Plan" />
-            {userType === UserTypes.ADMIN ||
-            userType === UserTypes.TREASURER ? (
-              <SwipeAction
-                onRequestEdit={() => {
-                  dispatch(setEditing(true));
-                  navigation.navigate(NavigationRoutes.CREATE_PAYMENT_PLAN, {
-                    type: 'future',
-                    ...paymentPlans.future,
-                  });
-                }}
-                onRequestDelete={() => setDeletePlanConfirmationVisible(true)}>
-                {renderPaymentPlan(paymentPlans.future)}
-              </SwipeAction>
-            ) : (
-              renderPaymentPlan(paymentPlans.future)
-            )}
+            <SectionTitle title="Payment Plans" marginTop={10} />
+            <Button
+              length="long"
+              style="outlined"
+              color={Colors.DARK_TEAL}
+              text="Ongoing plans"
+              upperCase={false}
+              onPress={() =>
+                navigation.navigate(NavigationRoutes.PAYMENT_PLANS, {
+                  type: 'ongoing',
+                })
+              }
+            />
+            <Button
+              length="long"
+              style="filled"
+              color={Colors.DARK_TEAL}
+              text="Future plans"
+              upperCase={false}
+              onPress={() =>
+                navigation.navigate(NavigationRoutes.PAYMENT_PLANS, {
+                  type: 'future',
+                })
+              }
+            />
           </>
-        ) : (
-          (userType === UserTypes.ADMIN ||
-            userType === UserTypes.TREASURER) && (
-            <>
-              <SectionTitle title="Future Plan" />
-              <Button
-                length="long"
-                style="outlined"
-                color={Colors.DEEP_TEAL}
-                text="Create Future Plan"
-                onPress={() =>
-                  navigation.navigate(NavigationRoutes.CREATE_PAYMENT_PLAN, {
-                    type: 'future',
-                  })
-                }
-              />
-            </>
-          )
         )}
 
-        <SectionTitle title="Collection Details" />
+        <SectionTitle title="Collection Details" marginTop={10} />
         <MonthlyPaymentSummery
           loading={false}
           data={{ ...collectionDetails, due: collectionDetails.due }}
@@ -202,23 +149,6 @@ const Payments = ({ navigation }) => {
           />
         ))}
       </ScrollView>
-      <ConfirmBox
-        visible={deletePlanConfirmationVisible}
-        title="Are you sure you want to delete this plan?"
-        ok={{
-          text: 'Delete',
-          onPress: () => {
-            dispatch(deletePlan(paymentPlans.future.id));
-            setDeletePlanConfirmationVisible(false);
-          },
-        }}
-        cancel={{
-          text: 'Cancel',
-          onPress: () => {
-            setDeletePlanConfirmationVisible(false);
-          },
-        }}
-      />
       <ConfirmBox
         visible={deletePaymentConfirmationVisible}
         title="Are you sure you want to delete this payment?"

@@ -6,24 +6,31 @@ import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
 import { createPlan, updatePlan } from '../redux/slices/paymentSlice';
 import { setEditing } from '../redux/slices/statusSlice';
+import PlayersPicker from '../components/PlayersPicker';
 
 interface RouteParams {
   type: 'future' | 'ongoing';
   id?: number | string;
+  playerId?: number | string;
   fee?: number;
   effectiveFrom?: {
     month: number;
     year: number;
   };
+  selectablePlayers: any[];
 }
 
 const CreatePaymentPlan = ({ navigation, route }) => {
+  const players = useSelector((state: RootState) => state.player.players);
+  const futurePlans = useSelector(
+    (state: RootState) => state.payment.paymentPlans.future
+  );
   const dispatch = useDispatch<AppDispatch>();
-  const { type, id, fee, effectiveFrom }: RouteParams = route.params;
+  const { type, id, fee, effectiveFrom, playerId }: RouteParams = route.params;
   const date = new Date();
 
   const getMinForFuturePlan = () => {
@@ -36,6 +43,7 @@ const CreatePaymentPlan = ({ navigation, route }) => {
   };
 
   const paymentPlanValidationSchema = Yup.object().shape({
+    playerId: Yup.number().required('Player is required.'),
     fee: Yup.number()
       .integer('Cents are not allowed.')
       .min(1, 'Fee must be at least an rupee.')
@@ -60,6 +68,7 @@ const CreatePaymentPlan = ({ navigation, route }) => {
         contentContainerStyle={{ display: 'flex', alignItems: 'center' }}>
         <Formik
           initialValues={{
+            playerId: playerId || null,
             fee: fee ? fee.toString() : '',
             effectiveFrom: effectiveFrom || null,
           }}
@@ -97,6 +106,27 @@ const CreatePaymentPlan = ({ navigation, route }) => {
             touched,
           }) => (
             <>
+              <PlayersPicker
+                placeholder="Player"
+                players={
+                  type === 'ongoing'
+                    ? players
+                    : players.filter(
+                        (player) =>
+                          !futurePlans.find(
+                            (plan) => plan.playerId === player.id
+                          )
+                      )
+                }
+                disabled={type === 'ongoing'}
+                emptyMessage="No players found."
+                selected={values.playerId}
+                error={touched.playerId && (errors.playerId as string)}
+                onBlur={() => setFieldTouched('playerId', true, true)}
+                onChangeSelection={(playerId) => {
+                  setFieldValue('playerId', playerId);
+                }}
+              />
               <TextInput
                 length="long"
                 placeholder="Fee"
@@ -108,6 +138,7 @@ const CreatePaymentPlan = ({ navigation, route }) => {
               />
               <MonthYearPicker
                 placeholder="Effective from"
+                disabled={type === 'ongoing'}
                 title="Effective from"
                 value={values.effectiveFrom}
                 min={

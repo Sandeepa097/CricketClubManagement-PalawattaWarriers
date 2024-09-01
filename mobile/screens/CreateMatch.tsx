@@ -278,19 +278,19 @@ const CreateMatch = ({ route, navigation }) => {
                   setFieldValue(
                     'battingStats',
                     values.battingStats.filter((batsman) =>
-                      officialPlayers.includes(batsman.id)
+                      (officialPlayers as any[]).includes(batsman.id)
                     )
                   );
                   setFieldValue(
                     'bowlingStats',
                     values.bowlingStats.filter((bowler) =>
-                      officialPlayers.includes(bowler.id)
+                      (officialPlayers as any[]).includes(bowler.id)
                     )
                   );
                   setFieldValue(
                     'fieldingStats',
                     values.fieldingStats.filter((fielder) =>
-                      officialPlayers.includes(fielder.id)
+                      (officialPlayers as any[]).includes(fielder.id)
                     )
                   );
                   setFieldValue('officialPlayers', officialPlayers);

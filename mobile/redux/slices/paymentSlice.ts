@@ -22,17 +22,18 @@ interface PreviousPaymentAttributes {
 }
 
 interface PaymentPlanAttributes {
-  id?: number | string;
+  id: number | string;
   effectiveFrom: {
     year: number;
     month: number;
   };
+  playerId: string | number;
   fee: number | string;
 }
 
 interface PaymentPlans {
-  onGoing: PaymentPlanAttributes;
-  future: PaymentPlanAttributes;
+  ongoing: PaymentPlanAttributes[];
+  future: PaymentPlanAttributes[];
 }
 
 interface CollectionAttributes {
@@ -108,26 +109,29 @@ export const getPreviousPayments = createAsyncThunk(
   }
 );
 
-export const getPaymentPlans = createAsyncThunk('payment/plan', async () => {
-  const currentDate = new Date();
-  const month = currentDate.getMonth();
-  const year = currentDate.getFullYear();
-  const response: any = await api.get(
-    `/payments/plans?month=${month}&year=${year}`
-  );
+export const getPaymentPlans = createAsyncThunk(
+  'payment/plan',
+  async (payload: 'ongoing' | 'future') => {
+    const currentDate = new Date();
+    const month = currentDate.getMonth();
+    const year = currentDate.getFullYear();
+    const response: any = await api.get(
+      `/payments/plans/${payload}?month=${month}&year=${year}`
+    );
 
-  if (response.ok) {
+    if (response.ok) {
+      return {
+        type: payload,
+        data: response.data[`${payload}Plans`],
+      };
+    }
+
     return {
-      onGoing: response.data?.onGoingPlan,
-      future: response.data?.futurePlan,
+      type: payload,
+      data: [],
     };
   }
-
-  return {
-    onGoing: null,
-    future: null,
-  };
-});
+);
 
 export const getCollectionDetails = createAsyncThunk(
   'payment/collection',
@@ -237,7 +241,7 @@ export const deletePlan = createAsyncThunk(
   async (payload: number | string, { rejectWithValue }) => {
     const response: any = await api.delete(`payments/plans/${payload}`);
     if (response.ok) {
-      return;
+      return payload;
     }
 
     return rejectWithValue(response.data?.message);
@@ -249,8 +253,8 @@ const initialState: PaymentSliceState = {
   pendingPayments: [],
   previousPayments: [],
   paymentPlans: {
-    onGoing: null,
-    future: null,
+    ongoing: [],
+    future: [],
   },
   collection: {
     projected: 0,
@@ -325,8 +329,17 @@ export const paymentSlice = createSlice({
       )
       .addCase(
         getPaymentPlans.fulfilled,
-        (state, action: PayloadAction<PaymentPlans>) => {
-          state.paymentPlans = action.payload;
+        (
+          state,
+          action: PayloadAction<{
+            type: 'ongoing' | 'future';
+            data: PaymentAttributes[];
+          }>
+        ) => {
+          state.paymentPlans = {
+            ...state.paymentPlans,
+            [action.payload.type]: action.payload.data,
+          };
         }
       )
       .addCase(
@@ -338,7 +351,10 @@ export const paymentSlice = createSlice({
       .addCase(
         createPlan.fulfilled,
         (state, action: PayloadAction<PaymentPlanAttributes>) => {
-          state.paymentPlans.future = action.payload;
+          state.paymentPlans.future = [
+            ...state.paymentPlans.future,
+            action.payload,
+          ];
         }
       )
       .addCase(
@@ -346,16 +362,31 @@ export const paymentSlice = createSlice({
         (
           state,
           action: PayloadAction<{
+            id: number | string;
             type: 'ongoing' | 'future';
             data: PaymentPlanAttributes;
           }>
         ) => {
-          state.paymentPlans[action.payload.type] = action.payload.data;
+          state.paymentPlans[action.payload.type] = state.paymentPlans[
+            action.payload.type
+          ].map((plan) => {
+            if (plan.id === action.payload.id)
+              return {
+                ...plan,
+                ...action.payload.data,
+              };
+            return plan;
+          });
         }
       )
-      .addCase(deletePlan.fulfilled, (state, _) => {
-        state.paymentPlans.future = null;
-      });
+      .addCase(
+        deletePlan.fulfilled,
+        (state, action: PayloadAction<number | string>) => {
+          state.paymentPlans.future = state.paymentPlans.future.filter(
+            (plan) => plan.id === action.payload
+          );
+        }
+      );
   },
 });
 

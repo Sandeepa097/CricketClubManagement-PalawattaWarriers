@@ -12,6 +12,7 @@ import CreatePlayer from '../screens/CreatePlayer';
 import OverviewPlayer from '../screens/OverviewPlayer';
 import CreatePayments from '../screens/CreatePayments';
 import CreatePaymentPlan from '../screens/CreatePaymentPlan';
+import PaymentPlans from '../screens/PaymentPlans';
 
 const Stack = createStackNavigator();
 
@@ -82,6 +83,22 @@ const AppNavigator = ({
       options={{
         header: () => (
           <SubHeader title="New Future Plan" onEditTitle="Edit Payment Plan" />
+        ),
+      }}
+    />
+    <Stack.Screen
+      name={NavigationRoutes.PAYMENT_PLANS}
+      component={PaymentPlans}
+      options={{
+        header: (props) => (
+          <SubHeader
+            title={
+              (props.route.params as { type: 'ongoing' | 'future' })?.type ===
+              'ongoing'
+                ? 'Ongoing Plans'
+                : 'Future Plans'
+            }
+          />
         ),
       }}
     />
