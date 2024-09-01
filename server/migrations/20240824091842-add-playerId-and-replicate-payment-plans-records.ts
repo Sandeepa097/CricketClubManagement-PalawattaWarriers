@@ -12,31 +12,28 @@ module.exports = {
     });
 
     const players = await queryInterface.sequelize.query(
-      'SELECT id FROM Players;',
+      'SELECT * FROM Players;',
       { type: QueryTypes.SELECT }
     );
 
-    const paymentPlans = await queryInterface.sequelize.query(
-      'SELECT * FROM PaymentPlans;',
-      { type: QueryTypes.SELECT }
-    );
+    await queryInterface.sequelize.query('TRUNCATE TABLE `PaymentPlans`;');
 
     const newPaymentPlans: any[] = [];
-    paymentPlans.forEach((plan: any) => {
-      players.forEach((player: any) => {
-        const newPlan = { ...plan, playerId: player.id };
-        delete newPlan.id;
-        newPaymentPlans.push(newPlan);
-      });
+    players.forEach((player: any) => {
+      const newPlan = {
+        fee: 500,
+        playerId: player.id,
+        effectiveMonth: player.feesPayingMonth,
+        effectiveYear: player.feesPayingYear,
+        createdAt: player.createdAt,
+        updatedAt: player.updatedAt,
+      };
+      newPaymentPlans.push(newPlan);
     });
 
     if (newPaymentPlans.length > 0) {
       await queryInterface.bulkInsert('PaymentPlans', newPaymentPlans);
     }
-
-    await queryInterface.bulkDelete('PaymentPlans', {
-      playerId: null,
-    });
 
     await queryInterface.changeColumn('PaymentPlans', 'playerId', {
       type: DataTypes.INTEGER,
@@ -50,25 +47,31 @@ module.exports = {
   },
 
   down: async (queryInterface: QueryInterface) => {
-    const originalPlans: any[] = await queryInterface.sequelize.query(
-      `
-      SELECT fee, effectiveMonth, effectiveYear
-      FROM PaymentPlans
-      GROUP BY fee, effectiveMonth, effectiveYear
-      HAVING COUNT(*) > 1
-      `,
-      { type: QueryTypes.SELECT }
+    await queryInterface.sequelize.query('TRUNCATE TABLE `PaymentPlans`;');
+
+    await queryInterface.sequelize.query(
+      'ALTER TABLE `PaymentPlans` DROP CONSTRAINT `paymentplans_ibfk_1`;'
     );
 
-    for (const plan of originalPlans) {
-      await queryInterface.bulkDelete('PaymentPlans', {
-        playerId: { [Op.not]: null },
-        fee: plan.fee,
-        effectiveMonth: plan.effectiveMonth,
-        effectiveYear: plan.effectiveYear,
-      });
-    }
+    await queryInterface.sequelize.query(
+      'ALTER TABLE `PaymentPlans` DROP COLUMN `playerId`;'
+    );
 
-    await queryInterface.removeColumn('PaymentPlans', 'playerId');
+    await queryInterface.bulkInsert('PaymentPlans', [
+      {
+        fee: 500,
+        effectiveMonth: 0,
+        effectiveYear: 1970,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        fee: 500,
+        effectiveMonth: 0,
+        effectiveYear: 2024,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
   },
 };
