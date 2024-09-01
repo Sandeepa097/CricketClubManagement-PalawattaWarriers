@@ -116,6 +116,7 @@ paymentRouter.post(
 
 paymentRouter.get(
   '/plans/ongoing',
+  validatePermissions([UserTypes.ADMIN, UserTypes.TREASURER]),
   validateRequest([
     query('month')
       .notEmpty()
@@ -133,6 +134,7 @@ paymentRouter.get(
 
 paymentRouter.get(
   '/plans/future',
+  validatePermissions([UserTypes.ADMIN, UserTypes.TREASURER]),
   validateRequest([
     query('month')
       .notEmpty()
