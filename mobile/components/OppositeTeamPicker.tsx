@@ -118,6 +118,7 @@ const OppositeTeamPicker = (props: OppositeTeamPickerProps) => {
               data={teams}
               renderItem={({ item }) => (
                 <TeamItem
+                  key={item.id}
                   text={item.name}
                   selected={item.id === props.value}
                   onPress={() => {

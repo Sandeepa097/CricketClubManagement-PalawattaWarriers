@@ -62,48 +62,39 @@ const PaymentPlans = ({ route, navigation }) => {
         message="No plans found."
       />
       <FlatList
-        data={paymentPlans[route.params.type].filter((plan) =>
-          players
-            .filter(
-              (player) =>
-                player.name
-                  .toLowerCase()
-                  .indexOf(searchText.toLocaleLowerCase()) > -1
-            )
-            .find((player) => player.id === plan.playerId)
+        data={paymentPlans[route.params.type].filter(
+          (plan) =>
+            players
+              .find((player) => player.id === plan.playerId)
+              ?.name.toLowerCase()
+              .indexOf(searchText.toLocaleLowerCase()) > -1
         )}
-        renderItem={({ item }) =>
-          userType === UserTypes.ADMIN || userType === UserTypes.TREASURER ? (
-            <SwipeAction
-              {...{
-                onRequestEdit: () => {
-                  dispatch(setEditing(true));
-                  navigation.navigate(NavigationRoutes.CREATE_PAYMENT_PLAN, {
-                    type: route.params.type,
-                    ...item,
-                  });
-                },
-                ...(route.params.type === 'future'
-                  ? {
-                      onRequestDelete: () => {
-                        setDeleteRequestedPlanId(item.id);
-                        setDeletePlanConfirmationVisible(true);
-                      },
-                    }
-                  : {}),
-              }}>
-              {renderPaymentPlan({
-                ...item,
-                player: players.find((player) => player.id === item.playerId),
-              })}
-            </SwipeAction>
-          ) : (
-            renderPaymentPlan({
+        renderItem={({ item }) => (
+          <SwipeAction
+            key={item.id}
+            {...{
+              onRequestEdit: () => {
+                dispatch(setEditing(true));
+                navigation.navigate(NavigationRoutes.CREATE_PAYMENT_PLAN, {
+                  type: route.params.type,
+                  ...item,
+                });
+              },
+              ...(route.params.type === 'future'
+                ? {
+                    onRequestDelete: () => {
+                      setDeleteRequestedPlanId(item.id);
+                      setDeletePlanConfirmationVisible(true);
+                    },
+                  }
+                : {}),
+            }}>
+            {renderPaymentPlan({
               ...item,
               player: players.find((player) => player.id === item.playerId),
-            })
-          )
-        }
+            })}
+          </SwipeAction>
+        )}
       />
 
       <ConfirmBox

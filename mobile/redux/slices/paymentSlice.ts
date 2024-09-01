@@ -207,7 +207,7 @@ export const createPlan = createAsyncThunk(
   async (payload: PaymentPlanAttributes, { rejectWithValue }) => {
     const response: any = await api.post('payments/plans', payload);
     if (response.ok) {
-      return payload;
+      return { ...response.data.plan };
     }
 
     return rejectWithValue(response.data?.message);
