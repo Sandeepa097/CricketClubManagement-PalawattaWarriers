@@ -46,6 +46,7 @@ const Payments = ({ navigation }) => {
   const collectionDetails = useSelector(
     (state: RootState) => state.payment.collection
   );
+  const players = useSelector((state: RootState) => state.player.players);
 
   const [deleteRequestedPaymentId, setDeleteRequestedPaymentId] =
     useState(null);
@@ -65,6 +66,13 @@ const Payments = ({ navigation }) => {
     if (previousPayments.length < totalPreviousPayments) {
       dispatch(getPreviousPayments(previousPayments.length));
     }
+  };
+
+  const onPressPaymentItem = (id: number | string) => {
+    navigation.navigate(
+      NavigationRoutes.OVERVIEW_PLAYER,
+      players.find((player: any) => player.id === id)
+    );
   };
 
   return (
@@ -122,6 +130,7 @@ const Payments = ({ navigation }) => {
             {...item}
             payment={item.due}
             pending={true}
+            onPress={(id) => onPressPaymentItem(id)}
           />
         ))}
 
@@ -133,6 +142,7 @@ const Payments = ({ navigation }) => {
             payment={item.amount}
             timestamp={new Date(item.createdAt)}
             pending={false}
+            onPress={(id) => onPressPaymentItem(id)}
             {...(userType === UserTypes.ADMIN ||
             userType === UserTypes.TREASURER
               ? {

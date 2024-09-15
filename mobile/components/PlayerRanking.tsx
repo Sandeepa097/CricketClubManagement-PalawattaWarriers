@@ -6,6 +6,7 @@ import {
   View,
   FlatList,
   Image,
+  TouchableOpacity,
 } from 'react-native';
 import Logo from '../assets/Logo';
 import { Colors } from '../constants/Colors';
@@ -17,6 +18,7 @@ interface RankingProps {
   name: string;
   avatar?: string;
   points: number;
+  onPressItem: (id: number | string) => void;
 }
 
 interface PlayerProps extends RankingProps {
@@ -33,7 +35,10 @@ const topPlayerContainerWidth = (width - 70) / 3;
 
 const TopPlayerItem = (props: TopPlayerProps) => {
   return (
-    <View style={styles.singleTopPlayerContainer}>
+    <TouchableOpacity
+      style={styles.singleTopPlayerContainer}
+      activeOpacity={0.5}
+      onPress={() => props.onPressItem(props.id)}>
       <View style={styles.singleTopPlayerDetailsContainer}>
         <View
           style={[
@@ -97,13 +102,16 @@ const TopPlayerItem = (props: TopPlayerProps) => {
           fontSize={20}
         />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
 const PlayerItem = (props: PlayerProps) => {
   return (
-    <View style={styles.playerContainer}>
+    <TouchableOpacity
+      style={styles.playerContainer}
+      activeOpacity={0.5}
+      onPress={() => props.onPressItem(props.id)}>
       <View style={styles.playerDetailsContainer}>
         <Text style={styles.playerText}>{props.placement}</Text>
         <View style={styles.playerAvatarContainer}>
@@ -119,11 +127,17 @@ const PlayerItem = (props: PlayerProps) => {
         <Text style={styles.playerText}>{props.name}</Text>
       </View>
       <Text style={styles.playerText}>{props.points}</Text>
-    </View>
+    </TouchableOpacity>
   );
 };
 
-const PlayerRanking = ({ items }: { items: RankingProps[] }) => {
+const PlayerRanking = ({
+  items,
+  onPressItem,
+}: {
+  items: RankingProps[];
+  onPressItem: (id: number | string) => void;
+}) => {
   return (
     <View style={styles.container}>
       {items.length >= 3 && (
@@ -133,16 +147,23 @@ const PlayerRanking = ({ items }: { items: RankingProps[] }) => {
               {...items[1]}
               placement={2}
               color={Colors.DEEP_ORANGE}
+              onPressItem={(id) => onPressItem(id)}
             />
           </View>
           <View style={{ marginBottom: 80 }}>
-            <TopPlayerItem {...items[0]} placement={1} color={Colors.PURPLE} />
+            <TopPlayerItem
+              {...items[0]}
+              placement={1}
+              color={Colors.PURPLE}
+              onPressItem={(id) => onPressItem(id)}
+            />
           </View>
           <View>
             <TopPlayerItem
               {...items[2]}
               placement={3}
               color={Colors.DARK_TEAL}
+              onPressItem={(id) => onPressItem(id)}
             />
           </View>
         </View>
@@ -151,7 +172,12 @@ const PlayerRanking = ({ items }: { items: RankingProps[] }) => {
         <FlatList
           data={items.slice(3, items.length)}
           renderItem={({ item, index }) => (
-            <PlayerItem key={item.id} {...item} placement={index + 4} />
+            <PlayerItem
+              key={item.id}
+              {...item}
+              placement={index + 4}
+              onPressItem={(id) => onPressItem(id)}
+            />
           )}
         />
       )}

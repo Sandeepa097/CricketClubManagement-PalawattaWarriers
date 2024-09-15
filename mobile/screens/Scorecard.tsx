@@ -1,7 +1,17 @@
 import React from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Colors } from '../constants/Colors';
 import SectionTitle from '../components/base/SectionTitle';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import { NavigationRoutes } from '../constants/NavigationRoutes';
 
 interface MatchStatsProps {
   vs?: string;
@@ -18,6 +28,7 @@ interface PlayersStatsColumn {
 interface PlayersStatsProps {
   columns: PlayersStatsColumn[];
   values: object[];
+  onPress: (id: number | string) => void;
 }
 
 interface BattingStatsType {
@@ -100,15 +111,17 @@ const PlayersStats = (props: PlayersStatsProps) => {
           </Text>
         ))}
       </View>
-      {props.values.map((value, valueIndex) => (
-        <View
+      {props.values.map((value: any, valueIndex) => (
+        <TouchableOpacity
           key={valueIndex}
           style={[
             styles.playerStatRow,
             props.values.length === valueIndex + 1
               ? { marginBottom: 0 }
               : { marginBottom: 10 },
-          ]}>
+          ]}
+          activeOpacity={0.5}
+          onPress={() => props.onPress(value.playerId)}>
           {props.columns.map((column, index) => (
             <Text
               style={[
@@ -123,13 +136,15 @@ const PlayersStats = (props: PlayersStatsProps) => {
               {value[column.key]}
             </Text>
           ))}
-        </View>
+        </TouchableOpacity>
       ))}
     </View>
   );
 };
 
-const Scorecard = ({ route }) => {
+const Scorecard = ({ route, navigation }) => {
+  const players = useSelector((state: RootState) => state.player.players);
+
   const matchDetails: ScorecardProps = {
     ...route.params,
     vs: route.params.oppositeTeam?.name,
@@ -137,10 +152,12 @@ const Scorecard = ({ route }) => {
     in: route.params.location,
     battingStats: route.params.battingStats.map((stat: any) => ({
       ...stat,
+      playerId: stat.player.id,
       player: stat.player.name,
     })),
     bowlingStats: route.params.bowlingStats.map((stat: any) => ({
       ...stat,
+      playerId: stat.player.id,
       player: stat.player.name,
     })),
     fieldingStats: route.params.fieldingStats
@@ -150,8 +167,16 @@ const Scorecard = ({ route }) => {
       )
       .map((stat: any) => ({
         ...stat,
+        playerId: stat.player.id,
         player: stat.player.name,
       })),
+  };
+
+  const onPressPlayerStat = (id: number | string) => {
+    navigation.navigate(
+      NavigationRoutes.OVERVIEW_PLAYER,
+      players.find((player: any) => player.id === id)
+    );
   };
 
   return (
@@ -184,6 +209,7 @@ const Scorecard = ({ route }) => {
                 { key: 'sixes', name: '6s' },
               ]}
               values={matchDetails.battingStats}
+              onPress={(id) => onPressPlayerStat(id)}
             />
           </View>
         )}
@@ -199,6 +225,7 @@ const Scorecard = ({ route }) => {
                 { key: 'maidens', name: 'Maidens' },
               ]}
               values={matchDetails.bowlingStats}
+              onPress={(id) => onPressPlayerStat(id)}
             />
           </View>
         )}
@@ -214,6 +241,7 @@ const Scorecard = ({ route }) => {
                 { key: 'indirectHits', name: 'Indirect Hits' },
               ]}
               values={matchDetails.fieldingStats}
+              onPress={(id) => onPressPlayerStat(id)}
             />
           </View>
         )}

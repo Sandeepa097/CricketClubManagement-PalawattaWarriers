@@ -1,5 +1,12 @@
 import React from 'react';
-import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Logo from '../assets/Logo';
 import { Colors } from '../constants/Colors';
 import StrokedText from './base/StrokedText';
@@ -14,6 +21,7 @@ interface PaymentProps {
   pending?: boolean;
   onRequestDelete?: () => void;
   onRequestEdit?: () => void;
+  onPress: (id: number | string) => void;
 }
 
 const width: number = Dimensions.get('window').width;
@@ -38,12 +46,14 @@ const SwipeablePaymentItem = ({
 
 const ChildPaymentItem = (props: PaymentProps) => {
   return (
-    <View
+    <TouchableOpacity
       style={
         props.pending
           ? [styles.pendingPaymentContainer, { marginBottom: 10 }]
           : styles.previousPaymentContainer
-      }>
+      }
+      activeOpacity={0.5}
+      onPress={() => props.onPress(props.id)}>
       <View style={styles.detailsContainer}>
         <View style={styles.avatarContainer}>
           {!props.avatar ? (
@@ -79,7 +89,7 @@ const ChildPaymentItem = (props: PaymentProps) => {
           fontSize={20}
         />
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 
