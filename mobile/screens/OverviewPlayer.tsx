@@ -123,7 +123,7 @@ const OverviewPlayer = ({ route }) => {
         playerStats.outdoor.bowlingStats.bestScore !== null ? (
           <PlayerStat
             header="Highest Wickets count"
-            body={`On ${playerStats.outdoor.bowlingStats.bestScore.match.oppositeTeam.name}`}
+            body={`Vs ${playerStats.outdoor.bowlingStats.bestScore.match.oppositeTeam.name}`}
             value={`${playerStats.outdoor.bowlingStats.bestScore.wickets}/${playerStats.outdoor.bowlingStats.bestScore.conceded}`}
           />
         ) : (
