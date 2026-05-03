@@ -33,6 +33,13 @@ export const createPPLGroup = async (group: {
   return await PPLGroup.create({ ...group });
 };
 
+export const updatePPLGroup = async (
+  id: string,
+  payload: { title?: string | null },
+) => {
+  return await PPLGroup.update(payload, { where: { id } });
+};
+
 export const updateMatch = async (id: number, match: CreateMatchAttributes) => {
   return await Match.update(match, { where: { id } });
 };
@@ -45,6 +52,10 @@ export const findMatch = async (id: number) => {
 
 export const removeMatch = async (id: number) => {
   return await Match.destroy({ where: { id } });
+};
+
+export const removePPLGroup = async (id: string) => {
+  return await PPLGroup.destroy({ where: { id } });
 };
 
 export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {

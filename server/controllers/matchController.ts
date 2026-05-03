@@ -8,11 +8,13 @@ import {
   getMatchesCount,
   getOutdoorMatches,
   getPPLMatches,
+  removePPLGroup,
   removeMatch,
   setMatchPlayers,
   setMatchPlayersBattingStats,
   setMatchPlayersBowlingStats,
   setMatchPlayersFieldingStats,
+  updatePPLGroup,
   updateMatch,
 } from '../services/matchService';
 import { StatusCodes } from 'http-status-codes';
@@ -302,7 +304,10 @@ const update = async (req: Request, res: Response) => {
     title,
     oppositeTeamId,
     pplGroupId,
+    pplGroupTitle,
     pplTeamSide,
+    teamATitle,
+    teamBTitle,
     date,
     location,
     result,
@@ -315,6 +320,201 @@ const update = async (req: Request, res: Response) => {
     numberOfDeliveriesPerOver,
   } = req.body;
 
+  const existingMatch = await findMatch(matchId);
+  if (!existingMatch)
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: 'Match not found.' });
+
+  let resolvedPplGroupId: string | null = null;
+  let resolvedPplTeamSide: 'teamA' | 'teamB' | null = null;
+
+  if (isPPL) {
+    resolvedPplGroupId =
+      pplGroupId || (existingMatch.dataValues.pplGroupId as string | null);
+
+    if (!resolvedPplGroupId) {
+      resolvedPplGroupId = randomUUID();
+      await createPPLGroup({
+        id: resolvedPplGroupId,
+        title: pplGroupTitle || null,
+      });
+    } else if (pplGroupTitle !== undefined) {
+      await updatePPLGroup(resolvedPplGroupId, {
+        title: pplGroupTitle || null,
+      });
+    }
+
+    resolvedPplTeamSide =
+      pplTeamSide ||
+      (existingMatch.dataValues.pplTeamSide as 'teamA' | 'teamB' | null) ||
+      'teamA';
+  }
+
+  const getStatsByPlayerIds = <T extends { id: number }>(
+    stats: T[] = [],
+    playerIds: number[] = [],
+  ) => stats.filter((stat) => playerIds.includes(stat.id));
+
+  const convertingOutdoorToPPL =
+    isPPL &&
+    !!existingMatch.dataValues.oppositeTeamId &&
+    !existingMatch.dataValues.pplGroupId;
+
+  if (convertingOutdoorToPPL) {
+    const teamAPlayersNormalized = teamAPlayers || [];
+    const teamBPlayersNormalized = teamBPlayers || [];
+
+    const teamABattingStats = getStatsByPlayerIds(
+      battingStats,
+      teamAPlayers || [],
+    ) as BattingStatsInterface[];
+    const teamBBattingStats = getStatsByPlayerIds(
+      battingStats,
+      teamBPlayers || [],
+    ) as BattingStatsInterface[];
+
+    const teamABowlingStats = getStatsByPlayerIds(
+      bowlingStats,
+      teamAPlayers || [],
+    ) as BowlingStatsInterface[];
+    const teamBBowlingStats = getStatsByPlayerIds(
+      bowlingStats,
+      teamBPlayers || [],
+    ) as BowlingStatsInterface[];
+
+    const teamAFieldingStats = getStatsByPlayerIds(
+      fieldingStats,
+      teamAPlayers || [],
+    ) as FieldingStatsInterface[];
+    const teamBFieldingStats = getStatsByPlayerIds(
+      fieldingStats,
+      teamBPlayers || [],
+    ) as FieldingStatsInterface[];
+
+    await updateMatch(matchId, {
+      title: teamATitle || title || 'Team A',
+      oppositeTeamId: null,
+      pplGroupId: resolvedPplGroupId,
+      pplTeamSide: 'teamA',
+      date,
+      location,
+      result: null,
+    });
+
+    const updatedTeamAMatch = await findMatch(matchId);
+    if (!updatedTeamAMatch)
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: 'Match not found.' });
+
+    await setMatchPlayers(updatedTeamAMatch, teamAPlayersNormalized);
+
+    await setMatchPlayersBattingStats(
+      updatedTeamAMatch,
+      teamABattingStats.map((stat) => {
+        const battingPoints = calculateBattingPoints({ ...stat.values });
+        return {
+          id: stat.id,
+          ...stat.values,
+          strikeRate: battingPoints.strikeRate,
+          points: battingPoints.totalPoints,
+        };
+      }),
+    );
+
+    await setMatchPlayersBowlingStats(
+      updatedTeamAMatch,
+      teamABowlingStats.map((stat) => {
+        const bowlingPoints = calculateBowlingPoints({
+          ...stat.values,
+          numberOfDeliveriesPerOver,
+        });
+        return {
+          id: stat.id,
+          ...stat.values,
+          economy: bowlingPoints.economy,
+          points: bowlingPoints.totalPoints,
+        };
+      }),
+    );
+
+    await setMatchPlayersFieldingStats(
+      updatedTeamAMatch,
+      teamAPlayersNormalized.map((playerId: number) => {
+        const fieldingStat = teamAFieldingStats.find(
+          (stat) => stat.id === playerId,
+        ) ?? { id: playerId, values: {} };
+        return {
+          id: fieldingStat.id,
+          ...fieldingStat.values,
+          points: calculateFieldingPoints({ ...fieldingStat.values }),
+        };
+      }),
+    );
+
+    const createdTeamBMatch = await createMatch({
+      title: teamBTitle || 'Team B',
+      oppositeTeamId: null,
+      pplGroupId: resolvedPplGroupId,
+      pplTeamSide: 'teamB',
+      date,
+      location,
+      result: null,
+    });
+
+    await setMatchPlayers(createdTeamBMatch, teamBPlayersNormalized);
+
+    await setMatchPlayersBattingStats(
+      createdTeamBMatch,
+      teamBBattingStats.map((stat) => {
+        const battingPoints = calculateBattingPoints({ ...stat.values });
+        return {
+          id: stat.id,
+          ...stat.values,
+          strikeRate: battingPoints.strikeRate,
+          points: battingPoints.totalPoints,
+        };
+      }),
+    );
+
+    await setMatchPlayersBowlingStats(
+      createdTeamBMatch,
+      teamBBowlingStats.map((stat) => {
+        const bowlingPoints = calculateBowlingPoints({
+          ...stat.values,
+          numberOfDeliveriesPerOver,
+        });
+        return {
+          id: stat.id,
+          ...stat.values,
+          economy: bowlingPoints.economy,
+          points: bowlingPoints.totalPoints,
+        };
+      }),
+    );
+
+    await setMatchPlayersFieldingStats(
+      createdTeamBMatch,
+      teamBPlayersNormalized.map((playerId: number) => {
+        const fieldingStat = teamBFieldingStats.find(
+          (stat) => stat.id === playerId,
+        ) ?? { id: playerId, values: {} };
+        return {
+          id: fieldingStat.id,
+          ...fieldingStat.values,
+          points: calculateFieldingPoints({ ...fieldingStat.values }),
+        };
+      }),
+    );
+
+    return res.status(StatusCodes.CREATED).json({
+      message: 'Outdoor match converted to PPL successfully.',
+      pplGroupId: resolvedPplGroupId,
+      matches: [updatedTeamAMatch, createdTeamBMatch],
+    });
+  }
+
   const normalizedMatchPlayers =
     teamAPlayers?.length || teamBPlayers?.length
       ? [...(teamAPlayers || []), ...(teamBPlayers || [])]
@@ -322,25 +522,18 @@ const update = async (req: Request, res: Response) => {
 
   await updateMatch(matchId, {
     title,
-    oppositeTeamId,
-    pplGroupId: isPPL ? pplGroupId || null : null,
-    pplTeamSide: isPPL ? pplTeamSide || null : null,
+    oppositeTeamId: isPPL ? null : oppositeTeamId,
+    pplGroupId: isPPL ? resolvedPplGroupId : null,
+    pplTeamSide: isPPL ? resolvedPplTeamSide : null,
     date,
     location,
-    result,
+    result: isPPL ? null : result,
   });
 
-  const updatedMatch = await findMatch(matchId);
-
-  if (!updatedMatch)
-    return res
-      .status(StatusCodes.NOT_FOUND)
-      .json({ message: 'Match not found.' });
-
-  await setMatchPlayers(updatedMatch, normalizedMatchPlayers);
+  await setMatchPlayers(existingMatch, normalizedMatchPlayers);
 
   await setMatchPlayersBattingStats(
-    updatedMatch,
+    existingMatch,
     (battingStats as BattingStatsInterface[]).map((stat) => {
       const battingPoints = calculateBattingPoints({ ...stat.values });
       return {
@@ -353,7 +546,7 @@ const update = async (req: Request, res: Response) => {
   );
 
   await setMatchPlayersBowlingStats(
-    updatedMatch,
+    existingMatch,
     (bowlingStats as BowlingStatsInterface[]).map((stat) => {
       const bowlingPoints = calculateBowlingPoints({
         ...stat.values,
@@ -369,7 +562,7 @@ const update = async (req: Request, res: Response) => {
   );
 
   await setMatchPlayersFieldingStats(
-    updatedMatch,
+    existingMatch,
     normalizedMatchPlayers.map((playerId: number) => {
       const fieldingStat = (fieldingStats as FieldingStatsInterface[]).find(
         (stat) => stat.id === playerId,
@@ -462,7 +655,17 @@ const index = async (req: Request, res: Response) => {
 
 const remove = async (req: Request, res: Response) => {
   const matchId = Number(req.params.id);
+  const matchToRemove: any = await findMatch(matchId);
+  const pplGroupId = matchToRemove?.dataValues?.pplGroupId || null;
+
   await removeMatch(matchId);
+
+  if (pplGroupId) {
+    const groupedMatchesCount = await getMatchesCount({ pplGroupId });
+    if (!groupedMatchesCount) {
+      await removePPLGroup(pplGroupId);
+    }
+  }
 
   return res
     .status(StatusCodes.NO_CONTENT)
