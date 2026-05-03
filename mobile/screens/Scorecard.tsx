@@ -63,6 +63,54 @@ interface ScorecardProps extends MatchStatsProps {
 
 const width: number = Dimensions.get('window').width;
 
+const hasStatValue = (value: any) =>
+  value !== null && value !== undefined && value !== '';
+
+const hasAnyStatValue = (stat: any, keys: string[]) =>
+  keys.some((key) => hasStatValue(stat[key]));
+
+const normalizeMatchDetails = (
+  match: any,
+): ScorecardProps & { title: string } => ({
+  ...match,
+  title: match.title || 'Match Details',
+  vs: match.oppositeTeam?.name,
+  on: match.date,
+  in: match.location,
+  battingStats: (match.battingStats || [])
+    .filter((stat: any) =>
+      hasAnyStatValue(stat, ['score', 'balls', 'fours', 'sixes', 'isOut']),
+    )
+    .map((stat: any) => ({
+      ...stat,
+      playerId: stat.player.id,
+      player: stat.player.name,
+    })),
+  bowlingStats: (match.bowlingStats || [])
+    .filter((stat: any) =>
+      hasAnyStatValue(stat, ['wickets', 'overs', 'conceded', 'maidens']),
+    )
+    .map((stat: any) => ({
+      ...stat,
+      playerId: stat.player.id,
+      player: stat.player.name,
+    })),
+  fieldingStats: (match.fieldingStats || [])
+    .filter((stat: any) =>
+      hasAnyStatValue(stat, [
+        'catches',
+        'stumps',
+        'directHits',
+        'indirectHits',
+      ]),
+    )
+    .map((stat: any) => ({
+      ...stat,
+      playerId: stat.player.id,
+      player: stat.player.name,
+    })),
+});
+
 const MatchStats = (props: MatchStatsProps) => {
   return (
     <View style={styles.matchStatContainer}>
@@ -145,37 +193,22 @@ const PlayersStats = (props: PlayersStatsProps) => {
 const Scorecard = ({ route, navigation }) => {
   const players = useSelector((state: RootState) => state.player.players);
 
-  const matchDetails: ScorecardProps = {
-    ...route.params,
-    vs: route.params.oppositeTeam?.name,
-    on: route.params.date,
-    in: route.params.location,
-    battingStats: route.params.battingStats.map((stat: any) => ({
-      ...stat,
-      playerId: stat.player.id,
-      player: stat.player.name,
-    })),
-    bowlingStats: route.params.bowlingStats.map((stat: any) => ({
-      ...stat,
-      playerId: stat.player.id,
-      player: stat.player.name,
-    })),
-    fieldingStats: route.params.fieldingStats
-      .filter(
-        (stat: any) =>
-          stat.catches || stat.stumps || stat.directHits || stat.indirectHits
-      )
-      .map((stat: any) => ({
-        ...stat,
-        playerId: stat.player.id,
-        player: stat.player.name,
-      })),
-  };
+  const isPPLPair =
+    !!route.params?.isPPLPair &&
+    !!route.params?.teamAMatch &&
+    !!route.params?.teamBMatch;
+
+  const matchesDetails = isPPLPair
+    ? [
+        normalizeMatchDetails(route.params.teamAMatch),
+        normalizeMatchDetails(route.params.teamBMatch),
+      ]
+    : [normalizeMatchDetails(route.params)];
 
   const onPressPlayerStat = (id: number | string) => {
     navigation.navigate(
       NavigationRoutes.OVERVIEW_PLAYER,
-      players.find((player: any) => player.id === id)
+      players.find((player: any) => player.id === id),
     );
   };
 
@@ -191,58 +224,107 @@ const Scorecard = ({ route, navigation }) => {
           title={route.params.title || 'Match Details'}
           marginTop={10}
         />
+        {/* Shared match info — only from first record for PPL pairs */}
         <MatchStats
-          vs={matchDetails.vs}
-          on={matchDetails.on}
-          in={matchDetails.in}
-          result={matchDetails.result}
+          vs={matchesDetails[0].vs}
+          on={matchesDetails[0].on}
+          in={matchesDetails[0].in}
+          result={matchesDetails[0].result}
         />
-        {matchDetails.battingStats.length > 0 && (
+
+        {/* Batting stats — all teams */}
+        {matchesDetails.some((m) => m.battingStats.length > 0) && (
           <View>
             <SectionTitle title="Batting Stats" />
-            <PlayersStats
-              columns={[
-                { key: 'player', name: 'Batter' },
-                { key: 'score', name: 'Runs' },
-                { key: 'balls', name: 'Balls' },
-                { key: 'fours', name: '4s' },
-                { key: 'sixes', name: '6s' },
-              ]}
-              values={matchDetails.battingStats}
-              onPress={(id) => onPressPlayerStat(id)}
-            />
+            {matchesDetails.map((matchDetails, index) =>
+              matchDetails.battingStats.length > 0 ? (
+                <View key={`batting-${index}`}>
+                  {isPPLPair && (
+                    <SectionTitle
+                      title={matchDetails.title}
+                      marginTop={index === 0 ? 0 : 15}
+                      fontSize={15}
+                      color={Colors.MEDIUM_TEAL}
+                    />
+                  )}
+                  <PlayersStats
+                    columns={[
+                      { key: 'player', name: 'Batter' },
+                      { key: 'score', name: 'Runs' },
+                      { key: 'balls', name: 'Balls' },
+                      { key: 'fours', name: '4s' },
+                      { key: 'sixes', name: '6s' },
+                    ]}
+                    values={matchDetails.battingStats}
+                    onPress={(id) => onPressPlayerStat(id)}
+                  />
+                </View>
+              ) : null,
+            )}
           </View>
         )}
-        {matchDetails.bowlingStats.length > 0 && (
+
+        {/* Bowling stats — all teams */}
+        {matchesDetails.some((m) => m.bowlingStats.length > 0) && (
           <View>
             <SectionTitle title="Bowling Stats" />
-            <PlayersStats
-              columns={[
-                { key: 'player', name: 'Batter' },
-                { key: 'wickets', name: 'Wickets' },
-                { key: 'conceded', name: 'Given' },
-                { key: 'overs', name: 'Overs' },
-                { key: 'maidens', name: 'Maidens' },
-              ]}
-              values={matchDetails.bowlingStats}
-              onPress={(id) => onPressPlayerStat(id)}
-            />
+            {matchesDetails.map((matchDetails, index) =>
+              matchDetails.bowlingStats.length > 0 ? (
+                <View key={`bowling-${index}`}>
+                  {isPPLPair && (
+                    <SectionTitle
+                      title={matchDetails.title}
+                      marginTop={index === 0 ? 0 : 15}
+                      fontSize={15}
+                      color={Colors.MEDIUM_TEAL}
+                    />
+                  )}
+                  <PlayersStats
+                    columns={[
+                      { key: 'player', name: 'Bowler' },
+                      { key: 'wickets', name: 'Wickets' },
+                      { key: 'conceded', name: 'Given' },
+                      { key: 'overs', name: 'Overs' },
+                      { key: 'maidens', name: 'Maidens' },
+                    ]}
+                    values={matchDetails.bowlingStats}
+                    onPress={(id) => onPressPlayerStat(id)}
+                  />
+                </View>
+              ) : null,
+            )}
           </View>
         )}
-        {matchDetails.fieldingStats.length > 0 && (
+
+        {/* Fielding stats — all teams */}
+        {matchesDetails.some((m) => m.fieldingStats.length > 0) && (
           <View>
             <SectionTitle title="Fielding Stats" />
-            <PlayersStats
-              columns={[
-                { key: 'player', name: 'Batter' },
-                { key: 'catches', name: 'Catches' },
-                { key: 'stumps', name: 'Stumps' },
-                { key: 'directHits', name: 'Direct Hits' },
-                { key: 'indirectHits', name: 'Indirect Hits' },
-              ]}
-              values={matchDetails.fieldingStats}
-              onPress={(id) => onPressPlayerStat(id)}
-            />
+            {matchesDetails.map((matchDetails, index) =>
+              matchDetails.fieldingStats.length > 0 ? (
+                <View key={`fielding-${index}`}>
+                  {isPPLPair && (
+                    <SectionTitle
+                      title={matchDetails.title}
+                      marginTop={index === 0 ? 0 : 15}
+                      fontSize={15}
+                      color={Colors.MEDIUM_TEAL}
+                    />
+                  )}
+                  <PlayersStats
+                    columns={[
+                      { key: 'player', name: 'Fielder' },
+                      { key: 'catches', name: 'Catches' },
+                      { key: 'stumps', name: 'Stumps' },
+                      { key: 'directHits', name: 'Direct Hits' },
+                      { key: 'indirectHits', name: 'Indirect Hits' },
+                    ]}
+                    values={matchDetails.fieldingStats}
+                    onPress={(id) => onPressPlayerStat(id)}
+                  />
+                </View>
+              ) : null,
+            )}
           </View>
         )}
       </ScrollView>

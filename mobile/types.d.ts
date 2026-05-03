@@ -64,4 +64,6 @@ export interface OutdoorMatch extends CompactMatch {
   winningPercentage: number;
 }
 
-export interface PPLMatch extends CompactMatch {}
+export interface PPLMatch extends CompactMatch {
+  date: string;
+}

@@ -64,12 +64,19 @@ interface Match {
 interface NewMatch {
   isPPL: boolean;
   oppositeTeamId: string | number | null | undefined;
+  pplGroupTitle?: string | null;
+  pplGroupId?: string | null;
+  pplTeamSide?: 'teamA' | 'teamB' | null;
+  teamATitle?: string | null;
+  teamBTitle?: string | null;
   date: string;
   title: string;
   location: string;
   result: 'won' | 'lost' | 'draw' | null | undefined;
   numberOfDeliveriesPerOver: number;
   officialPlayers: number[] | string[];
+  teamAPlayers?: number[] | string[];
+  teamBPlayers?: number[] | string[];
   battingStats: BattingStat[];
   bowlingStats: BowlingStat[];
   fieldingStats: FieldingStat[];
@@ -120,7 +127,7 @@ export const retrieveOutdoorMatches = createAsyncThunk(
       return rejectWithValue('End of the list reached.');
 
     const response: any = await api.get(
-      `/matches?type=outdoor&limit=${PAGE_SIZE}&offset=${offset}`
+      `/matches?type=outdoor&limit=${PAGE_SIZE}&offset=${offset}`,
     );
     if (response.ok) {
       const oppositeTeams = (getState() as RootState).team.teams;
@@ -128,16 +135,16 @@ export const retrieveOutdoorMatches = createAsyncThunk(
       const outdoorCompactMatches: OutdoorMatch[] = [];
       for (let i = 0; i < response.data.matches.length; i++) {
         const oppositeTeam = oppositeTeams.find(
-          (team) => team.id === response.data.matches[i].oppositeTeamId
+          (team) => team.id === response.data.matches[i].oppositeTeamId,
         );
 
         const bestBatsman: any = players.find(
           (player) =>
-            player.id === response.data.matches[i].bestBatter?.playerId
+            player.id === response.data.matches[i].bestBatter?.playerId,
         );
         const bestBowler: any = players.find(
           (player) =>
-            player.id === response.data.matches[i].bestBowler?.playerId
+            player.id === response.data.matches[i].bestBowler?.playerId,
         );
 
         outdoorCompactMatches.push({
@@ -147,7 +154,7 @@ export const retrieveOutdoorMatches = createAsyncThunk(
             name: oppositeTeam?.name,
           },
           winningPercentage: Math.round(
-            response.data.matches[i].winningPercentage
+            response.data.matches[i].winningPercentage,
           ),
           title: oppositeTeam?.name,
           bestBatsman: bestBatsman
@@ -173,7 +180,7 @@ export const retrieveOutdoorMatches = createAsyncThunk(
     }
 
     rejectWithValue('Request failed');
-  }
+  },
 );
 
 export const retrievePPLMatches = createAsyncThunk(
@@ -189,7 +196,7 @@ export const retrievePPLMatches = createAsyncThunk(
       return rejectWithValue('End of the list reached.');
 
     const response: any = await api.get(
-      `/matches?type=ppl&limit=${PAGE_SIZE}&offset=${offset}`
+      `/matches?type=ppl&limit=${PAGE_SIZE}&offset=${offset}`,
     );
     if (response.ok) {
       const pplCompactMatches: PPLMatch[] = [];
@@ -198,15 +205,16 @@ export const retrievePPLMatches = createAsyncThunk(
         const players = (getState() as RootState).player.players;
         const bestBatsman: any = players.find(
           (player) =>
-            player.id === response.data.matches[i].bestBatter?.playerId
+            player.id === response.data.matches[i].bestBatter?.playerId,
         );
         const bestBowler: any = players.find(
           (player) =>
-            player.id === response.data.matches[i].bestBowler?.playerId
+            player.id === response.data.matches[i].bestBowler?.playerId,
         );
 
         pplCompactMatches.push({
           id: response.data.matches[i].date,
+          date: response.data.matches[i].date,
           title: response.data.matches[i].date,
           bestBatsman: bestBatsman
             ? {
@@ -231,7 +239,7 @@ export const retrievePPLMatches = createAsyncThunk(
     }
 
     rejectWithValue('Request failed');
-  }
+  },
 );
 
 export const getMatches = createAsyncThunk(
@@ -246,21 +254,23 @@ export const getMatches = createAsyncThunk(
     )
       return rejectWithValue('End of the list reached.');
 
+    const isOutdoorRequest = !!(data as GetOutdoor).oppositeTeamId;
+
     const response: any = await api.get(
-      `/matches?${
-        (data as GetOutdoor).oppositeTeamId
-          ? `opposite=${(data as GetOutdoor).oppositeTeamId}&result=${
-              (data as GetOutdoor).result
-            }`
-          : `date=${(data as GetPPL).date}`
-      }&limit=${PAGE_SIZE}&offset=${data.offset}`
+      isOutdoorRequest
+        ? `/matches?opposite=${(data as GetOutdoor).oppositeTeamId}&result=${
+            (data as GetOutdoor).result
+          }&limit=${PAGE_SIZE}&offset=${data.offset}`
+        : `/matches?date=${(data as GetPPL).date}`,
     );
 
     if (response.ok) {
       return {
-        tabCounts: (data as GetOutdoor).result
-          ? (getState() as RootState).match.renderedMatches.tabCounts
-          : response.data.tabCounts,
+        tabCounts: isOutdoorRequest
+          ? (data as GetOutdoor).result
+            ? (getState() as RootState).match.renderedMatches.tabCounts
+            : response.data.tabCounts
+          : null,
         matches: response.data.matches,
         total: response.data.totalCount,
         offset: data.offset,
@@ -268,14 +278,14 @@ export const getMatches = createAsyncThunk(
     }
 
     rejectWithValue('Request failed');
-  }
+  },
 );
 
 export const getPPLMatch = createAsyncThunk(
   'match/getOutdoor',
   async (
     data: { date: string; offset: number },
-    { getState, rejectWithValue }
+    { getState, rejectWithValue },
   ) => {
     if (
       data.offset &&
@@ -297,7 +307,7 @@ export const getPPLMatch = createAsyncThunk(
     }
 
     rejectWithValue('Request failed');
-  }
+  },
 );
 
 export const createMatch = createAsyncThunk(
@@ -310,7 +320,7 @@ export const createMatch = createAsyncThunk(
       return;
     }
     return rejectWithValue(response.data?.message);
-  }
+  },
 );
 
 export const updateMatch = createAsyncThunk(
@@ -323,7 +333,7 @@ export const updateMatch = createAsyncThunk(
       return;
     }
     return rejectWithValue(response.data?.message);
-  }
+  },
 );
 
 export const deleteMatch = createAsyncThunk(
@@ -334,7 +344,7 @@ export const deleteMatch = createAsyncThunk(
       return payload;
     }
     return rejectWithValue(response.data?.message);
-  }
+  },
 );
 
 export const matchSlice = createSlice({
@@ -351,7 +361,7 @@ export const matchSlice = createSlice({
             matches: OutdoorMatch[];
             offset: number;
             total: number;
-          }>
+          }>,
         ) => {
           state.outdoorsTotal = action.payload.total;
           if (!action.payload.offset) {
@@ -359,7 +369,7 @@ export const matchSlice = createSlice({
           } else {
             state.outdoors = [...state.outdoors, ...action.payload.matches];
           }
-        }
+        },
       )
       .addCase(
         retrievePPLMatches.fulfilled,
@@ -369,7 +379,7 @@ export const matchSlice = createSlice({
             matches: PPLMatch[];
             offset: number;
             total: number;
-          }>
+          }>,
         ) => {
           state.pplsTotal = action.payload.total;
           if (!action.payload.offset) {
@@ -377,7 +387,7 @@ export const matchSlice = createSlice({
           } else {
             state.ppls = [...state.ppls, ...action.payload.matches];
           }
-        }
+        },
       )
       .addCase(
         getMatches.fulfilled,
@@ -393,7 +403,7 @@ export const matchSlice = createSlice({
             matches: Match[];
             offset: number;
             total: number;
-          }>
+          }>,
         ) => {
           state.renderedMatches.total = action.payload.total;
           state.renderedMatches.tabCounts = action.payload.tabCounts;
@@ -405,14 +415,14 @@ export const matchSlice = createSlice({
               ...action.payload.matches,
             ];
           }
-        }
+        },
       )
       .addCase(
         deleteMatch.fulfilled,
         (state, action: PayloadAction<DeleteMatch>) => {
           state.renderedMatches.total--;
           state.renderedMatches.matches = state.renderedMatches.matches.filter(
-            (match) => match.id !== action.payload.id
+            (match) => match.id !== action.payload.id,
           );
           state.renderedMatches.tabCounts = action.payload.result
             ? {
@@ -422,7 +432,7 @@ export const matchSlice = createSlice({
                   state.renderedMatches.tabCounts[action.payload.result] - 1,
               }
             : null;
-        }
+        },
       );
   },
 });

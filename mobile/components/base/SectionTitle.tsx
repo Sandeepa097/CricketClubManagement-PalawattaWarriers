@@ -7,11 +7,25 @@ const width: number = Dimensions.get('window').width;
 const SectionTitle = ({
   title,
   marginTop = 20,
+  fontSize,
+  color,
 }: {
   title: string;
   marginTop?: number;
+  fontSize?: number;
+  color?: string;
 }) => {
-  return <Text style={[styles.title, { marginTop: marginTop }]}>{title}</Text>;
+  return (
+    <Text
+      style={[
+        styles.title,
+        { marginTop },
+        fontSize !== undefined ? { fontSize } : {},
+        color !== undefined ? { color } : {},
+      ]}>
+      {title}
+    </Text>
+  );
 };
 
 const styles = StyleSheet.create({
