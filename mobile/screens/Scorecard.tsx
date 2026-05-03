@@ -244,7 +244,6 @@ const Scorecard = ({ route, navigation }) => {
                       title={matchDetails.title}
                       marginTop={index === 0 ? 0 : 15}
                       fontSize={15}
-                      color={Colors.MEDIUM_TEAL}
                     />
                   )}
                   <PlayersStats
@@ -276,7 +275,6 @@ const Scorecard = ({ route, navigation }) => {
                       title={matchDetails.title}
                       marginTop={index === 0 ? 0 : 15}
                       fontSize={15}
-                      color={Colors.MEDIUM_TEAL}
                     />
                   )}
                   <PlayersStats
@@ -308,7 +306,6 @@ const Scorecard = ({ route, navigation }) => {
                       title={matchDetails.title}
                       marginTop={index === 0 ? 0 : 15}
                       fontSize={15}
-                      color={Colors.MEDIUM_TEAL}
                     />
                   )}
                   <PlayersStats

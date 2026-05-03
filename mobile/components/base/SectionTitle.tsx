@@ -13,7 +13,6 @@ const SectionTitle = ({
   title: string;
   marginTop?: number;
   fontSize?: number;
-  color?: string;
 }) => {
   return (
     <Text
@@ -21,7 +20,6 @@ const SectionTitle = ({
         styles.title,
         { marginTop },
         fontSize !== undefined ? { fontSize } : {},
-        color !== undefined ? { color } : {},
       ]}>
       {title}
     </Text>
