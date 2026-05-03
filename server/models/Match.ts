@@ -1,6 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelizeConnection from '../config/sequelizeConnection';
 import Player from './Player';
+import PPLGroup from './PPLGroup';
 import MatchPlayerBattingStat from './MatchPlayerBattingStat';
 import MatchPlayerBowlingStat from './MatchPlayerBowlingStat';
 import MatchPlayerFieldingStat from './MatchPlayerFieldingStat';
@@ -8,6 +9,8 @@ import MatchPlayerFieldingStat from './MatchPlayerFieldingStat';
 interface MatchInstance extends Model {
   title: string;
   oppositeTeamId?: number | null;
+  pplGroupId?: string | null;
+  pplTeamSide?: 'teamA' | 'teamB' | null;
   date: string;
   location: string;
   result?: string | null;
@@ -17,26 +20,29 @@ interface MatchInstance extends Model {
 class Match extends Model implements MatchInstance {
   public title!: string;
   public oppositeTeamId?: number | null | undefined;
+  public pplGroupId?: string | null | undefined;
+  public pplTeamSide?: 'teamA' | 'teamB' | null | undefined;
   public date!: string;
   public location!: string;
   public result?: string | null | undefined;
   public numberOfDeliveriesPerOver?: number | undefined;
+  public pplGroup?: PPLGroup | undefined;
 
   public setOfficialPlayers!: (players: Player[]) => Promise<void>;
 
   public getBattingStats!: () => Promise<MatchPlayerBattingStat[]>;
   public createBattingStat!: (
-    battingStat: MatchPlayerBattingStat
+    battingStat: MatchPlayerBattingStat,
   ) => Promise<void>;
 
   public getBowlingStats!: () => Promise<MatchPlayerBowlingStat[]>;
   public createBowlingStat!: (
-    bowlingStat: MatchPlayerBowlingStat
+    bowlingStat: MatchPlayerBowlingStat,
   ) => Promise<void>;
 
   public getFieldingStats!: () => Promise<MatchPlayerFieldingStat[]>;
   public createFieldingStat!: (
-    fieldingStat: MatchPlayerFieldingStat
+    fieldingStat: MatchPlayerFieldingStat,
   ) => Promise<void>;
 
   static associate(models: any) {
@@ -48,6 +54,8 @@ Match.init(
   {
     title: DataTypes.STRING,
     oppositeTeamId: DataTypes.INTEGER.UNSIGNED,
+    pplGroupId: DataTypes.UUID,
+    pplTeamSide: DataTypes.ENUM('teamA', 'teamB'),
     date: DataTypes.STRING,
     location: DataTypes.STRING,
     result: DataTypes.STRING,
@@ -59,7 +67,7 @@ Match.init(
     defaultScope: {
       attributes: { include: [] },
     },
-  }
+  },
 );
 
 export default Match;

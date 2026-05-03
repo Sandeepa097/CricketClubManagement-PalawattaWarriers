@@ -23,7 +23,7 @@ MatchPlayer.init(
   {
     sequelize: sequelizeConnection,
     modelName: 'MatchPlayer',
-  }
+  },
 );
 
 export default MatchPlayer;

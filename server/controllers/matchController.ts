@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import {
+  createPPLGroup,
   createMatch,
   findMatch,
   getGroupMatchesCount,
@@ -20,6 +21,7 @@ import {
   calculateBowlingPoints,
   calculateFieldingPoints,
 } from '../services/pointService';
+import { randomUUID } from 'crypto';
 
 interface BattingStatsInterface {
   id: number;
@@ -54,27 +56,197 @@ interface FieldingStatsInterface {
 
 const create = async (req: Request, res: Response) => {
   const {
+    isPPL,
     title,
     oppositeTeamId,
+    pplGroupTitle,
+    teamATitle,
+    teamBTitle,
     date,
     location,
     result,
     officialPlayers,
+    teamAPlayers,
+    teamBPlayers,
     battingStats,
     bowlingStats,
     fieldingStats,
     numberOfDeliveriesPerOver,
   } = req.body;
 
+  const normalizedMatchPlayers = officialPlayers || [];
+
+  const getStatsByPlayerIds = <T extends { id: number }>(
+    stats: T[] = [],
+    playerIds: number[] = [],
+  ) => stats.filter((stat) => playerIds.includes(stat.id));
+
+  if (isPPL) {
+    const pplGroupId = randomUUID();
+    const firstTeamTitle = teamATitle || 'Team A';
+    const secondTeamTitle = teamBTitle || 'Team B';
+
+    await createPPLGroup({
+      id: pplGroupId,
+      title: pplGroupTitle || null,
+    });
+
+    const createdMatchOne = await createMatch({
+      title: firstTeamTitle,
+      oppositeTeamId: null,
+      pplGroupId,
+      pplTeamSide: 'teamA',
+      date,
+      location,
+      result: null,
+    });
+
+    const createdMatchTwo = await createMatch({
+      title: secondTeamTitle,
+      oppositeTeamId: null,
+      pplGroupId,
+      pplTeamSide: 'teamB',
+      date,
+      location,
+      result: null,
+    });
+
+    const teamAPlayersNormalized = teamAPlayers || [];
+    const teamBPlayersNormalized = teamBPlayers || [];
+
+    await setMatchPlayers(createdMatchOne, teamAPlayersNormalized);
+    await setMatchPlayers(createdMatchTwo, teamBPlayersNormalized);
+
+    const teamABattingStats = getStatsByPlayerIds(
+      battingStats,
+      teamAPlayers || [],
+    ) as BattingStatsInterface[];
+    const teamBBattingStats = getStatsByPlayerIds(
+      battingStats,
+      teamBPlayers || [],
+    ) as BattingStatsInterface[];
+
+    const teamABowlingStats = getStatsByPlayerIds(
+      bowlingStats,
+      teamAPlayers || [],
+    ) as BowlingStatsInterface[];
+    const teamBBowlingStats = getStatsByPlayerIds(
+      bowlingStats,
+      teamBPlayers || [],
+    ) as BowlingStatsInterface[];
+
+    const teamAFieldingStats = getStatsByPlayerIds(
+      fieldingStats,
+      teamAPlayers || [],
+    ) as FieldingStatsInterface[];
+    const teamBFieldingStats = getStatsByPlayerIds(
+      fieldingStats,
+      teamBPlayers || [],
+    ) as FieldingStatsInterface[];
+
+    await setMatchPlayersBattingStats(
+      createdMatchOne,
+      teamABattingStats.map((stat) => {
+        const battingPoints = calculateBattingPoints({ ...stat.values });
+        return {
+          id: stat.id,
+          ...stat.values,
+          strikeRate: battingPoints.strikeRate,
+          points: battingPoints.totalPoints,
+        };
+      }),
+    );
+    await setMatchPlayersBattingStats(
+      createdMatchTwo,
+      teamBBattingStats.map((stat) => {
+        const battingPoints = calculateBattingPoints({ ...stat.values });
+        return {
+          id: stat.id,
+          ...stat.values,
+          strikeRate: battingPoints.strikeRate,
+          points: battingPoints.totalPoints,
+        };
+      }),
+    );
+
+    await setMatchPlayersBowlingStats(
+      createdMatchOne,
+      teamABowlingStats.map((stat) => {
+        const bowlingPoints = calculateBowlingPoints({
+          ...stat.values,
+          numberOfDeliveriesPerOver,
+        });
+        return {
+          id: stat.id,
+          ...stat.values,
+          economy: bowlingPoints.economy,
+          points: bowlingPoints.totalPoints,
+        };
+      }),
+    );
+    await setMatchPlayersBowlingStats(
+      createdMatchTwo,
+      teamBBowlingStats.map((stat) => {
+        const bowlingPoints = calculateBowlingPoints({
+          ...stat.values,
+          numberOfDeliveriesPerOver,
+        });
+        return {
+          id: stat.id,
+          ...stat.values,
+          economy: bowlingPoints.economy,
+          points: bowlingPoints.totalPoints,
+        };
+      }),
+    );
+
+    await setMatchPlayersFieldingStats(
+      createdMatchOne,
+      teamAPlayersNormalized.map((playerId: number) => {
+        const fieldingStat = teamAFieldingStats.find(
+          (stat) => stat.id === playerId,
+        ) ?? { id: playerId, values: {} };
+        return {
+          id: fieldingStat.id,
+          ...fieldingStat.values,
+          points: calculateFieldingPoints({ ...fieldingStat.values }),
+        };
+      }),
+    );
+
+    await setMatchPlayersFieldingStats(
+      createdMatchTwo,
+      teamBPlayersNormalized.map((playerId: number) => {
+        const fieldingStat = teamBFieldingStats.find(
+          (stat) => stat.id === playerId,
+        ) ?? { id: playerId, values: {} };
+        return {
+          id: fieldingStat.id,
+          ...fieldingStat.values,
+          points: calculateFieldingPoints({ ...fieldingStat.values }),
+        };
+      }),
+    );
+
+    return res.status(StatusCodes.CREATED).json({
+      message: 'PPL match group created successfully.',
+      pplGroupId,
+      pplGroupTitle: pplGroupTitle || null,
+      matches: [createdMatchOne, createdMatchTwo],
+    });
+  }
+
   const createdMatch = await createMatch({
     title,
     oppositeTeamId,
+    pplGroupId: null,
+    pplTeamSide: null,
     date,
     location,
     result,
   });
 
-  await setMatchPlayers(createdMatch, officialPlayers);
+  await setMatchPlayers(createdMatch, normalizedMatchPlayers);
   await setMatchPlayersBattingStats(
     createdMatch,
     (battingStats as BattingStatsInterface[]).map((stat) => {
@@ -85,7 +257,7 @@ const create = async (req: Request, res: Response) => {
         strikeRate: battingPoints.strikeRate,
         points: battingPoints.totalPoints,
       };
-    })
+    }),
   );
   await setMatchPlayersBowlingStats(
     createdMatch,
@@ -100,21 +272,21 @@ const create = async (req: Request, res: Response) => {
         economy: bowlingPoints.economy,
         points: bowlingPoints.totalPoints,
       };
-    })
+    }),
   );
 
   await setMatchPlayersFieldingStats(
     createdMatch,
-    officialPlayers.map((playerId: number) => {
+    normalizedMatchPlayers.map((playerId: number) => {
       const fieldingStat = (fieldingStats as FieldingStatsInterface[]).find(
-        (stat) => stat.id === playerId
+        (stat) => stat.id === playerId,
       ) ?? { id: playerId, values: {} };
       return {
         id: fieldingStat.id,
         ...fieldingStat.values,
         points: calculateFieldingPoints({ ...fieldingStat.values }),
       };
-    })
+    }),
   );
 
   return res.status(StatusCodes.CREATED).json({
@@ -126,21 +298,33 @@ const create = async (req: Request, res: Response) => {
 const update = async (req: Request, res: Response) => {
   const matchId = Number(req.params.id);
   const {
+    isPPL,
     title,
     oppositeTeamId,
+    pplGroupId,
+    pplTeamSide,
     date,
     location,
     result,
     officialPlayers,
+    teamAPlayers,
+    teamBPlayers,
     battingStats,
     bowlingStats,
     fieldingStats,
     numberOfDeliveriesPerOver,
   } = req.body;
 
+  const normalizedMatchPlayers =
+    teamAPlayers?.length || teamBPlayers?.length
+      ? [...(teamAPlayers || []), ...(teamBPlayers || [])]
+      : officialPlayers || [];
+
   await updateMatch(matchId, {
     title,
     oppositeTeamId,
+    pplGroupId: isPPL ? pplGroupId || null : null,
+    pplTeamSide: isPPL ? pplTeamSide || null : null,
     date,
     location,
     result,
@@ -153,7 +337,7 @@ const update = async (req: Request, res: Response) => {
       .status(StatusCodes.NOT_FOUND)
       .json({ message: 'Match not found.' });
 
-  await setMatchPlayers(updatedMatch, officialPlayers);
+  await setMatchPlayers(updatedMatch, normalizedMatchPlayers);
 
   await setMatchPlayersBattingStats(
     updatedMatch,
@@ -165,7 +349,7 @@ const update = async (req: Request, res: Response) => {
         strikeRate: battingPoints.strikeRate,
         points: battingPoints.totalPoints,
       };
-    })
+    }),
   );
 
   await setMatchPlayersBowlingStats(
@@ -181,21 +365,21 @@ const update = async (req: Request, res: Response) => {
         economy: bowlingPoints.economy,
         points: bowlingPoints.totalPoints,
       };
-    })
+    }),
   );
 
   await setMatchPlayersFieldingStats(
     updatedMatch,
-    officialPlayers.map((playerId: number) => {
+    normalizedMatchPlayers.map((playerId: number) => {
       const fieldingStat = (fieldingStats as FieldingStatsInterface[]).find(
-        (stat) => stat.id === playerId
+        (stat) => stat.id === playerId,
       ) ?? { id: playerId, values: {} };
       return {
         id: fieldingStat.id,
         ...fieldingStat.values,
         points: calculateFieldingPoints({ ...fieldingStat.values }),
       };
-    })
+    }),
   );
 
   return res.status(StatusCodes.CREATED).json({
@@ -208,6 +392,7 @@ const index = async (req: Request, res: Response) => {
   const offset: number = Number(req.query.offset || 0);
   const matchType = req.query.type as 'outdoor' | 'ppl' | null | undefined;
   const matchDate = req.query.date as string | null | undefined;
+  const pplGroupId = req.query.pplGroupId as string | null | undefined;
   const matchOppositeTeamId = req.query.opposite as
     | string
     | number
@@ -231,12 +416,26 @@ const index = async (req: Request, res: Response) => {
         ? await getOutdoorMatches(offset, Number(limit || totalCount))
         : await getPPLMatches(offset, Number(limit || totalCount));
   } else {
-    const where = matchDate
-      ? { date: matchDate }
-      : {
-          oppositeTeamId: matchOppositeTeamId || null,
-          ...(matchResult ? { result: matchResult } : {}),
-        };
+    const parsedSingleMatchId =
+      pplGroupId && pplGroupId.startsWith('single-')
+        ? Number(pplGroupId.replace('single-', ''))
+        : null;
+    const parsedNumericGroupFallbackId =
+      pplGroupId && /^\d+$/.test(pplGroupId) ? Number(pplGroupId) : null;
+
+    const where = pplGroupId
+      ? parsedSingleMatchId || parsedNumericGroupFallbackId
+        ? {
+            id: parsedSingleMatchId || parsedNumericGroupFallbackId,
+            oppositeTeamId: null,
+          }
+        : { pplGroupId, oppositeTeamId: null }
+      : matchDate
+        ? { date: matchDate, oppositeTeamId: null }
+        : {
+            oppositeTeamId: matchOppositeTeamId || null,
+            ...(matchResult ? { result: matchResult } : {}),
+          };
     totalCount = await getMatchesCount(where);
     matches = await getMatches(where, offset, Number(limit || totalCount));
     if (matchOppositeTeamId && !matchResult) {

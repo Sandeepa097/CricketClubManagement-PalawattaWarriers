@@ -1,6 +1,7 @@
 import User from './User';
 import Player from './Player';
 import OppositeTeam from './OppositeTeam';
+import PPLGroup from './PPLGroup';
 import Match from './Match';
 import MatchPlayer from './MatchPlayer';
 import MatchPlayerBattingStat from './MatchPlayerBattingStat';
@@ -13,6 +14,16 @@ import Payment from './Payment';
 Match.belongsTo(OppositeTeam, {
   foreignKey: 'oppositeTeamId',
   as: 'oppositeTeam',
+});
+
+// PPL group
+Match.belongsTo(PPLGroup, {
+  foreignKey: 'pplGroupId',
+  as: 'pplGroup',
+});
+PPLGroup.hasMany(Match, {
+  foreignKey: 'pplGroupId',
+  as: 'matches',
 });
 
 // Match players
@@ -95,6 +106,7 @@ export {
   User,
   Player,
   OppositeTeam,
+  PPLGroup,
   Match,
   MatchPlayer,
   MatchPlayerBattingStat,

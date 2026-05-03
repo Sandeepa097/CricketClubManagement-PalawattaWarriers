@@ -6,6 +6,7 @@ import {
   MatchPlayerBowlingStat,
   MatchPlayerFieldingStat,
   OppositeTeam,
+  PPLGroup,
   Player,
 } from '../models';
 import { findPlayers } from './playerService';
@@ -14,6 +15,8 @@ import sequelizeConnection from '../config/sequelizeConnection';
 interface CreateMatchAttributes {
   title: string;
   oppositeTeamId: number | null;
+  pplGroupId?: string | null;
+  pplTeamSide?: 'teamA' | 'teamB' | null;
   date: string;
   location: string;
   result: string | null;
@@ -21,6 +24,13 @@ interface CreateMatchAttributes {
 
 export const createMatch = async (match: CreateMatchAttributes) => {
   return await Match.create({ ...match });
+};
+
+export const createPPLGroup = async (group: {
+  id: string;
+  title?: string | null;
+}) => {
+  return await PPLGroup.create({ ...group });
 };
 
 export const updateMatch = async (id: number, match: CreateMatchAttributes) => {
@@ -38,7 +48,7 @@ export const removeMatch = async (id: number) => {
 };
 
 export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
-  const ppls: any = await Match.findAll({
+  const groupedDates: any[] = await Match.findAll({
     where: { oppositeTeamId: { [Op.is]: null } },
     attributes: [
       'date',
@@ -49,30 +59,43 @@ export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
     ],
     group: ['date'],
     order: [['latestMatchId', 'DESC']],
-    limit: limit,
-    offset: offset,
+    limit,
+    offset,
     raw: true,
   });
 
-  const dates = ppls.map((ppl: any) => ppl.date);
+  const dates = groupedDates.map((group) => group.date);
+  if (!dates.length) {
+    return [];
+  }
 
-  const matchIds = await Match.findAll({
-    where: { date: { [Op.in]: dates } },
+  const matchesByDate: any[] = await Match.findAll({
+    where: {
+      oppositeTeamId: { [Op.is]: null },
+      date: { [Op.in]: dates },
+    },
     attributes: ['id', 'date'],
     raw: true,
   });
 
-  const matchIdsByDate = matchIds.reduce((acc: any, match: any) => {
-    if (!acc[match.date]) acc[match.date] = [];
-    acc[match.date].push(match.id);
-    return acc;
-  }, {});
+  const matchIdsByDate = matchesByDate.reduce(
+    (acc: Record<string, number[]>, match) => {
+      if (!acc[match.date]) {
+        acc[match.date] = [];
+      }
+      acc[match.date].push(match.id);
+      return acc;
+    },
+    {},
+  );
 
-  const allStats = await Promise.all([
+  const matchIds = matchesByDate.map((match) => match.id);
+
+  const [battingStats, bowlingStats] = await Promise.all([
     MatchPlayerBattingStat.findAll({
       where: {
         matchId: {
-          [Op.in]: matchIds.map((m: any) => m.id),
+          [Op.in]: matchIds,
         },
       },
       attributes: [
@@ -97,7 +120,7 @@ export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
     MatchPlayerBowlingStat.findAll({
       where: {
         matchId: {
-          [Op.in]: matchIds.map((m: any) => m.id),
+          [Op.in]: matchIds,
         },
       },
       attributes: [
@@ -121,16 +144,14 @@ export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
     }),
   ]);
 
-  const [battingStats, bowlingStats] = allStats;
-
-  ppls.forEach((ppl: any) => {
-    const matchIdsForDate = matchIdsByDate[ppl.date] || [];
+  return groupedDates.map((group: any) => {
+    const idsForDate = matchIdsByDate[group.date] || [];
 
     const relevantBattingStats = battingStats.filter((stat: any) =>
-      matchIdsForDate.includes(stat.matchId)
+      idsForDate.includes(stat.matchId),
     );
     const relevantBowlingStats = bowlingStats.filter((stat: any) =>
-      matchIdsForDate.includes(stat.matchId)
+      idsForDate.includes(stat.matchId),
     );
 
     const aggregatedBattingStats = relevantBattingStats.reduce(
@@ -148,7 +169,7 @@ export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
         acc[stat.playerId].totalBalls += stat.totalBalls;
         return acc;
       },
-      {}
+      {},
     );
 
     const aggregatedBowlingStats = relevantBowlingStats.reduce(
@@ -166,33 +187,36 @@ export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
         acc[stat.playerId].totalConceded += stat.totalConceded;
         return acc;
       },
-      {}
+      {},
     );
 
     const bestBatter = Object.keys(aggregatedBattingStats).length
       ? Object.values(aggregatedBattingStats).reduce(
           (prev: any, current: any) =>
-            prev.totalPoints > current.totalPoints ? prev : current
+            prev.totalPoints > current.totalPoints ? prev : current,
         )
       : null;
 
     const bestBowler = Object.keys(aggregatedBowlingStats).length
       ? Object.values(aggregatedBowlingStats).reduce(
           (prev: any, current: any) =>
-            prev.totalPoints > current.totalPoints ? prev : current
+            prev.totalPoints > current.totalPoints ? prev : current,
         )
       : null;
 
-    ppl.bestBatter = bestBatter;
-    ppl.bestBowler = bestBowler;
+    return {
+      id: group.date,
+      date: group.date,
+      title: group.date,
+      bestBatter,
+      bestBowler,
+    };
   });
-
-  return ppls;
 };
 
 export const getOutdoorMatches = async (
   offset: number = 0,
-  limit: number = 10
+  limit: number = 10,
 ) => {
   const outdoors: any[] = await Match.findAll({
     where: { oppositeTeamId: { [Op.not]: null } },
@@ -211,7 +235,7 @@ export const getOutdoorMatches = async (
   });
 
   const oppositeTeamIds = outdoors.map(
-    (outdoor: any) => outdoor.oppositeTeamId
+    (outdoor: any) => outdoor.oppositeTeamId,
   );
 
   const matchDetails = await Match.findAll({
@@ -226,7 +250,7 @@ export const getOutdoorMatches = async (
       acc[match.oppositeTeamId].push(match);
       return acc;
     },
-    {}
+    {},
   );
 
   const allStats = await Promise.all([
@@ -289,10 +313,10 @@ export const getOutdoorMatches = async (
       matchIdsByOppositeTeamId[outdoor.oppositeTeamId] || [];
 
     const relevantBattingStats = battingStats.filter((stat: any) =>
-      matchesForOppositeTeam.some((match: any) => match.id === stat.matchId)
+      matchesForOppositeTeam.some((match: any) => match.id === stat.matchId),
     );
     const relevantBowlingStats = bowlingStats.filter((stat: any) =>
-      matchesForOppositeTeam.some((match: any) => match.id === stat.matchId)
+      matchesForOppositeTeam.some((match: any) => match.id === stat.matchId),
     );
 
     const aggregatedBattingStats = relevantBattingStats.reduce(
@@ -310,7 +334,7 @@ export const getOutdoorMatches = async (
         acc[stat.playerId].totalBalls += stat.totalBalls;
         return acc;
       },
-      {}
+      {},
     );
 
     const aggregatedBowlingStats = relevantBowlingStats.reduce(
@@ -328,26 +352,26 @@ export const getOutdoorMatches = async (
         acc[stat.playerId].totalConceded += stat.totalConceded;
         return acc;
       },
-      {}
+      {},
     );
 
     const bestBatter = Object.keys(aggregatedBattingStats).length
       ? Object.values(aggregatedBattingStats).reduce(
           (prev: any, current: any) =>
-            prev.totalPoints > current.totalPoints ? prev : current
+            prev.totalPoints > current.totalPoints ? prev : current,
         )
       : null;
 
     const bestBowler = Object.keys(aggregatedBowlingStats).length
       ? Object.values(aggregatedBowlingStats).reduce(
           (prev: any, current: any) =>
-            prev.totalPoints > current.totalPoints ? prev : current
+            prev.totalPoints > current.totalPoints ? prev : current,
         )
       : null;
 
     const totalMatches = matchesForOppositeTeam.length;
     const wonMatches = matchesForOppositeTeam.filter(
-      (match: any) => match.result === 'won'
+      (match: any) => match.result === 'won',
     ).length;
     const winningPercentage =
       totalMatches > 0 ? (wonMatches / totalMatches) * 100 : 0;
@@ -363,7 +387,7 @@ export const getOutdoorMatches = async (
 export const getMatches = async (
   where: object,
   offset: number = 0,
-  limit: number = 0
+  limit: number = 0,
 ) => {
   return Match.findAll({
     where: { ...where },
@@ -371,6 +395,10 @@ export const getMatches = async (
       {
         model: OppositeTeam,
         as: 'oppositeTeam',
+      },
+      {
+        model: PPLGroup,
+        as: 'pplGroup',
       },
       {
         model: Player,
@@ -424,14 +452,26 @@ export const getMatchesCount = async (where: object) => {
 };
 
 export const getGroupMatchesCount = async (type: 'ppl' | 'outdoor') => {
+  if (type === 'ppl') {
+    return await Match.count({
+      distinct: true,
+      where: {
+        oppositeTeamId: {
+          [Op.is]: null,
+        },
+      },
+      col: 'date',
+    });
+  }
+
   return await Match.count({
-    distinct: true,
     where: {
       oppositeTeamId: {
-        [type === 'ppl' ? Op.is : Op.not]: null,
+        [Op.not]: null,
       },
     },
-    col: type === 'ppl' ? 'date' : 'oppositeTeamId',
+    distinct: true,
+    col: 'oppositeTeamId',
   });
 };
 
@@ -443,8 +483,27 @@ export const setMatchPlayers = async (match: Match, players: number[]) => {
     await previousRecords[i].destroy();
   }
 
+  if (!players.length) {
+    return [];
+  }
+
   const selectedPlayers = await findPlayers(players);
-  return match.setOfficialPlayers(selectedPlayers);
+  const selectedPlayerIds = selectedPlayers.map(
+    (player) => player.dataValues.id,
+  );
+
+  const matchPlayers = players
+    .filter((playerId) => selectedPlayerIds.includes(playerId))
+    .map((playerId) => ({
+      matchId: match.dataValues.id,
+      playerId,
+    }));
+
+  if (!matchPlayers.length) {
+    return [];
+  }
+
+  return MatchPlayer.bulkCreate(matchPlayers);
 };
 
 export const setMatchPlayersBattingStats = async (
@@ -458,7 +517,7 @@ export const setMatchPlayersBattingStats = async (
     isOut?: boolean;
     strikeRate: number;
     points: number;
-  }[]
+  }[],
 ) => {
   const previousRecords = await match.getBattingStats();
   for (let i = 0; i < previousRecords.length; i++) {
@@ -478,7 +537,7 @@ export const setMatchPlayersBattingStats = async (
   return await Promise.all(
     playersStats.map(async (stat) => {
       return await match.createBattingStat(stat as MatchPlayerBattingStat);
-    })
+    }),
   );
 };
 
@@ -492,7 +551,7 @@ export const setMatchPlayersBowlingStats = async (
     maidens?: number;
     economy: number;
     points: number;
-  }[]
+  }[],
 ) => {
   const previousRecords = await match.getBowlingStats();
   for (let i = 0; i < previousRecords.length; i++) {
@@ -511,7 +570,7 @@ export const setMatchPlayersBowlingStats = async (
   return await Promise.all(
     playersStats.map(async (stat) => {
       return await match.createBowlingStat(stat as MatchPlayerBowlingStat);
-    })
+    }),
   );
 };
 
@@ -524,7 +583,7 @@ export const setMatchPlayersFieldingStats = async (
     directHits?: number;
     indirectHits?: number;
     points: number;
-  }[]
+  }[],
 ) => {
   const previousRecords = await match.getFieldingStats();
   for (let i = 0; i < previousRecords.length; i++) {
@@ -542,6 +601,6 @@ export const setMatchPlayersFieldingStats = async (
   return await Promise.all(
     playersStats.map(async (stat) => {
       return await match.createFieldingStat(stat as MatchPlayerFieldingStat);
-    })
+    }),
   );
 };

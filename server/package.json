@@ -10,6 +10,7 @@
     "ts:check": "tsc",
     "user:create": "node ./dist/commands/user/createUser.js",
     "user:password:reset": "node ./dist/commands/user/resetUserPassword.js",
+    "ppl:group:import": "node ./dist/commands/match/importPPLGroups.js",
     "points": "node ./dist/commands/points/recalculatePoints.js",
     "points:batting": "node ./dist/commands/points/recalculatePoints.js batting",
     "points:bowling": "node ./dist/commands/points/recalculatePoints.js bowling",

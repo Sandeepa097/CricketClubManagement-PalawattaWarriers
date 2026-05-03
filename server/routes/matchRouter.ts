@@ -10,6 +10,7 @@ import { findMatch } from '../services/matchService';
 const MatchValidations = [
   body('isPPL').toBoolean().isBoolean(),
   body('title')
+    .if(({ req }) => !req.body.isPPL)
     .notEmpty()
     .withMessage('Match title is required.')
     .isLength({ max: 255 })
@@ -25,6 +26,22 @@ const MatchValidations = [
       if (!oppositeTeam) throw Error('Opposite team is invalid.');
       return true;
     }),
+  body('teamATitle')
+    .if(({ req }) => req.body.isPPL)
+    .notEmpty()
+    .withMessage('Team A title is required.')
+    .isLength({ max: 255 })
+    .withMessage('Team A title is too long.'),
+  body('teamBTitle')
+    .if(({ req }) => req.body.isPPL)
+    .notEmpty()
+    .withMessage('Team B title is required.')
+    .isLength({ max: 255 })
+    .withMessage('Team B title is too long.'),
+  body('pplGroupTitle')
+    .optional({ nullable: true })
+    .isLength({ max: 255 })
+    .withMessage('PPL title is too long.'),
   body('date').notEmpty().withMessage('Date is required.'),
   body('location')
     .notEmpty()
@@ -43,7 +60,7 @@ const MatchValidations = [
   body('numberOfDeliveriesPerOver')
     .isInt({ min: 1, max: 10 })
     .withMessage(
-      'Number of deliveries for an over should be between 1 and 10.'
+      'Number of deliveries for an over should be between 1 and 10.',
     ),
   body('officialPlayers')
     .optional()
@@ -57,6 +74,52 @@ const MatchValidations = [
       if (!player) throw Error('Official player id is invalid.');
       return true;
     }),
+  body('teamAPlayers')
+    .optional()
+    .isArray()
+    .withMessage('Team A players must be an array.'),
+  body('teamAPlayers.*')
+    .optional()
+    .toInt()
+    .custom(async (value) => {
+      if (!value) return true;
+      const player = await findPlayer(value);
+      if (!player) throw Error('Team A player id is invalid.');
+      return true;
+    }),
+  body('teamBPlayers')
+    .optional()
+    .isArray()
+    .withMessage('Team B players must be an array.'),
+  body('teamBPlayers.*')
+    .optional()
+    .toInt()
+    .custom(async (value) => {
+      if (!value) return true;
+      const player = await findPlayer(value);
+      if (!player) throw Error('Team B player id is invalid.');
+      return true;
+    }),
+  body('teamBPlayers').custom((value, { req }) => {
+    if (!req.body.isPPL) return true;
+
+    const teamAPlayers = req.body.teamAPlayers || [];
+    const teamBPlayers = value || [];
+
+    if (!teamAPlayers.length || !teamBPlayers.length) {
+      throw Error('Both PPL teams should have at least one player.');
+    }
+
+    const duplicatedPlayer = teamAPlayers.find((playerId: number) =>
+      teamBPlayers.includes(playerId),
+    );
+
+    if (duplicatedPlayer) {
+      throw Error('A player cannot be selected in both PPL teams.');
+    }
+
+    return true;
+  }),
   body('battingStats')
     .optional()
     .isArray()
@@ -169,7 +232,7 @@ matchRouter.post(
   '/',
   validatePermissions(UserTypes.ADMIN),
   validateRequest([...MatchValidations]),
-  matchController.create
+  matchController.create,
 );
 
 matchRouter.get('/', matchController.index);
@@ -188,7 +251,7 @@ matchRouter.put(
       }),
     ...MatchValidations,
   ]),
-  matchController.update
+  matchController.update,
 );
 
 matchRouter.delete(
@@ -204,7 +267,7 @@ matchRouter.delete(
         return true;
       }),
   ]),
-  matchController.remove
+  matchController.remove,
 );
 
 export default matchRouter;
