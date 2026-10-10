@@ -84,7 +84,7 @@ const normalizeMatchDetails = (
     .map((stat: any) => ({
       ...stat,
       playerId: stat.player.id,
-      player: stat.player.name,
+      player: `${stat.player.name}${stat.isOut ? '' : '*'}`,
     })),
   bowlingStats: (match.bowlingStats || [])
     .filter((stat: any) =>
