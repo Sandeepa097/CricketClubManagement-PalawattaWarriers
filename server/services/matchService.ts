@@ -20,6 +20,7 @@ interface CreateMatchAttributes {
   date: string;
   location: string;
   result: string | null;
+  numberOfDeliveriesPerOver?: number;
 }
 
 export const createMatch = async (match: CreateMatchAttributes) => {

@@ -101,6 +101,7 @@ const create = async (req: Request, res: Response) => {
       date,
       location,
       result: null,
+      numberOfDeliveriesPerOver,
     });
 
     const createdMatchTwo = await createMatch({
@@ -111,6 +112,7 @@ const create = async (req: Request, res: Response) => {
       date,
       location,
       result: null,
+      numberOfDeliveriesPerOver,
     });
 
     const teamAPlayersNormalized = teamAPlayers || [];
@@ -246,6 +248,7 @@ const create = async (req: Request, res: Response) => {
     date,
     location,
     result,
+    numberOfDeliveriesPerOver,
   });
 
   await setMatchPlayers(createdMatch, normalizedMatchPlayers);
@@ -400,6 +403,7 @@ const update = async (req: Request, res: Response) => {
       date,
       location,
       result: null,
+      numberOfDeliveriesPerOver,
     });
 
     const updatedTeamAMatch = await findMatch(matchId);
@@ -461,6 +465,7 @@ const update = async (req: Request, res: Response) => {
       date,
       location,
       result: null,
+      numberOfDeliveriesPerOver,
     });
 
     await setMatchPlayers(createdTeamBMatch, teamBPlayersNormalized);
@@ -528,6 +533,7 @@ const update = async (req: Request, res: Response) => {
     date,
     location,
     result: isPPL ? null : result,
+    numberOfDeliveriesPerOver,
   });
 
   await setMatchPlayers(existingMatch, normalizedMatchPlayers);
