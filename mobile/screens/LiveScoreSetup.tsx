@@ -23,7 +23,7 @@ const LiveScoreSetup = ({ navigation }) => {
   const [draft, setDraft] = useState<LiveDraft | null>(null);
   const [title, setTitle] = useState('');
   const [oppositeTeamId, setOppositeTeamId] = useState<number | null>(null);
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(new Date().toDateString());
   const [location, setLocation] = useState('');
   const [ballsPerOver, setBallsPerOver] = useState('6');
   const [firstRole, setFirstRole] = useState<OurRole | null>(null);
@@ -170,17 +170,24 @@ const LiveScoreSetup = ({ navigation }) => {
         />
       </View>
       {!!errors.firstRole && <Text style={styles.error}>{errors.firstRole}</Text>}
-      <Text style={styles.note}>
-        The other team's total stays on this phone. Saving the match keeps our
-        batters, bowlers, and fielders.
-      </Text>
-      <Button
-        length="long"
-        text="Start scoring"
-        style="filled"
-        color={Colors.DEEP_TEAL}
-        onPress={startScoring}
-      />
+      <View style={{ marginTop: 40 }}>
+        <Button
+          length="long"
+          text="Start scoring"
+          style="filled"
+          color={Colors.DEEP_TEAL}
+          onPress={startScoring}
+        />
+        <Button
+          length="long"
+          style="outlined"
+          color={Colors.DEEP_TEAL}
+          text="Cancel"
+          onPress={() => {
+            navigation.goBack();
+          }}
+        />
+      </View>
     </ScrollView>
   );
 };

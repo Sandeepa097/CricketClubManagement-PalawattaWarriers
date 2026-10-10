@@ -95,6 +95,21 @@ export interface FieldingFigure {
   indirectHits: number;
 }
 
+export interface PartnershipFigure {
+  idA: number;
+  idB: number;
+  runs: number;
+  balls: number;
+}
+
+export interface ExtrasFigure {
+  wides: number;
+  noBalls: number;
+  byes: number;
+  legByes: number;
+  total: number;
+}
+
 export interface InningsState {
   role: OurRole;
   ended: boolean;
@@ -109,6 +124,8 @@ export interface InningsState {
   bowlers: BowlerFigure[];
   fielding: FieldingFigure[];
   thisOver: string[];
+  partnerships: PartnershipFigure[];
+  extras: ExtrasFigure;
 }
 
 export interface LiveScoreState {
@@ -132,6 +149,8 @@ interface MutableInnings {
   fielding: FieldingFigure[];
   thisOver: string[];
   pendingOverReset: boolean;
+  partnerships: PartnershipFigure[];
+  extras: ExtrasFigure;
 }
 
 const emptyBatter = (id: number): BatterFigure => ({
@@ -142,6 +161,14 @@ const emptyBatter = (id: number): BatterFigure => ({
   sixes: 0,
   isOut: false,
   retired: false,
+});
+
+const emptyExtras = (): ExtrasFigure => ({
+  wides: 0,
+  noBalls: 0,
+  byes: 0,
+  legByes: 0,
+  total: 0,
 });
 
 const emptyInnings = (role: OurRole): MutableInnings => ({
@@ -158,6 +185,8 @@ const emptyInnings = (role: OurRole): MutableInnings => ({
   fielding: [],
   thisOver: [],
   pendingOverReset: false,
+  partnerships: [],
+  extras: emptyExtras(),
 });
 
 export const formatOversLabel = (legalBalls: number, ballsPerOver: number) => {
@@ -283,6 +312,33 @@ const swapStrike = (innings: MutableInnings) => {
   innings.nonStrikerId = strikerId;
 };
 
+const startPartnership = (innings: MutableInnings) => {
+  if (innings.strikerId == null || innings.nonStrikerId == null) return;
+  innings.partnerships.push({
+    idA: innings.strikerId,
+    idB: innings.nonStrikerId,
+    runs: 0,
+    balls: 0,
+  });
+};
+
+const addExtras = (innings: MutableInnings, ball: BallEvent) => {
+  if (ball.extra === 'wide') {
+    const runs = Math.max(ball.runs, 1);
+    innings.extras.wides += runs;
+    innings.extras.total += runs;
+  } else if (ball.extra === 'noBall') {
+    innings.extras.noBalls += 1;
+    innings.extras.total += 1;
+  } else if (ball.extra === 'bye') {
+    innings.extras.byes += ball.runs;
+    innings.extras.total += ball.runs;
+  } else if (ball.extra === 'legBye') {
+    innings.extras.legByes += ball.runs;
+    innings.extras.total += ball.runs;
+  }
+};
+
 const applyBall = (
   innings: MutableInnings,
   ball: BallEvent,
@@ -347,6 +403,17 @@ const applyBall = (
     }
   }
 
+  if (innings.role === 'bat') {
+    const partnership = innings.partnerships[innings.partnerships.length - 1];
+    if (partnership) {
+      partnership.runs += teamRunsFor(ball);
+      if (legal) partnership.balls += 1;
+    }
+    if (ball.wicket) startPartnership(innings);
+  }
+
+  if (innings.role === 'field') addExtras(innings, ball);
+
   if (legal) {
     innings.legalBalls += 1;
     if (innings.role === 'field' && innings.bowlerId != null) {
@@ -388,6 +455,8 @@ const applyEvent = (
     innings.nonStrikerId = event.nonStrikerId;
     ensureBatter(innings, event.strikerId);
     ensureBatter(innings, event.nonStrikerId);
+    innings.partnerships = [];
+    startPartnership(innings);
     return;
   }
 
@@ -414,6 +483,7 @@ const applyEvent = (
     } else if (innings.nonStrikerId === event.batsmanId) {
       innings.nonStrikerId = event.nextBatsmanId;
     }
+    startPartnership(innings);
     return;
   }
 
@@ -456,6 +526,8 @@ const publishInnings = (
   })),
   fielding: innings.fielding.map((fielder) => ({ ...fielder })),
   thisOver: [...innings.thisOver],
+  partnerships: innings.partnerships.map((partnership) => ({ ...partnership })),
+  extras: { ...innings.extras },
 });
 
 export const reduceLiveScore = (draft: LiveDraft): LiveScoreState => {

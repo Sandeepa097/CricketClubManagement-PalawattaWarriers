@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Text,
   TextInput as NativeTextInput,
-  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -17,15 +16,12 @@ import PlayersSelectionModal from '../components/PlayersSelectionModal';
 import { Colors } from '../constants/Colors';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
 import { AppDispatch, RootState } from '../redux/store';
-import { createMatch } from '../redux/slices/matchSlice';
 import { retrievePlayers } from '../redux/slices/playerSlice';
-import {
-  clearLiveDraft,
-  loadLiveDraft,
-  saveLiveDraft,
-} from '../scoring/draftStorage';
+import { loadLiveDraft, saveLiveDraft } from '../scoring/draftStorage';
 import {
   BallEvent,
+  BatterFigure,
+  InningsState,
   ExtraKind,
   LiveDraft,
   MatchResult,
@@ -71,11 +67,9 @@ const LiveScore = ({ navigation }) => {
   const [customRuns, setCustomRuns] = useState('');
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [result, setResult] = useState<MatchResult>('draw');
-  const [saving, setSaving] = useState(false);
   const draftRef = useRef<LiveDraft | null>(null);
   const chain = useRef(Promise.resolve());
   const promptedKey = useRef('');
-  const savingRef = useRef(false);
 
   useEffect(() => {
     if (!focused) return;
@@ -232,24 +226,30 @@ const LiveScore = ({ navigation }) => {
     }
   };
 
-  const saveMatch = async () => {
-    if (!draft || savingRef.current) return;
-    savingRef.current = true;
-    setSaving(true);
-    try {
-      await dispatch(createMatch(toMatchPayload(draft, result))).unwrap();
-      await clearLiveDraft();
-      draftRef.current = null;
-      ToastAndroid.show('Match saved.', ToastAndroid.SHORT);
-      navigation.navigate(NavigationRoutes.MATCHES);
-    } catch (error) {
-      const message =
-        typeof error === 'string' ? error : 'Could not save the match.';
-      ToastAndroid.show(message, ToastAndroid.SHORT);
-    } finally {
-      savingRef.current = false;
-      setSaving(false);
-    }
+  const reviewMatch = () => {
+    if (!draft) return;
+    const payload = toMatchPayload(draft, result);
+    const storedId = (id: number) =>
+      players.find((player) => Number(player.id) === id)?.id ?? id;
+    navigation.navigate(NavigationRoutes.CREATE_MATCH, {
+      fromLiveScore: true,
+      prefill: {
+        ...payload,
+        officialPlayers: payload.officialPlayers.map(storedId),
+        battingStats: payload.battingStats.map((stat) => ({
+          ...stat,
+          id: storedId(stat.id),
+        })),
+        bowlingStats: payload.bowlingStats.map((stat) => ({
+          ...stat,
+          id: storedId(stat.id),
+        })),
+        fieldingStats: payload.fieldingStats.map((stat) => ({
+          ...stat,
+          id: storedId(stat.id),
+        })),
+      },
+    });
   };
 
   if (!draft || !view) return <View style={styles.container} />;
@@ -282,9 +282,9 @@ const LiveScore = ({ navigation }) => {
           : picker === 'retireNext'
             ? 'Select the batter who comes in'
             : picker === 'bowler'
-              ? 'Select our bowler'
+              ? 'Select the bowler'
               : picker === 'fielder'
-                ? 'Select our fielder'
+                ? 'Select the fielder'
                 : '';
 
   return (
@@ -303,8 +303,8 @@ const LiveScore = ({ navigation }) => {
               value={`${bowlingInnings?.runs || 0}-${bowlingInnings?.wickets || 0} (${bowlingInnings?.oversLabel})`}
             />
             <Text style={styles.hint}>
-              Totals decide the result. The saved scorecard keeps our players
-              only.
+              Review the figures on the match form before saving. Team totals
+              stay on this screen.
             </Text>
             <View style={styles.resultRow}>
               {(['won', 'lost', 'draw'] as MatchResult[]).map((item) => (
@@ -343,27 +343,6 @@ const LiveScore = ({ navigation }) => {
               {innings.runs}-{innings.wickets}
               <Text style={styles.overs}> ({innings.oversLabel})</Text>
             </Text>
-            {innings.role === 'bat'
-              ? innings.batsmen.map((batter) => (
-                  <Text key={batter.id} style={styles.playerLine}>
-                    {playerName(batter.id)}
-                    {batter.id === innings.strikerId ? '*' : ''}
-                    {'  '}
-                    {batter.runs} ({batter.balls})
-                    {batter.isOut ? '  out' : batter.retired ? '  retired' : ''}
-                  </Text>
-                ))
-              : innings.bowlers.map((bowler) => (
-                  <Text key={bowler.id} style={styles.playerLine}>
-                  {playerName(bowler.id)}
-                  {bowler.id === innings.bowlerId ? '*' : ''}
-                  {`  ${bowler.wickets}-${bowler.conceded} (${formatOversLabel(
-                    bowler.legalBalls,
-                    draft.numberOfDeliveriesPerOver,
-                  )})`}
-                  {bowler.maidens > 0 ? `  M ${bowler.maidens}` : ''}
-                  </Text>
-                ))}
             <View style={styles.overRow}>
               {innings.thisOver.length === 0 ? (
                 <Text style={styles.overEmpty}>This over</Text>
@@ -375,6 +354,31 @@ const LiveScore = ({ navigation }) => {
                 ))
               )}
             </View>
+            {innings.role === 'bat' ? (
+              <BattingScore innings={innings} playerName={playerName} />
+            ) : (
+              <View>
+                {innings.bowlers.map((bowler) => (
+                  <StatRow
+                    key={bowler.id}
+                    name={playerName(bowler.id)}
+                    active={bowler.id === innings.bowlerId}
+                    detail={`${bowler.wickets}-${bowler.conceded} (${formatOversLabel(
+                      bowler.legalBalls,
+                      draft.numberOfDeliveriesPerOver,
+                    )})${bowler.maidens > 0 ? `  M ${bowler.maidens}` : ''}`}
+                  />
+                ))}
+                <View style={styles.partnershipSection}>
+                  <Text style={styles.sectionTitle}>Extras</Text>
+                  <Text style={styles.extrasDetail}>
+                    {innings.extras.total} · wd {innings.extras.wides} · nb{' '}
+                    {innings.extras.noBalls} · b {innings.extras.byes} · lb{' '}
+                    {innings.extras.legByes}
+                  </Text>
+                </View>
+              </View>
+            )}
           </View>
         )}
       </ScrollView>
@@ -383,10 +387,10 @@ const LiveScore = ({ navigation }) => {
         <View style={styles.pad}>
           <Button
             length="long"
-            text={saving ? 'Saving' : 'Save match'}
+            text="Review match"
             style="filled"
             color={Colors.DEEP_TEAL}
-            onPress={saveMatch}
+            onPress={reviewMatch}
           />
           <PadButton
             label="Undo"
@@ -411,7 +415,7 @@ const LiveScore = ({ navigation }) => {
               <Text style={styles.promptText}>
                 {innings.role === 'bat'
                   ? 'Select the two batters'
-                  : 'Select our bowler'}
+                  : 'Select the bowler'}
               </Text>
             </TouchableOpacity>
           )}
@@ -453,20 +457,13 @@ const LiveScore = ({ navigation }) => {
                 disabled={false}
               />
             )}
-            {innings.role === 'bat' ? (
+            {innings.role === 'bat' && (
               <PadButton
                 label="Retire"
                 onPress={() => setPicker('retireNext')}
                 disabled={!ready}
               />
-            ) : (
-              <View style={styles.padSpacer} />
             )}
-            <PadButton
-              label="End"
-              onPress={() => setConfirmEnd(true)}
-              disabled={false}
-            />
           </View>
           <View style={styles.row}>
             {[0, 1, 2, 3].map((runs) => (
@@ -496,6 +493,12 @@ const LiveScore = ({ navigation }) => {
               disabled={!ready}
             />
           </View>
+          <TouchableOpacity
+            style={styles.endInnings}
+            onPress={() => setConfirmEnd(true)}
+            activeOpacity={0.7}>
+            <Text style={styles.endInningsText}>End innings</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -568,6 +571,100 @@ const LiveScore = ({ navigation }) => {
         }}
         cancel={{ text: 'Keep scoring', onPress: () => setConfirmEnd(false) }}
       />
+    </View>
+  );
+};
+
+const batterStatus = (batter: BatterFigure) => {
+  if (batter.isOut) return 'out';
+  if (batter.retired) return 'retired';
+  return '';
+};
+
+const StatRow = ({
+  name,
+  detail,
+  active,
+  meta,
+}: {
+  name: string;
+  detail: string;
+  active?: boolean;
+  meta?: string;
+}) => (
+  <View style={styles.statRow}>
+    <View style={[styles.statMark, active && styles.statMarkActive]} />
+    <Text
+      style={[styles.statName, active && styles.statNameActive]}
+      numberOfLines={1}>
+      {name}
+      {active ? '*' : ''}
+    </Text>
+    {!!meta && <Text style={styles.statMeta}>{meta}</Text>}
+    <Text style={[styles.statDetail, active && styles.statDetailActive]}>
+      {detail}
+    </Text>
+  </View>
+);
+
+const BattingScore = ({
+  innings,
+  playerName,
+}: {
+  innings: InningsState;
+  playerName: (id: number | null) => string;
+}) => {
+  const atCrease = [innings.strikerId, innings.nonStrikerId].filter(
+    (id): id is number => id != null,
+  );
+  const creaseBatters = atCrease
+    .map((id) => innings.batsmen.find((batter) => batter.id === id))
+    .filter((batter): batter is BatterFigure => !!batter);
+  const earlierBatters = innings.batsmen.filter(
+    (batter) => !atCrease.includes(batter.id),
+  );
+  const currentPartnership =
+    innings.partnerships[innings.partnerships.length - 1];
+  const earlierPartnerships = innings.partnerships.slice(0, -1);
+
+  return (
+    <View>
+      {creaseBatters.map((batter) => (
+        <StatRow
+          key={batter.id}
+          name={playerName(batter.id)}
+          active={batter.id === innings.strikerId}
+          detail={`${batter.runs} (${batter.balls})`}
+        />
+      ))}
+      {currentPartnership && (
+        <Text style={styles.noteLine}>
+          Partnership {currentPartnership.runs} ({currentPartnership.balls})
+        </Text>
+      )}
+      {(earlierBatters.length > 0 || earlierPartnerships.length > 0) && (
+        <View style={styles.hairline} />
+      )}
+      {earlierBatters.map((batter) => (
+        <StatRow
+          key={batter.id}
+          name={playerName(batter.id)}
+          meta={batterStatus(batter)}
+          detail={`${batter.runs} (${batter.balls})`}
+        />
+      ))}
+      {earlierPartnerships.length > 0 && (
+        <View style={styles.partnershipSection}>
+          <Text style={styles.sectionTitle}>Partnerships</Text>
+          {earlierPartnerships.map((partnership, index) => (
+            <StatRow
+              key={`${partnership.idA}-${partnership.idB}-${index}`}
+              name={`${playerName(partnership.idA)} & ${playerName(partnership.idB)}`}
+              detail={`${partnership.runs} (${partnership.balls})`}
+            />
+          ))}
+        </View>
+      )}
     </View>
   );
 };
@@ -663,25 +760,103 @@ const styles = StyleSheet.create({
   },
   score: {
     fontFamily: 'Anybody-Regular',
-    fontSize: 48,
+    fontSize: 44,
     fontWeight: 'bold',
     color: Colors.DEEP_TEAL,
-    marginVertical: 6,
+    marginTop: 2,
+    marginBottom: 2,
   },
   overs: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'normal',
+    color: Colors.DARK_TEAL,
   },
-  playerLine: {
+  statRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 28,
+  },
+  statMark: {
+    width: 3,
+    height: 16,
+    borderRadius: 2,
+    marginRight: 8,
+    backgroundColor: 'transparent',
+  },
+  statMarkActive: {
+    backgroundColor: Colors.DEEP_ORANGE,
+  },
+  statName: {
+    flex: 1,
     fontFamily: 'Anybody-Regular',
     fontSize: 16,
     color: Colors.DEEP_TEAL,
-    marginBottom: 2,
+  },
+  statNameActive: {
+    fontWeight: 'bold',
+  },
+  statMeta: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 12,
+    color: Colors.MEDIUM_TEAL,
+    marginRight: 8,
+  },
+  statDetail: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 16,
+    color: Colors.DEEP_TEAL,
+  },
+  statDetailActive: {
+    fontWeight: 'bold',
+  },
+  noteLine: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 13,
+    color: Colors.MEDIUM_TEAL,
+    marginLeft: 11,
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  hairline: {
+    height: 1,
+    backgroundColor: Colors.LIGHT_SHADOW,
+    marginVertical: 8,
+  },
+  partnershipSection: {
+    marginTop: 16,
+  },
+  sectionTitle: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 13,
+    color: Colors.MEDIUM_TEAL,
+    marginBottom: 4,
+  },
+  extrasDetail: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 16,
+    color: Colors.DEEP_TEAL,
+  },
+  endInnings: {
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.DEEP_ORANGE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+    marginBottom: 4,
+    backgroundColor: Colors.OFF_WHITE,
+  },
+  endInningsText: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 16,
+    color: Colors.DEEP_ORANGE,
   },
   overRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 10,
+    alignItems: 'center',
+    marginBottom: 8,
     minHeight: 28,
   },
   overEmpty: {
@@ -691,17 +866,15 @@ const styles = StyleSheet.create({
   },
   chip: {
     backgroundColor: Colors.WHITE,
-    borderColor: Colors.DEEP_TEAL,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    marginRight: 6,
-    marginBottom: 6,
+    borderRadius: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    marginRight: 4,
+    marginBottom: 4,
   },
   chipText: {
     fontFamily: 'Anybody-Regular',
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.DEEP_TEAL,
   },
   hint: {

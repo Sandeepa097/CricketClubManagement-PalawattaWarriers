@@ -24,6 +24,7 @@ import { NavigationRoutes } from '../constants/NavigationRoutes';
 import { useIsFocused } from '@react-navigation/native';
 import { retrieveTeams } from '../redux/slices/teamSlice';
 import { retrievePlayers } from '../redux/slices/playerSlice';
+import { clearLiveDraft } from '../scoring/draftStorage';
 
 const splitStatsByPlayerIds = (stats: any[] = [], playerIds: number[]) =>
   stats
@@ -86,7 +87,9 @@ const CreateMatch = ({ route, navigation }) => {
   const dispatch = useDispatch<AppDispatch>();
   const emptyPlayersMessage = 'No players found in the team';
   const players = useSelector((state: RootState) => state.player.players);
-  const editMatch = route.params;
+  const fromLiveScore = !!route.params?.fromLiveScore;
+  const livePrefill = fromLiveScore ? route.params.prefill : null;
+  const editMatch = fromLiveScore ? undefined : route.params;
 
   const isEditingPPLPair =
     !!editMatch?.isPPLPair &&
@@ -202,9 +205,9 @@ const CreateMatch = ({ route, navigation }) => {
           wickets: yupPositiveIntegerSchema('Number of wickets'),
           overs: Yup.number()
             .typeError('Number of overs should be a positive number.')
-            .positive('Number of overs should be a positive number.')
+            .min(0, 'Number of overs should be a positive number.')
             .test('is-decimal', 'Number of overs is invalid.', (val: any) => {
-              if (val) return /^(0|[1-9]\d*)(\.[012345])?$/.test(val);
+              if (val) return /^(0|[1-9]\d*)(\.\d)?$/.test(String(val));
               return true;
             }),
           conceded: yupPositiveIntegerSchema('Number of runs conceded'),
@@ -250,9 +253,9 @@ const CreateMatch = ({ route, navigation }) => {
           wickets: yupPositiveIntegerSchema('Number of wickets'),
           overs: Yup.number()
             .typeError('Number of overs should be a positive number.')
-            .positive('Number of overs should be a positive number.')
+            .min(0, 'Number of overs should be a positive number.')
             .test('is-decimal', 'Number of overs is invalid.', (val: any) => {
-              if (val) return /^(0|[1-9]\d*)(\.[012345])?$/.test(val);
+              if (val) return /^(0|[1-9]\d*)(\.\d)?$/.test(String(val));
               return true;
             }),
           conceded: yupPositiveIntegerSchema('Number of runs conceded'),
@@ -266,9 +269,9 @@ const CreateMatch = ({ route, navigation }) => {
           wickets: yupPositiveIntegerSchema('Number of wickets'),
           overs: Yup.number()
             .typeError('Number of overs should be a positive number.')
-            .positive('Number of overs should be a positive number.')
+            .min(0, 'Number of overs should be a positive number.')
             .test('is-decimal', 'Number of overs is invalid.', (val: any) => {
-              if (val) return /^(0|[1-9]\d*)(\.[012345])?$/.test(val);
+              if (val) return /^(0|[1-9]\d*)(\.\d)?$/.test(String(val));
               return true;
             }),
           conceded: yupPositiveIntegerSchema('Number of runs conceded'),
@@ -303,7 +306,39 @@ const CreateMatch = ({ route, navigation }) => {
       <ScrollView
         contentContainerStyle={{ display: 'flex', alignItems: 'center' }}>
         <Formik
-          initialValues={{
+          key={
+            fromLiveScore
+              ? `live-${JSON.stringify(livePrefill)}`
+              : String(editMatch?.id || 'new-match')
+          }
+          initialValues={
+            livePrefill
+              ? {
+                  isPPL: false,
+                  title: livePrefill.title || '',
+                  oppositeTeamId: livePrefill.oppositeTeamId,
+                  pplGroupTitle: '',
+                  teamATitle: '',
+                  teamBTitle: '',
+                  date: livePrefill.date || '',
+                  location: livePrefill.location || '',
+                  result: livePrefill.result || null,
+                  numberOfDeliveriesPerOver:
+                    livePrefill.numberOfDeliveriesPerOver || 6,
+                  officialPlayers: livePrefill.officialPlayers || [],
+                  teamAPlayers: [],
+                  teamBPlayers: [],
+                  battingStats: livePrefill.battingStats || [],
+                  bowlingStats: livePrefill.bowlingStats || [],
+                  fieldingStats: livePrefill.fieldingStats || [],
+                  teamABattingStats: [],
+                  teamBBattingStats: [],
+                  teamABowlingStats: [],
+                  teamBBowlingStats: [],
+                  teamAFieldingStats: [],
+                  teamBFieldingStats: [],
+                }
+              : {
             isPPL: teamAEditMatch ? !teamAEditMatch.oppositeTeamId : false,
             title: teamAEditMatch ? teamAEditMatch?.title : '',
             oppositeTeamId: teamAEditMatch?.oppositeTeamId || null,
@@ -493,6 +528,7 @@ const CreateMatch = ({ route, navigation }) => {
                 ).unwrap();
               }
 
+              if (fromLiveScore) await clearLiveDraft();
               ToastAndroid.showWithGravity(
                 `Match ${editMatch ? 'updated' : 'created'} successfully.`,
                 ToastAndroid.SHORT,
