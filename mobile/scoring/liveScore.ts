@@ -126,6 +126,7 @@ export interface InningsState {
   thisOver: string[];
   partnerships: PartnershipFigure[];
   extras: ExtrasFigure;
+  creaseOrder: number[];
 }
 
 export interface LiveScoreState {
@@ -151,6 +152,7 @@ interface MutableInnings {
   pendingOverReset: boolean;
   partnerships: PartnershipFigure[];
   extras: ExtrasFigure;
+  creaseOrder: number[];
 }
 
 const emptyBatter = (id: number): BatterFigure => ({
@@ -187,6 +189,7 @@ const emptyInnings = (role: OurRole): MutableInnings => ({
   pendingOverReset: false,
   partnerships: [],
   extras: emptyExtras(),
+  creaseOrder: [],
 });
 
 export const formatOversLabel = (legalBalls: number, ballsPerOver: number) => {
@@ -312,6 +315,16 @@ const swapStrike = (innings: MutableInnings) => {
   innings.nonStrikerId = strikerId;
 };
 
+const replaceCreaseBatter = (
+  innings: MutableInnings,
+  fromId: number,
+  toId: number,
+) => {
+  const index = innings.creaseOrder.indexOf(fromId);
+  if (index === -1) innings.creaseOrder.push(toId);
+  else innings.creaseOrder[index] = toId;
+};
+
 const startPartnership = (innings: MutableInnings) => {
   if (innings.strikerId == null || innings.nonStrikerId == null) return;
   innings.partnerships.push({
@@ -368,12 +381,16 @@ const applyBall = (
     if (ball.wicket) {
       batter.isOut = true;
       innings.wickets += 1;
+      const dismissedId = innings.strikerId;
       if (
         ball.nextBatsmanId != null &&
         ball.nextBatsmanId !== innings.nonStrikerId
       ) {
         ensureBatter(innings, ball.nextBatsmanId);
         innings.strikerId = ball.nextBatsmanId;
+        if (dismissedId != null) {
+          replaceCreaseBatter(innings, dismissedId, ball.nextBatsmanId);
+        }
       } else {
         innings.strikerId = null;
       }
@@ -455,6 +472,7 @@ const applyEvent = (
     innings.nonStrikerId = event.nonStrikerId;
     ensureBatter(innings, event.strikerId);
     ensureBatter(innings, event.nonStrikerId);
+    innings.creaseOrder = [event.strikerId, event.nonStrikerId];
     innings.partnerships = [];
     startPartnership(innings);
     return;
@@ -478,6 +496,7 @@ const applyEvent = (
     }
     batter.retired = true;
     ensureBatter(innings, event.nextBatsmanId);
+    replaceCreaseBatter(innings, event.batsmanId, event.nextBatsmanId);
     if (innings.strikerId === event.batsmanId) {
       innings.strikerId = event.nextBatsmanId;
     } else if (innings.nonStrikerId === event.batsmanId) {
@@ -528,6 +547,7 @@ const publishInnings = (
   thisOver: [...innings.thisOver],
   partnerships: innings.partnerships.map((partnership) => ({ ...partnership })),
   extras: { ...innings.extras },
+  creaseOrder: [...innings.creaseOrder],
 });
 
 export const reduceLiveScore = (draft: LiveDraft): LiveScoreState => {

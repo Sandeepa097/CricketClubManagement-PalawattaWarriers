@@ -614,9 +614,15 @@ const BattingScore = ({
   innings: InningsState;
   playerName: (id: number | null) => string;
 }) => {
-  const atCrease = [innings.strikerId, innings.nonStrikerId].filter(
-    (id): id is number => id != null,
+  const creaseIds = new Set(
+    [innings.strikerId, innings.nonStrikerId].filter(
+      (id): id is number => id != null,
+    ),
   );
+  const ordered = innings.creaseOrder.filter((id) => creaseIds.has(id));
+  const atCrease = ordered.length
+    ? ordered
+    : [...creaseIds];
   const creaseBatters = atCrease
     .map((id) => innings.batsmen.find((batter) => batter.id === id))
     .filter((batter): batter is BatterFigure => !!batter);
