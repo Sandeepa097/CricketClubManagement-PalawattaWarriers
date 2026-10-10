@@ -11,6 +11,7 @@ const height: number = Dimensions.get('window').height;
 interface PlayersSelectionModalProps {
   isVisible: boolean;
   players: PlayerType[];
+  title?: string;
   emptyMessage?: string;
   selected: string | number | (string | number)[];
   onPressItem: (id: string | number) => void;
@@ -24,7 +25,8 @@ const PlayersSelectionModal = (props: PlayersSelectionModalProps) => {
       onBackdropPress={props.onRequestClose}
       style={styles.modal}>
       <View style={styles.container}>
-        <View>
+        {!!props.title && <Text style={styles.title}>{props.title}</Text>}
+        <View style={styles.list}>
           <FlatList
             data={props.players}
             renderItem={({ item }) => (
@@ -72,6 +74,10 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
   },
+  list: {
+    flex: 1,
+    width: '100%',
+  },
   emptyMessageContainer: {
     display: 'flex',
     width: width - 30,
@@ -82,6 +88,13 @@ const styles = StyleSheet.create({
   emptyText: {
     color: Colors.DEEP_TEAL,
     fontSize: 20,
+    fontFamily: 'Anybody-Regular',
+  },
+  title: {
+    width: width - 50,
+    marginBottom: 10,
+    color: Colors.DEEP_TEAL,
+    fontSize: 18,
     fontFamily: 'Anybody-Regular',
   },
 });

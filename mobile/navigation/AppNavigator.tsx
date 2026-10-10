@@ -8,6 +8,8 @@ import SubHeader from '../headers/SubHeader';
 import OppositeTeamMatches from '../screens/OppositeTeamMatches';
 import Scorecard from '../screens/Scorecard';
 import CreateMatch from '../screens/CreateMatch';
+import LiveScoreSetup from '../screens/LiveScoreSetup';
+import LiveScore from '../screens/LiveScore';
 import CreatePlayer from '../screens/CreatePlayer';
 import OverviewPlayer from '../screens/OverviewPlayer';
 import CreatePayments from '../screens/CreatePayments';
@@ -53,6 +55,16 @@ const AppNavigator = ({
       options={{
         header: () => <SubHeader title="New Match" onEditTitle="Edit Match" />,
       }}
+    />
+    <Stack.Screen
+      name={NavigationRoutes.LIVE_SCORE_SETUP}
+      component={LiveScoreSetup}
+      options={{ header: () => <SubHeader title="Live Match" /> }}
+    />
+    <Stack.Screen
+      name={NavigationRoutes.LIVE_SCORE}
+      component={LiveScore}
+      options={{ header: () => <SubHeader title="Scoring" /> }}
     />
     <Stack.Screen
       name={NavigationRoutes.CREATE_PLAYER}

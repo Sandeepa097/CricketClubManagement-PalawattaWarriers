@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
 import Button from '../components/base/Button';
 import { Colors } from '../constants/Colors';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import SearchField from '../components/base/SearchField';
 import TabBar from '../components/base/TabBar';
 import CompactMatchItem from '../components/CompactMatchItem';
@@ -20,6 +26,8 @@ import {
 import { retrieveTeams } from '../redux/slices/teamSlice';
 import { retrievePlayers } from '../redux/slices/playerSlice';
 import Draggable from '../components/base/Draggable';
+import { loadLiveDraft } from '../scoring/draftStorage';
+import { LiveDraft } from '../scoring/liveScore';
 
 const Matches = ({ navigation }) => {
   const focused = useIsFocused();
@@ -33,9 +41,11 @@ const Matches = ({ navigation }) => {
   const totalPPLs = useSelector((state: RootState) => state.match.pplsTotal);
   const [searchText, setSearchText] = useState('');
   const [selectedTabItem, setSelectedTabItem] = useState('outdoor');
+  const [liveDraft, setLiveDraft] = useState<LiveDraft | null>(null);
 
   useEffect(() => {
     if (focused) {
+      loadLiveDraft().then(setLiveDraft);
       dispatch(retrieveTeams())
         .unwrap()
         .then(() => {
@@ -76,6 +86,15 @@ const Matches = ({ navigation }) => {
         ]}
         onPressItem={(id) => setSelectedTabItem(id.toString())}
       />
+      {userType === UserTypes.ADMIN && liveDraft && (
+        <TouchableOpacity
+          style={styles.resumeBanner}
+          onPress={() => navigation.navigate(NavigationRoutes.LIVE_SCORE)}>
+          <Text style={styles.resumeText}>
+            Resume live match vs {liveDraft.oppositeTeamName}
+          </Text>
+        </TouchableOpacity>
+      )}
       <EmptyListMessage
         visible={
           selectedTabItem === 'outdoor'
@@ -117,22 +136,38 @@ const Matches = ({ navigation }) => {
       />
       {userType === UserTypes.ADMIN && (
         <Draggable>
-          <Button
-            sticky={true}
-            position={{ bottom: 10, right: 10 }}
-            shape="square"
-            size={52}
-            color={Colors.DEEP_TEAL}
-            style="filled"
-            icon={() => (
-              <MaterialIcons
-                name="post-add"
-                size={24}
-                color={Colors.OFF_WHITE}
-              />
-            )}
-            onPress={() => navigation.navigate(NavigationRoutes.CREATE_MATCH)}
-          />
+          <View style={styles.actions}>
+            <Button
+              shape="square"
+              size={52}
+              color={Colors.DEEP_ORANGE}
+              style="filled"
+              icon={() => (
+                <MaterialCommunityIcons
+                  name="cricket"
+                  size={26}
+                  color={Colors.OFF_WHITE}
+                />
+              )}
+              onPress={() =>
+                navigation.navigate(NavigationRoutes.LIVE_SCORE_SETUP)
+              }
+            />
+            <Button
+              shape="square"
+              size={52}
+              color={Colors.DEEP_TEAL}
+              style="filled"
+              icon={() => (
+                <MaterialIcons
+                  name="post-add"
+                  size={24}
+                  color={Colors.OFF_WHITE}
+                />
+              )}
+              onPress={() => navigation.navigate(NavigationRoutes.CREATE_MATCH)}
+            />
+          </View>
         </Draggable>
       )}
     </View>
@@ -144,6 +179,24 @@ const styles = StyleSheet.create({
     height: '100%',
     display: 'flex',
     alignItems: 'center',
+  },
+  actions: {
+    alignItems: 'flex-end',
+    padding: 10,
+    gap: 12,
+  },
+  resumeBanner: {
+    width: '94%',
+    backgroundColor: Colors.DEEP_TEAL,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 8,
+  },
+  resumeText: {
+    fontFamily: 'Anybody-Regular',
+    fontSize: 15,
+    color: Colors.OFF_WHITE,
   },
 });
 

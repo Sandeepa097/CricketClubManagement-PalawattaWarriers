@@ -28,7 +28,7 @@ interface BattingStat {
     balls: number | string | null | undefined;
     fours: number | string | null | undefined;
     sixes: number | string | null | undefined;
-    isOut: number | string | null | undefined;
+    isOut: boolean | number | string | null | undefined;
   };
 }
 

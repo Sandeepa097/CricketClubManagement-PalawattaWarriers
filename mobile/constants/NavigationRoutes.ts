@@ -10,6 +10,8 @@ export enum NavigationRoutes {
   OPPOSITE_TEAM_MATCHES = 'OppositeTeamMatchesScreen',
   SCORECARD = 'ScorecardScreen',
   CREATE_MATCH = 'CreateMatchScreen',
+  LIVE_SCORE_SETUP = 'LiveScoreSetupScreen',
+  LIVE_SCORE = 'LiveScoreScreen',
 
   CREATE_PLAYER = 'CreatePlayerScreen',
   OVERVIEW_PLAYER = 'OverviewPlayerScreen',
