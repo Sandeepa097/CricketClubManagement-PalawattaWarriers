@@ -11,6 +11,7 @@ import {
 } from '../models';
 import { findPlayers } from './playerService';
 import sequelizeConnection from '../config/sequelizeConnection';
+import { pickBestPlayers } from './bestPlayers';
 
 interface CreateMatchAttributes {
   title: string;
@@ -103,7 +104,7 @@ export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
 
   const matchIds = matchesByDate.map((match) => match.id);
 
-  const [battingStats, bowlingStats] = await Promise.all([
+  const [battingStats, bowlingStats, fieldingStats] = await Promise.all([
     MatchPlayerBattingStat.findAll({
       where: {
         matchId: {
@@ -154,6 +155,42 @@ export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
       group: ['playerId', 'matchId'],
       raw: true,
     }),
+    MatchPlayerFieldingStat.findAll({
+      where: {
+        matchId: {
+          [Op.in]: matchIds,
+        },
+      },
+      attributes: [
+        'playerId',
+        'matchId',
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('points')),
+          'totalPoints',
+        ],
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('catches')),
+          'totalCatches',
+        ],
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('stumps')),
+          'totalStumps',
+        ],
+        [
+          sequelizeConnection.fn('sum', sequelizeConnection.col('directHits')),
+          'totalDirectHits',
+        ],
+        [
+          sequelizeConnection.fn(
+            'sum',
+            sequelizeConnection.col('indirectHits'),
+          ),
+          'totalIndirectHits',
+        ],
+      ],
+      group: ['playerId', 'matchId'],
+      raw: true,
+    }),
   ]);
 
   return groupedDates.map((group: any) => {
@@ -165,63 +202,23 @@ export const getPPLMatches = async (offset: number = 0, limit: number = 10) => {
     const relevantBowlingStats = bowlingStats.filter((stat: any) =>
       idsForDate.includes(stat.matchId),
     );
-
-    const aggregatedBattingStats = relevantBattingStats.reduce(
-      (acc: any, stat: any) => {
-        if (!acc[stat.playerId]) {
-          acc[stat.playerId] = {
-            playerId: stat.playerId,
-            totalPoints: 0,
-            totalScore: 0,
-            totalBalls: 0,
-          };
-        }
-        acc[stat.playerId].totalPoints += stat.totalPoints;
-        acc[stat.playerId].totalScore += stat.totalScore;
-        acc[stat.playerId].totalBalls += stat.totalBalls;
-        return acc;
-      },
-      {},
+    const relevantFieldingStats = fieldingStats.filter((stat: any) =>
+      idsForDate.includes(stat.matchId),
     );
 
-    const aggregatedBowlingStats = relevantBowlingStats.reduce(
-      (acc: any, stat: any) => {
-        if (!acc[stat.playerId]) {
-          acc[stat.playerId] = {
-            playerId: stat.playerId,
-            totalPoints: 0,
-            totalWickets: 0,
-            totalConceded: 0,
-          };
-        }
-        acc[stat.playerId].totalPoints += stat.totalPoints;
-        acc[stat.playerId].totalWickets += stat.totalWickets;
-        acc[stat.playerId].totalConceded += stat.totalConceded;
-        return acc;
-      },
-      {},
+    const { bestBatters, bestBowlers, bestFielders } = pickBestPlayers(
+      relevantBattingStats,
+      relevantBowlingStats,
+      relevantFieldingStats,
     );
-
-    const bestBatter = Object.keys(aggregatedBattingStats).length
-      ? Object.values(aggregatedBattingStats).reduce(
-          (prev: any, current: any) =>
-            prev.totalPoints > current.totalPoints ? prev : current,
-        )
-      : null;
-
-    const bestBowler = Object.keys(aggregatedBowlingStats).length
-      ? Object.values(aggregatedBowlingStats).reduce(
-          (prev: any, current: any) =>
-            prev.totalPoints > current.totalPoints ? prev : current,
-        )
-      : null;
 
     return {
       id: group.date,
       date: group.date,
       title: group.date,
-      bestBatter,
-      bestBowler,
+      bestBatters,
+      bestBowlers,
+      bestFielders,
     };
   });
 };
@@ -331,55 +328,10 @@ export const getOutdoorMatches = async (
       matchesForOppositeTeam.some((match: any) => match.id === stat.matchId),
     );
 
-    const aggregatedBattingStats = relevantBattingStats.reduce(
-      (acc: any, stat: any) => {
-        if (!acc[stat.playerId]) {
-          acc[stat.playerId] = {
-            playerId: stat.playerId,
-            totalPoints: 0,
-            totalScore: 0,
-            totalBalls: 0,
-          };
-        }
-        acc[stat.playerId].totalPoints += stat.totalPoints;
-        acc[stat.playerId].totalScore += stat.totalScore;
-        acc[stat.playerId].totalBalls += stat.totalBalls;
-        return acc;
-      },
-      {},
+    const { bestBatter, bestBowler } = pickBestPlayers(
+      relevantBattingStats,
+      relevantBowlingStats,
     );
-
-    const aggregatedBowlingStats = relevantBowlingStats.reduce(
-      (acc: any, stat: any) => {
-        if (!acc[stat.playerId]) {
-          acc[stat.playerId] = {
-            playerId: stat.playerId,
-            totalPoints: 0,
-            totalWickets: 0,
-            totalConceded: 0,
-          };
-        }
-        acc[stat.playerId].totalPoints += stat.totalPoints;
-        acc[stat.playerId].totalWickets += stat.totalWickets;
-        acc[stat.playerId].totalConceded += stat.totalConceded;
-        return acc;
-      },
-      {},
-    );
-
-    const bestBatter = Object.keys(aggregatedBattingStats).length
-      ? Object.values(aggregatedBattingStats).reduce(
-          (prev: any, current: any) =>
-            prev.totalPoints > current.totalPoints ? prev : current,
-        )
-      : null;
-
-    const bestBowler = Object.keys(aggregatedBowlingStats).length
-      ? Object.values(aggregatedBowlingStats).reduce(
-          (prev: any, current: any) =>
-            prev.totalPoints > current.totalPoints ? prev : current,
-        )
-      : null;
 
     const totalMatches = matchesForOppositeTeam.length;
     const wonMatches = matchesForOppositeTeam.filter(

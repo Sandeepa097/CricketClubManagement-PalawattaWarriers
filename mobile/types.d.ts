@@ -66,4 +66,7 @@ export interface OutdoorMatch extends CompactMatch {
 
 export interface PPLMatch extends CompactMatch {
   date: string;
+  bestBatters: BestPlayer[];
+  bestBowlers: BestPlayer[];
+  bestFielders: BestPlayer[];
 }

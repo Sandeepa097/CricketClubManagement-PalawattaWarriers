@@ -3,6 +3,7 @@ import { OutdoorMatch, PPLMatch } from '../../types';
 import api from '../../api';
 import { RootState } from '../store';
 import { PAGE_SIZE } from '../../config/config';
+import { formatBestPlayer, formatBestPlayers } from '../../utils/bestPlayers';
 
 interface MatchState {
   outdoorsTotal: number;
@@ -138,37 +139,18 @@ export const retrieveOutdoorMatches = createAsyncThunk(
           (team) => team.id === response.data.matches[i].oppositeTeamId,
         );
 
-        const bestBatsman: any = players.find(
-          (player) =>
-            player.id === response.data.matches[i].bestBatter?.playerId,
-        );
-        const bestBowler: any = players.find(
-          (player) =>
-            player.id === response.data.matches[i].bestBowler?.playerId,
-        );
+        const match = response.data.matches[i];
 
         outdoorCompactMatches.push({
-          id: response.data.matches[i].oppositeTeamId,
+          id: match.oppositeTeamId,
           oppositeTeam: {
             id: oppositeTeam?.id,
             name: oppositeTeam?.name,
           },
-          winningPercentage: Math.round(
-            response.data.matches[i].winningPercentage,
-          ),
+          winningPercentage: Math.round(match.winningPercentage),
           title: oppositeTeam?.name,
-          bestBatsman: bestBatsman
-            ? {
-                ...bestBatsman,
-                score: `${response.data.matches[i].bestBatter?.totalScore}/${response.data.matches[i].bestBatter?.totalBalls}`,
-              }
-            : null,
-          bestBowler: bestBowler
-            ? {
-                ...bestBowler,
-                score: `${response.data.matches[i].bestBowler?.totalWickets}/${response.data.matches[i].bestBowler?.totalConceded}`,
-              }
-            : null,
+          bestBatsman: formatBestPlayer(match.bestBatter, players, 'batter'),
+          bestBowler: formatBestPlayer(match.bestBowler, players, 'bowler'),
         });
       }
 
@@ -201,33 +183,23 @@ export const retrievePPLMatches = createAsyncThunk(
     if (response.ok) {
       const pplCompactMatches: PPLMatch[] = [];
 
+      const players = (getState() as RootState).player.players;
       for (let i = 0; i < response.data.matches.length; i++) {
-        const players = (getState() as RootState).player.players;
-        const bestBatsman: any = players.find(
-          (player) =>
-            player.id === response.data.matches[i].bestBatter?.playerId,
-        );
-        const bestBowler: any = players.find(
-          (player) =>
-            player.id === response.data.matches[i].bestBowler?.playerId,
-        );
+        const match = response.data.matches[i];
 
         pplCompactMatches.push({
-          id: response.data.matches[i].date,
-          date: response.data.matches[i].date,
-          title: response.data.matches[i].date,
-          bestBatsman: bestBatsman
-            ? {
-                ...bestBatsman,
-                score: `${response.data.matches[i].bestBatter?.totalScore}/${response.data.matches[i].bestBatter?.totalBalls}`,
-              }
-            : null,
-          bestBowler: bestBowler
-            ? {
-                ...bestBowler,
-                score: `${response.data.matches[i].bestBowler?.totalWickets}/${response.data.matches[i].bestBowler?.totalConceded}`,
-              }
-            : null,
+          id: match.date,
+          date: match.date,
+          title: match.date,
+          bestBatsman: null,
+          bestBowler: null,
+          bestBatters: formatBestPlayers(match.bestBatters, players, 'batter'),
+          bestBowlers: formatBestPlayers(match.bestBowlers, players, 'bowler'),
+          bestFielders: formatBestPlayers(
+            match.bestFielders,
+            players,
+            'fielder',
+          ),
         });
       }
 
