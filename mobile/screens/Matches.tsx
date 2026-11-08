@@ -27,7 +27,7 @@ import { retrieveTeams } from '../redux/slices/teamSlice';
 import { retrievePlayers } from '../redux/slices/playerSlice';
 import Draggable from '../components/base/Draggable';
 import { loadLiveDraft } from '../scoring/draftStorage';
-import { LiveDraft } from '../scoring/liveScore';
+import { LiveDraft, isPplDraft } from '../scoring/liveScore';
 
 const Matches = ({ navigation }) => {
   const focused = useIsFocused();
@@ -91,7 +91,9 @@ const Matches = ({ navigation }) => {
           style={styles.resumeBanner}
           onPress={() => navigation.navigate(NavigationRoutes.LIVE_SCORE)}>
           <Text style={styles.resumeText}>
-            Resume live match vs {liveDraft.oppositeTeamName}
+            {isPplDraft(liveDraft)
+              ? `Resume live match ${liveDraft.teamATitle} vs ${liveDraft.teamBTitle}`
+              : `Resume live match vs ${liveDraft.oppositeTeamName}`}
           </Text>
         </TouchableOpacity>
       )}

@@ -27,11 +27,17 @@ import {
   MatchResult,
   ScoringEvent,
   WicketKind,
+  battingSideFor,
   canScoreBall,
   formatOversLabel,
+  isPplDraft,
+  otherSide,
   reduceLiveScore,
+  sidePlayerIds,
+  sideTitle,
   suggestResult,
   toMatchPayload,
+  toPplMatchPayload,
   wicketKindLabel,
   wicketKindsFor,
 } from '../scoring/liveScore';
@@ -81,7 +87,9 @@ const LiveScore = ({ navigation }) => {
       }
       draftRef.current = loaded;
       setDraft(loaded);
-      if (reduceLiveScore(loaded).matchEnded) setResult(suggestResult(loaded));
+      if (reduceLiveScore(loaded).matchEnded && !isPplDraft(loaded)) {
+        setResult(suggestResult(loaded));
+      }
     });
   }, [focused]);
 
@@ -101,11 +109,16 @@ const LiveScore = ({ navigation }) => {
     ].join(':');
     if (promptedKey.current === key) return;
     promptedKey.current = key;
-    if (view.current.role === 'bat' && view.current.strikerId == null) {
-      setPicker('striker');
-    } else if (view.current.role === 'field' && view.current.bowlerId == null) {
-      setPicker('bowler');
-    }
+    const needsOpeners =
+      view.current.role !== 'field' &&
+      view.current.strikerId == null &&
+      view.current.nonStrikerId == null;
+    const needsBowler =
+      view.current.role !== 'bat' &&
+      view.current.bowlerId == null &&
+      (view.current.role === 'field' || view.current.strikerId != null);
+    if (needsOpeners) setPicker('striker');
+    else if (needsBowler) setPicker('bowler');
   }, [draft, view, picker, wicketOpen, customOpen]);
 
   const playerName = (id: number | null) => {
@@ -123,7 +136,11 @@ const LiveScore = ({ navigation }) => {
       const endedInnings = next.events.filter(
         (item) => item.type === 'endInnings',
       ).length;
-      if (event.type === 'endInnings' && endedInnings === 2) {
+      if (
+        event.type === 'endInnings' &&
+        endedInnings === 2 &&
+        !isPplDraft(next)
+      ) {
         setResult(suggestResult(next));
       }
       await saveLiveDraft(next);
@@ -152,6 +169,31 @@ const LiveScore = ({ navigation }) => {
     setPendingKind(null);
   };
 
+  const canBringNextBatter = () => {
+    if (!view || !draft || !isPplDraft(draft)) return true;
+    const busy = new Set<number>();
+    if (view.current.strikerId != null) busy.add(view.current.strikerId);
+    if (view.current.nonStrikerId != null) busy.add(view.current.nonStrikerId);
+    view.current.batsmen.forEach((batter) => {
+      if (batter.isOut || batter.retired) busy.add(batter.id);
+    });
+    return sidePlayerIds(draft, battingSideFor(draft, view.currentInningsIndex)).some(
+      (id) => !busy.has(Number(id)),
+    );
+  };
+
+  const askForNextBatter = (entry: BallEvent) => {
+    if (canBringNextBatter()) {
+      setPendingBall(entry);
+      setPendingKind(null);
+      setPicker('next');
+      return;
+    }
+    setPicker(null);
+    commit(entry);
+    clearEntry();
+  };
+
   const scoreRuns = (runs: number) => {
     if (!view || !canScoreBall(view.current)) return;
     const entry: BallEvent = { type: 'ball', runs, extra, wicket };
@@ -161,7 +203,7 @@ const LiveScore = ({ navigation }) => {
       return;
     }
     setPendingBall(entry);
-    if (view.current.role === 'bat') setPicker('next');
+    if (view.current.role === 'bat') askForNextBatter(entry);
     else setWicketOpen(true);
   };
 
@@ -169,6 +211,10 @@ const LiveScore = ({ navigation }) => {
     setWicketOpen(false);
     if (!pendingBall) return;
     if (kind === 'bowled') {
+      if (view?.current.role === 'both') {
+        askForNextBatter({ ...pendingBall, wicketKind: kind });
+        return;
+      }
       commit({ ...pendingBall, wicketKind: kind });
       clearEntry();
       return;
@@ -216,6 +262,14 @@ const LiveScore = ({ navigation }) => {
       return;
     }
     if (picker === 'fielder' && pendingBall && pendingKind) {
+      if (view.current.role === 'both') {
+        askForNextBatter({
+          ...pendingBall,
+          wicketKind: pendingKind,
+          fielderId: playerId,
+        });
+        return;
+      }
       setPicker(null);
       commit({
         ...pendingBall,
@@ -228,26 +282,46 @@ const LiveScore = ({ navigation }) => {
 
   const reviewMatch = () => {
     if (!draft) return;
-    const payload = toMatchPayload(draft, result);
-    const storedId = (id: number) =>
-      players.find((player) => Number(player.id) === id)?.id ?? id;
+    const storedId = (id: number | string) =>
+      players.find((player) => Number(player.id) === Number(id))?.id ?? id;
+    const mapStats = (stats: { id: number | string }[]) =>
+      stats.map((stat) => ({ ...stat, id: storedId(stat.id) }));
+    const mapPlayers = (ids: Array<number | string>) => ids.map(storedId);
+    const payload = isPplDraft(draft)
+      ? toPplMatchPayload(draft)
+      : toMatchPayload(draft, result);
     navigation.navigate(NavigationRoutes.CREATE_MATCH, {
       fromLiveScore: true,
       prefill: {
         ...payload,
-        officialPlayers: payload.officialPlayers.map(storedId),
-        battingStats: payload.battingStats.map((stat) => ({
-          ...stat,
-          id: storedId(stat.id),
-        })),
-        bowlingStats: payload.bowlingStats.map((stat) => ({
-          ...stat,
-          id: storedId(stat.id),
-        })),
-        fieldingStats: payload.fieldingStats.map((stat) => ({
-          ...stat,
-          id: storedId(stat.id),
-        })),
+        officialPlayers: mapPlayers(payload.officialPlayers),
+        teamAPlayers: mapPlayers(
+          'teamAPlayers' in payload ? payload.teamAPlayers : [],
+        ),
+        teamBPlayers: mapPlayers(
+          'teamBPlayers' in payload ? payload.teamBPlayers : [],
+        ),
+        battingStats: mapStats(payload.battingStats),
+        bowlingStats: mapStats(payload.bowlingStats),
+        fieldingStats: mapStats(payload.fieldingStats),
+        teamABattingStats: mapStats(
+          'teamABattingStats' in payload ? payload.teamABattingStats : [],
+        ),
+        teamBBattingStats: mapStats(
+          'teamBBattingStats' in payload ? payload.teamBBattingStats : [],
+        ),
+        teamABowlingStats: mapStats(
+          'teamABowlingStats' in payload ? payload.teamABowlingStats : [],
+        ),
+        teamBBowlingStats: mapStats(
+          'teamBBowlingStats' in payload ? payload.teamBBowlingStats : [],
+        ),
+        teamAFieldingStats: mapStats(
+          'teamAFieldingStats' in payload ? payload.teamAFieldingStats : [],
+        ),
+        teamBFieldingStats: mapStats(
+          'teamBFieldingStats' in payload ? payload.teamBFieldingStats : [],
+        ),
       },
     });
   };
@@ -255,8 +329,24 @@ const LiveScore = ({ navigation }) => {
   if (!draft || !view) return <View style={styles.container} />;
 
   const innings = view.current;
-  const battingInnings = view.innings.find((item) => item.role === 'bat');
-  const bowlingInnings = view.innings.find((item) => item.role === 'field');
+  const ppl = isPplDraft(draft);
+  const battingInnings = ppl
+    ? view.innings[draft.battingFirst === 'teamA' ? 0 : 1]
+    : view.innings.find((item) => item.role === 'bat');
+  const bowlingInnings = ppl
+    ? view.innings[draft.battingFirst === 'teamA' ? 1 : 0]
+    : view.innings.find((item) => item.role === 'field');
+  const currentBattingSide = ppl
+    ? battingSideFor(draft, view.currentInningsIndex)
+    : null;
+  const needsOpeners =
+    innings.role !== 'field' &&
+    innings.strikerId == null &&
+    innings.nonStrikerId == null;
+  const needsBowlerPrompt =
+    innings.role !== 'bat' &&
+    innings.bowlerId == null &&
+    (innings.role === 'field' || innings.strikerId != null);
   const ready = canScoreBall(innings);
   const busyIds = new Set<number>();
   if (picker === 'nonStriker' && pendingStriker != null) {
@@ -269,9 +359,17 @@ const LiveScore = ({ navigation }) => {
       if (batter.isOut || batter.retired) busyIds.add(batter.id);
     });
   }
-  const selectablePlayers = players.filter(
-    (player) => !busyIds.has(Number(player.id)),
-  );
+  const squadIds =
+    ppl && currentBattingSide
+      ? picker === 'bowler' || picker === 'fielder'
+        ? sidePlayerIds(draft, otherSide(currentBattingSide))
+        : sidePlayerIds(draft, currentBattingSide)
+      : null;
+  const selectablePlayers = players.filter((player) => {
+    if (busyIds.has(Number(player.id))) return false;
+    if (!squadIds) return true;
+    return squadIds.some((id) => Number(id) === Number(player.id));
+  });
   const pickerTitle =
     picker === 'striker'
       ? 'Select the striker'
@@ -290,48 +388,62 @@ const LiveScore = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scoreboard}>
-        <Text style={styles.opponent}>Vs {draft.oppositeTeamName}</Text>
+        <Text style={styles.opponent}>
+          {ppl
+            ? `${draft.teamATitle} vs ${draft.teamBTitle}`
+            : `Vs ${draft.oppositeTeamName}`}
+        </Text>
         {view.matchEnded ? (
           <View>
             <Text style={styles.inningsLabel}>Match complete</Text>
             <ScoreLine
-              label="Our score"
-              value={`${battingInnings?.runs || 0}-${battingInnings?.wickets || 0} (${battingInnings?.oversLabel})`}
+              label={ppl ? `${sideTitle(draft, draft.battingFirst)} score` : 'Our score'}
+              value={`${(ppl ? view.innings[0] : battingInnings)?.runs || 0}-${(ppl ? view.innings[0] : battingInnings)?.wickets || 0} (${(ppl ? view.innings[0] : battingInnings)?.oversLabel})`}
             />
             <ScoreLine
-              label="Their score"
-              value={`${bowlingInnings?.runs || 0}-${bowlingInnings?.wickets || 0} (${bowlingInnings?.oversLabel})`}
+              label={
+                ppl
+                  ? `${sideTitle(draft, otherSide(draft.battingFirst))} score`
+                  : 'Their score'
+              }
+              value={`${(ppl ? view.innings[1] : bowlingInnings)?.runs || 0}-${(ppl ? view.innings[1] : bowlingInnings)?.wickets || 0} (${(ppl ? view.innings[1] : bowlingInnings)?.oversLabel})`}
             />
             <Text style={styles.hint}>
               Review the figures on the match form before saving. Team totals
               stay on this screen.
             </Text>
-            <View style={styles.resultRow}>
-              {(['won', 'lost', 'draw'] as MatchResult[]).map((item) => (
-                <TouchableOpacity
-                  key={item}
-                  style={[
-                    styles.resultButton,
-                    result === item && styles.resultButtonOn,
-                  ]}
-                  onPress={() => setResult(item)}>
-                  <Text
+            {!ppl && (
+              <View style={styles.resultRow}>
+                {(['won', 'lost', 'draw'] as MatchResult[]).map((item) => (
+                  <TouchableOpacity
+                    key={item}
                     style={[
-                      styles.resultText,
-                      result === item && styles.resultTextOn,
-                    ]}>
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                      styles.resultButton,
+                      result === item && styles.resultButtonOn,
+                    ]}
+                    onPress={() => setResult(item)}>
+                    <Text
+                      style={[
+                        styles.resultText,
+                        result === item && styles.resultTextOn,
+                      ]}>
+                      {item}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
         ) : (
           <View>
             <Text style={styles.inningsLabel}>
               {view.currentInningsIndex === 0 ? '1st innings' : '2nd innings'}
               {' · '}
-              {innings.role === 'bat' ? 'We are batting' : 'We are bowling'}
+              {ppl && currentBattingSide
+                ? `${sideTitle(draft, currentBattingSide)} batting`
+                : innings.role === 'bat'
+                  ? 'We are batting'
+                  : 'We are bowling'}
             </Text>
             {view.currentInningsIndex === 1 && (
               <Text style={styles.previous}>
@@ -354,10 +466,16 @@ const LiveScore = ({ navigation }) => {
                 ))
               )}
             </View>
-            {innings.role === 'bat' ? (
+            {innings.role !== 'field' && (
               <BattingScore innings={innings} playerName={playerName} />
-            ) : (
+            )}
+            {innings.role !== 'bat' && (
               <View>
+                {innings.role === 'both' && (
+                  <View style={styles.partnershipSection}>
+                    <Text style={styles.sectionTitle}>Bowling</Text>
+                  </View>
+                )}
                 {innings.bowlers.map((bowler) => (
                   <StatRow
                     key={bowler.id}
@@ -400,12 +518,12 @@ const LiveScore = ({ navigation }) => {
         </View>
       ) : (
         <View style={styles.pad}>
-          {!ready && (
+          {(needsOpeners || needsBowlerPrompt) && (
             <TouchableOpacity
               style={styles.prompt}
               onPress={() =>
                 setPicker(
-                  innings.role === 'bat'
+                  needsOpeners
                     ? pendingStriker == null
                       ? 'striker'
                       : 'nonStriker'
@@ -413,9 +531,7 @@ const LiveScore = ({ navigation }) => {
                 )
               }>
               <Text style={styles.promptText}>
-                {innings.role === 'bat'
-                  ? 'Select the two batters'
-                  : 'Select the bowler'}
+                {needsOpeners ? 'Select the two batters' : 'Select the bowler'}
               </Text>
             </TouchableOpacity>
           )}
@@ -444,24 +560,25 @@ const LiveScore = ({ navigation }) => {
               onPress={undo}
               disabled={draft.events.length === 0}
             />
-            {innings.role === 'bat' ? (
+            {innings.role !== 'field' && (
               <PadButton
                 label="Swap"
                 onPress={() => commit({ type: 'swap' })}
                 disabled={!ready}
               />
-            ) : (
-              <PadButton
-                label="Bowler"
-                onPress={() => setPicker('bowler')}
-                disabled={false}
-              />
             )}
-            {innings.role === 'bat' && (
+            {innings.role !== 'field' && (
               <PadButton
                 label="Retire"
                 onPress={() => setPicker('retireNext')}
                 disabled={!ready}
+              />
+            )}
+            {innings.role !== 'bat' && (
+              <PadButton
+                label="Bowler"
+                onPress={() => setPicker('bowler')}
+                disabled={false}
               />
             )}
           </View>
@@ -560,7 +677,9 @@ const LiveScore = ({ navigation }) => {
         title={
           view.currentInningsIndex === 0
             ? 'End this innings?'
-            : 'End the match and choose the result?'
+            : ppl
+              ? 'End the match?'
+              : 'End the match and choose the result?'
         }
         ok={{
           text: 'End',

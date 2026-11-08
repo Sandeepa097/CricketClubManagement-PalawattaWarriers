@@ -1,4 +1,8 @@
-export type OurRole = 'bat' | 'field';
+export type SideRole = 'bat' | 'field';
+
+export type OurRole = SideRole | 'both';
+
+export type TeamSide = 'teamA' | 'teamB';
 
 export type ExtraKind = 'wide' | 'noBall' | 'bye' | 'legBye';
 
@@ -54,17 +58,50 @@ export type ScoringEvent =
   | BowlerEvent
   | EndInningsEvent;
 
-export interface LiveDraft {
+export interface OutdoorLiveDraft {
   version: 1;
+  kind?: 'outdoor';
   title: string;
   oppositeTeamId: number;
   oppositeTeamName: string;
   date: string;
   location: string;
   numberOfDeliveriesPerOver: number;
-  firstRole: OurRole;
+  firstRole: SideRole;
   events: ScoringEvent[];
 }
+
+export interface PplLiveDraft {
+  version: 1;
+  kind: 'ppl';
+  pplGroupTitle: string;
+  teamATitle: string;
+  teamBTitle: string;
+  teamAPlayerIds: Array<number | string>;
+  teamBPlayerIds: Array<number | string>;
+  battingFirst: TeamSide;
+  date: string;
+  location: string;
+  numberOfDeliveriesPerOver: number;
+  events: ScoringEvent[];
+}
+
+export type LiveDraft = OutdoorLiveDraft | PplLiveDraft;
+
+export const isPplDraft = (draft: LiveDraft): draft is PplLiveDraft =>
+  draft.kind === 'ppl';
+
+export const otherSide = (side: TeamSide): TeamSide =>
+  side === 'teamA' ? 'teamB' : 'teamA';
+
+export const sideTitle = (draft: PplLiveDraft, side: TeamSide) =>
+  side === 'teamA' ? draft.teamATitle : draft.teamBTitle;
+
+export const sidePlayerIds = (draft: PplLiveDraft, side: TeamSide) =>
+  side === 'teamA' ? draft.teamAPlayerIds : draft.teamBPlayerIds;
+
+export const battingSideFor = (draft: PplLiveDraft, index: 0 | 1): TeamSide =>
+  index === 0 ? draft.battingFirst : otherSide(draft.battingFirst);
 
 export interface BatterFigure {
   id: number;
@@ -263,6 +300,10 @@ const runningRunsFor = (ball: BallEvent) => {
 const isLegalDelivery = (ball: BallEvent) =>
   ball.extra !== 'wide' && ball.extra !== 'noBall';
 
+const tracksBatting = (role: OurRole) => role !== 'field';
+
+const tracksBowling = (role: OurRole) => role !== 'bat';
+
 const creditsBowlerWicket = (kind: WicketKind | undefined) =>
   kind === 'bowled' || kind === 'caught' || kind === 'stumped';
 
@@ -366,7 +407,10 @@ const applyBall = (
   innings.runs += teamRunsFor(ball);
   innings.thisOver.push(ballToken(ball.runs, ball.extra, ball.wicket));
 
-  if (innings.role === 'bat' && innings.strikerId != null) {
+  const batting = tracksBatting(innings.role);
+  const bowling = tracksBowling(innings.role);
+
+  if (batting && innings.strikerId != null) {
     const batter = ensureBatter(innings, innings.strikerId);
     const batterRuns = batterRunsFor(ball);
     batter.runs += batterRuns;
@@ -380,7 +424,6 @@ const applyBall = (
     }
     if (ball.wicket) {
       batter.isOut = true;
-      innings.wickets += 1;
       const dismissedId = innings.strikerId;
       if (
         ball.nextBatsmanId != null &&
@@ -397,13 +440,12 @@ const applyBall = (
     }
   }
 
-  if (innings.role === 'field' && innings.bowlerId != null) {
+  if (bowling && innings.bowlerId != null) {
     const bowler = ensureBowler(innings, innings.bowlerId);
     const conceded = bowlerRunsFor(ball);
     bowler.conceded += conceded;
     bowler.currentOverConceded += conceded;
     if (ball.wicket) {
-      innings.wickets += 1;
       if (creditsBowlerWicket(ball.wicketKind)) bowler.wickets += 1;
       if (ball.fielderId != null && ball.wicketKind === 'caught') {
         ensureFielder(innings, ball.fielderId).catches += 1;
@@ -420,7 +462,9 @@ const applyBall = (
     }
   }
 
-  if (innings.role === 'bat') {
+  if (ball.wicket && (batting || bowling)) innings.wickets += 1;
+
+  if (batting) {
     const partnership = innings.partnerships[innings.partnerships.length - 1];
     if (partnership) {
       partnership.runs += teamRunsFor(ball);
@@ -429,11 +473,11 @@ const applyBall = (
     if (ball.wicket) startPartnership(innings);
   }
 
-  if (innings.role === 'field') addExtras(innings, ball);
+  if (bowling) addExtras(innings, ball);
 
   if (legal) {
     innings.legalBalls += 1;
-    if (innings.role === 'field' && innings.bowlerId != null) {
+    if (bowling && innings.bowlerId != null) {
       const bowler = ensureBowler(innings, innings.bowlerId);
       bowler.legalBalls += 1;
       bowler.currentOverBalls += 1;
@@ -455,7 +499,7 @@ const applyBall = (
     });
     innings.pendingOverReset = true;
     swapStrike(innings);
-    if (innings.role === 'field') innings.bowlerId = null;
+    if (bowling) innings.bowlerId = null;
   }
 };
 
@@ -465,7 +509,7 @@ const applyEvent = (
   ballsPerOver: number,
 ) => {
   if (event.type === 'openers') {
-    if (innings.role !== 'bat') return;
+    if (!tracksBatting(innings.role)) return;
     if (event.strikerId === event.nonStrikerId) return;
     if (innings.legalBalls > 0) return;
     innings.strikerId = event.strikerId;
@@ -479,13 +523,13 @@ const applyEvent = (
   }
 
   if (event.type === 'swap') {
-    if (innings.role !== 'bat') return;
+    if (!tracksBatting(innings.role)) return;
     swapStrike(innings);
     return;
   }
 
   if (event.type === 'retire') {
-    if (innings.role !== 'bat') return;
+    if (!tracksBatting(innings.role)) return;
     const batter = findBatter(innings, event.batsmanId);
     if (!batter || batter.isOut || batter.retired) return;
     if (
@@ -507,7 +551,7 @@ const applyEvent = (
   }
 
   if (event.type === 'bowler') {
-    if (innings.role !== 'field') return;
+    if (!tracksBowling(innings.role)) return;
     ensureBowler(innings, event.bowlerId);
     innings.bowlerId = event.bowlerId;
     return;
@@ -515,12 +559,12 @@ const applyEvent = (
 
   if (event.type === 'ball') {
     if (
-      innings.role === 'bat' &&
+      tracksBatting(innings.role) &&
       (innings.strikerId == null || innings.nonStrikerId == null)
     ) {
       return;
     }
-    if (innings.role === 'field' && innings.bowlerId == null) return;
+    if (tracksBowling(innings.role) && innings.bowlerId == null) return;
     applyBall(innings, event, ballsPerOver);
   }
 };
@@ -552,10 +596,12 @@ const publishInnings = (
 
 export const reduceLiveScore = (draft: LiveDraft): LiveScoreState => {
   const ballsPerOver = draft.numberOfDeliveriesPerOver || 6;
-  const innings: [MutableInnings, MutableInnings] = [
-    emptyInnings(draft.firstRole),
-    emptyInnings(draft.firstRole === 'bat' ? 'field' : 'bat'),
-  ];
+  const innings: [MutableInnings, MutableInnings] = isPplDraft(draft)
+    ? [emptyInnings('both'), emptyInnings('both')]
+    : [
+        emptyInnings(draft.firstRole),
+        emptyInnings(draft.firstRole === 'bat' ? 'field' : 'bat'),
+      ];
   let index: 0 | 1 = 0;
   let matchEnded = false;
 
@@ -585,13 +631,14 @@ export const reduceLiveScore = (draft: LiveDraft): LiveScoreState => {
 
 export const canScoreBall = (innings: InningsState) => {
   if (innings.ended) return false;
-  if (innings.role === 'bat') {
-    return innings.strikerId != null && innings.nonStrikerId != null;
-  }
-  return innings.bowlerId != null;
+  const battingReady =
+    !tracksBatting(innings.role) ||
+    (innings.strikerId != null && innings.nonStrikerId != null);
+  const bowlingReady = !tracksBowling(innings.role) || innings.bowlerId != null;
+  return battingReady && bowlingReady;
 };
 
-export const suggestResult = (draft: LiveDraft): MatchResult => {
+export const suggestResult = (draft: OutdoorLiveDraft): MatchResult => {
   const state = reduceLiveScore(draft);
   const ours = state.innings.find((innings) => innings.role === 'bat');
   const theirs = state.innings.find((innings) => innings.role === 'field');
@@ -602,7 +649,54 @@ export const suggestResult = (draft: LiveDraft): MatchResult => {
   return 'draw';
 };
 
-export const toMatchPayload = (draft: LiveDraft, result: MatchResult) => {
+const battingStatsFrom = (batsmen: BatterFigure[]) =>
+  batsmen.map((batter) => ({
+    id: batter.id,
+    values: {
+      score: batter.runs,
+      balls: batter.balls,
+      fours: batter.fours,
+      sixes: batter.sixes,
+      isOut: batter.isOut,
+    },
+  }));
+
+const bowlingStatsFrom = (bowlers: BowlerFigure[]) =>
+  bowlers
+    .filter(
+      (bowler) =>
+        bowler.legalBalls > 0 || bowler.conceded > 0 || bowler.wickets > 0,
+    )
+    .map((bowler) => ({
+      id: bowler.id,
+      values: {
+        wickets: bowler.wickets,
+        overs: bowler.overs,
+        conceded: bowler.conceded,
+        maidens: bowler.maidens,
+      },
+    }));
+
+const fieldingStatsFrom = (fielding: FieldingFigure[]) =>
+  fielding
+    .filter(
+      (fielder) =>
+        fielder.catches ||
+        fielder.stumps ||
+        fielder.directHits ||
+        fielder.indirectHits,
+    )
+    .map((fielder) => ({
+      id: fielder.id,
+      values: {
+        catches: fielder.catches,
+        stumps: fielder.stumps,
+        directHits: fielder.directHits,
+        indirectHits: fielder.indirectHits,
+      },
+    }));
+
+export const toMatchPayload = (draft: OutdoorLiveDraft, result: MatchResult) => {
   const state = reduceLiveScore(draft);
   const batting = state.innings.find((innings) => innings.role === 'bat');
   const bowling = state.innings.find((innings) => innings.role === 'field');
@@ -636,46 +730,50 @@ export const toMatchPayload = (draft: LiveDraft, result: MatchResult) => {
     officialPlayers: [...officialPlayerIds],
     teamATitle: null,
     teamBTitle: null,
-    battingStats: (batting?.batsmen || []).map((batter) => ({
-      id: batter.id,
-      values: {
-        score: batter.runs,
-        balls: batter.balls,
-        fours: batter.fours,
-        sixes: batter.sixes,
-        isOut: batter.isOut,
-      },
-    })),
-    bowlingStats: (bowling?.bowlers || [])
-      .filter(
-        (bowler) =>
-          bowler.legalBalls > 0 || bowler.conceded > 0 || bowler.wickets > 0,
-      )
-      .map((bowler) => ({
-        id: bowler.id,
-        values: {
-          wickets: bowler.wickets,
-          overs: bowler.overs,
-          conceded: bowler.conceded,
-          maidens: bowler.maidens,
-        },
-      })),
-    fieldingStats: (bowling?.fielding || [])
-      .filter(
-        (fielder) =>
-          fielder.catches ||
-          fielder.stumps ||
-          fielder.directHits ||
-          fielder.indirectHits,
-      )
-      .map((fielder) => ({
-        id: fielder.id,
-        values: {
-          catches: fielder.catches,
-          stumps: fielder.stumps,
-          directHits: fielder.directHits,
-          indirectHits: fielder.indirectHits,
-        },
-      })),
+    battingStats: battingStatsFrom(batting?.batsmen || []),
+    bowlingStats: bowlingStatsFrom(bowling?.bowlers || []),
+    fieldingStats: fieldingStatsFrom(bowling?.fielding || []),
+  };
+};
+
+export const toPplMatchPayload = (draft: PplLiveDraft) => {
+  const state = reduceLiveScore(draft);
+  const battingInnings = (side: TeamSide) =>
+    state.innings[draft.battingFirst === side ? 0 : 1];
+  const bowlingInnings = (side: TeamSide) =>
+    state.innings[draft.battingFirst === side ? 1 : 0];
+
+  const teamABattingStats = battingStatsFrom(battingInnings('teamA').batsmen);
+  const teamBBattingStats = battingStatsFrom(battingInnings('teamB').batsmen);
+  const teamABowlingStats = bowlingStatsFrom(bowlingInnings('teamA').bowlers);
+  const teamBBowlingStats = bowlingStatsFrom(bowlingInnings('teamB').bowlers);
+  const teamAFieldingStats = fieldingStatsFrom(bowlingInnings('teamA').fielding);
+  const teamBFieldingStats = fieldingStatsFrom(bowlingInnings('teamB').fielding);
+  const teamAPlayers = draft.teamAPlayerIds.map(Number);
+  const teamBPlayers = draft.teamBPlayerIds.map(Number);
+
+  return {
+    isPPL: true as const,
+    title: `${draft.teamATitle} vs ${draft.teamBTitle}`,
+    oppositeTeamId: null,
+    pplGroupTitle: draft.pplGroupTitle,
+    teamATitle: draft.teamATitle,
+    teamBTitle: draft.teamBTitle,
+    date: draft.date,
+    location: draft.location,
+    result: null,
+    numberOfDeliveriesPerOver: draft.numberOfDeliveriesPerOver,
+    officialPlayers: [...teamAPlayers, ...teamBPlayers],
+    teamAPlayers,
+    teamBPlayers,
+    battingStats: [...teamABattingStats, ...teamBBattingStats],
+    bowlingStats: [...teamABowlingStats, ...teamBBowlingStats],
+    fieldingStats: [...teamAFieldingStats, ...teamBFieldingStats],
+    teamABattingStats,
+    teamBBattingStats,
+    teamABowlingStats,
+    teamBBowlingStats,
+    teamAFieldingStats,
+    teamBFieldingStats,
   };
 };

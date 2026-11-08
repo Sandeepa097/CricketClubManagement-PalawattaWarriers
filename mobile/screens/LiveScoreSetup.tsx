@@ -7,6 +7,7 @@ import TextInput from '../components/base/TextInput';
 import Button from '../components/base/Button';
 import DatePicker from '../components/DatePicker';
 import OppositeTeamPicker from '../components/OppositeTeamPicker';
+import PlayersPicker from '../components/PlayersPicker';
 import ConfirmBox from '../components/base/ConfirmBox';
 import { Colors } from '../constants/Colors';
 import { NavigationRoutes } from '../constants/NavigationRoutes';
@@ -14,19 +15,35 @@ import { AppDispatch, RootState } from '../redux/store';
 import { retrieveTeams } from '../redux/slices/teamSlice';
 import { retrievePlayers } from '../redux/slices/playerSlice';
 import { clearLiveDraft, loadLiveDraft, saveLiveDraft } from '../scoring/draftStorage';
-import { LiveDraft, OurRole, reduceLiveScore } from '../scoring/liveScore';
+import {
+  LiveDraft,
+  SideRole,
+  TeamSide,
+  battingSideFor,
+  isPplDraft,
+  reduceLiveScore,
+  sideTitle,
+} from '../scoring/liveScore';
 
 const LiveScoreSetup = ({ navigation }) => {
   const focused = useIsFocused();
   const dispatch = useDispatch<AppDispatch>();
   const teams = useSelector((state: RootState) => state.team.teams);
+  const players = useSelector((state: RootState) => state.player.players);
   const [draft, setDraft] = useState<LiveDraft | null>(null);
+  const [matchKind, setMatchKind] = useState<'outdoor' | 'ppl'>('outdoor');
   const [title, setTitle] = useState('');
   const [oppositeTeamId, setOppositeTeamId] = useState<number | null>(null);
+  const [pplGroupTitle, setPplGroupTitle] = useState('');
+  const [teamATitle, setTeamATitle] = useState('');
+  const [teamBTitle, setTeamBTitle] = useState('');
+  const [teamAPlayerIds, setTeamAPlayerIds] = useState<Array<number | string>>([]);
+  const [teamBPlayerIds, setTeamBPlayerIds] = useState<Array<number | string>>([]);
+  const [battingFirst, setBattingFirst] = useState<TeamSide | null>(null);
   const [date, setDate] = useState(new Date().toDateString());
   const [location, setLocation] = useState('');
   const [ballsPerOver, setBallsPerOver] = useState('6');
-  const [firstRole, setFirstRole] = useState<OurRole | null>(null);
+  const [firstRole, setFirstRole] = useState<SideRole | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [confirmDiscard, setConfirmDiscard] = useState(false);
 
@@ -40,29 +57,58 @@ const LiveScoreSetup = ({ navigation }) => {
   const startScoring = async () => {
     const deliveries = Number(ballsPerOver);
     const nextErrors: Record<string, string> = {};
-    if (!title.trim()) nextErrors.title = 'Title is required.';
-    if (!oppositeTeamId) nextErrors.oppositeTeamId = 'Opposite team is required.';
     if (!date) nextErrors.date = 'Date is required.';
     if (!location.trim()) nextErrors.location = 'Location is required.';
     if (!Number.isInteger(deliveries) || deliveries < 1 || deliveries > 10) {
       nextErrors.ballsPerOver = 'Balls in an over should be from 1 to 10.';
     }
-    if (!firstRole) nextErrors.firstRole = 'Choose bat or field.';
+    if (matchKind === 'outdoor') {
+      if (!title.trim()) nextErrors.title = 'Title is required.';
+      if (!oppositeTeamId) nextErrors.oppositeTeamId = 'Opposite team is required.';
+      if (!firstRole) nextErrors.firstRole = 'Choose bat or field.';
+    } else {
+      if (!teamATitle.trim()) nextErrors.teamATitle = 'Team A name is required.';
+      if (!teamBTitle.trim()) nextErrors.teamBTitle = 'Team B name is required.';
+      if (teamAPlayerIds.length < 2) {
+        nextErrors.teamAPlayerIds = 'Team A needs at least two players.';
+      }
+      if (teamBPlayerIds.length < 2) {
+        nextErrors.teamBPlayerIds = 'Team B needs at least two players.';
+      }
+      if (!battingFirst) nextErrors.battingFirst = 'Choose which team bats first.';
+    }
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length || !firstRole || !oppositeTeamId) return;
+    if (Object.keys(nextErrors).length) return;
 
     const team = teams.find((item) => Number(item.id) === oppositeTeamId);
-    const nextDraft: LiveDraft = {
-      version: 1,
-      title: title.trim(),
-      oppositeTeamId,
-      oppositeTeamName: team?.name || 'Opponent',
-      date,
-      location: location.trim(),
-      numberOfDeliveriesPerOver: deliveries,
-      firstRole,
-      events: [],
-    };
+    const nextDraft: LiveDraft =
+      matchKind === 'ppl'
+        ? {
+            version: 1,
+            kind: 'ppl',
+            pplGroupTitle: pplGroupTitle.trim(),
+            teamATitle: teamATitle.trim(),
+            teamBTitle: teamBTitle.trim(),
+            teamAPlayerIds,
+            teamBPlayerIds,
+            battingFirst: battingFirst as TeamSide,
+            date,
+            location: location.trim(),
+            numberOfDeliveriesPerOver: deliveries,
+            events: [],
+          }
+        : {
+            version: 1,
+            kind: 'outdoor',
+            title: title.trim(),
+            oppositeTeamId: oppositeTeamId as number,
+            oppositeTeamName: team?.name || 'Opponent',
+            date,
+            location: location.trim(),
+            numberOfDeliveriesPerOver: deliveries,
+            firstRole: firstRole as SideRole,
+            events: [],
+          };
     await saveLiveDraft(nextDraft);
     navigation.navigate(NavigationRoutes.LIVE_SCORE);
   };
@@ -76,21 +122,28 @@ const LiveScoreSetup = ({ navigation }) => {
   if (draft) {
     const score = reduceLiveScore(draft);
     const innings = score.matchEnded ? null : score.current;
+    const ppl = isPplDraft(draft);
+    const resumeTitle = ppl
+      ? `${draft.teamATitle} vs ${draft.teamBTitle}`
+      : draft.title;
+    const resumeDetail = ppl
+      ? draft.pplGroupTitle || 'PPL'
+      : `Vs ${draft.oppositeTeamName}`;
+    const resumeScore = !innings
+      ? ''
+      : ppl
+        ? `${sideTitle(draft, battingSideFor(draft, score.currentInningsIndex))} batting ${innings.runs}-${innings.wickets} (${innings.oversLabel})`
+        : `${innings.role === 'bat' ? 'We are batting' : 'We are bowling'} ${innings.runs}-${innings.wickets} (${innings.oversLabel})`;
     return (
       <View style={styles.container}>
         <SectionTitle title="Live draft" />
         <View style={styles.resumeCard}>
-          <Text style={styles.resumeTitle}>{draft.title}</Text>
-          <Text style={styles.resumeDetail}>Vs {draft.oppositeTeamName}</Text>
+          <Text style={styles.resumeTitle}>{resumeTitle}</Text>
+          <Text style={styles.resumeDetail}>{resumeDetail}</Text>
           <Text style={styles.resumeDetail}>
             {draft.date} · {draft.location}
           </Text>
-          {innings && (
-            <Text style={styles.resumeScore}>
-              {innings.role === 'bat' ? 'We are batting' : 'We are bowling'}{' '}
-              {innings.runs}-{innings.wickets} ({innings.oversLabel})
-            </Text>
-          )}
+          {innings && <Text style={styles.resumeScore}>{resumeScore}</Text>}
           {score.matchEnded && (
             <Text style={styles.resumeScore}>Ready to save the result</Text>
           )}
@@ -122,19 +175,87 @@ const LiveScoreSetup = ({ navigation }) => {
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       <SectionTitle title="Match" marginTop={10} />
-      <TextInput
-        length="long"
-        placeholder="Title"
-        value={title}
-        error={errors.title}
-        onChangeText={setTitle}
-      />
-      <OppositeTeamPicker
-        placeholder="Opposite team"
-        value={oppositeTeamId}
-        error={errors.oppositeTeamId}
-        onChange={(value) => setOppositeTeamId(Number(value))}
-      />
+      <View style={styles.roleRow}>
+        <RoleChoice
+          label="Outdoor"
+          selected={matchKind === 'outdoor'}
+          onPress={() => setMatchKind('outdoor')}
+        />
+        <RoleChoice
+          label="PPL"
+          selected={matchKind === 'ppl'}
+          onPress={() => setMatchKind('ppl')}
+        />
+      </View>
+      {matchKind === 'outdoor' ? (
+        <>
+          <TextInput
+            length="long"
+            placeholder="Title"
+            value={title}
+            error={errors.title}
+            onChangeText={setTitle}
+          />
+          <OppositeTeamPicker
+            placeholder="Opposite team"
+            value={oppositeTeamId}
+            error={errors.oppositeTeamId}
+            onChange={(value) => setOppositeTeamId(Number(value))}
+          />
+        </>
+      ) : (
+        <>
+          <TextInput
+            length="long"
+            placeholder="PPL title"
+            value={pplGroupTitle}
+            onChangeText={setPplGroupTitle}
+          />
+          <TextInput
+            length="long"
+            placeholder="Team A name"
+            value={teamATitle}
+            error={errors.teamATitle}
+            onChangeText={setTeamATitle}
+          />
+          <TextInput
+            length="long"
+            placeholder="Team B name"
+            value={teamBTitle}
+            error={errors.teamBTitle}
+            onChangeText={setTeamBTitle}
+          />
+          <PlayersPicker
+            placeholder={`Players of ${teamATitle.trim() || 'Team A'}`}
+            players={players}
+            emptyMessage="No players found."
+            selected={teamAPlayerIds}
+            error={errors.teamAPlayerIds}
+            onChangeSelection={(ids) => {
+              const next = ids as Array<number | string>;
+              setTeamAPlayerIds(next);
+              setTeamBPlayerIds((current) =>
+                current.filter(
+                  (id) => !next.some((picked) => Number(picked) === Number(id)),
+                ),
+              );
+            }}
+          />
+          <PlayersPicker
+            placeholder={`Players of ${teamBTitle.trim() || 'Team B'}`}
+            players={players.filter(
+              (player) =>
+                !teamAPlayerIds.some((id) => Number(id) === Number(player.id)),
+            )}
+            emptyMessage="No available players found."
+            selected={teamBPlayerIds}
+            error={errors.teamBPlayerIds}
+            onChangeSelection={(ids) =>
+              setTeamBPlayerIds(ids as Array<number | string>)
+            }
+          />
+        </>
+      )}
       <DatePicker
         placeholder="Date"
         value={date}
@@ -156,20 +277,45 @@ const LiveScoreSetup = ({ navigation }) => {
         error={errors.ballsPerOver}
         onChangeText={setBallsPerOver}
       />
-      <SectionTitle title="We start by" />
-      <View style={styles.roleRow}>
-        <RoleChoice
-          label="Batting"
-          selected={firstRole === 'bat'}
-          onPress={() => setFirstRole('bat')}
-        />
-        <RoleChoice
-          label="Fielding"
-          selected={firstRole === 'field'}
-          onPress={() => setFirstRole('field')}
-        />
-      </View>
-      {!!errors.firstRole && <Text style={styles.error}>{errors.firstRole}</Text>}
+      {matchKind === 'outdoor' ? (
+        <>
+          <SectionTitle title="We start by" />
+          <View style={styles.roleRow}>
+            <RoleChoice
+              label="Batting"
+              selected={firstRole === 'bat'}
+              onPress={() => setFirstRole('bat')}
+            />
+            <RoleChoice
+              label="Fielding"
+              selected={firstRole === 'field'}
+              onPress={() => setFirstRole('field')}
+            />
+          </View>
+          {!!errors.firstRole && (
+            <Text style={styles.error}>{errors.firstRole}</Text>
+          )}
+        </>
+      ) : (
+        <>
+          <SectionTitle title="Bats first" />
+          <View style={styles.roleRow}>
+            <RoleChoice
+              label={teamATitle.trim() || 'Team A'}
+              selected={battingFirst === 'teamA'}
+              onPress={() => setBattingFirst('teamA')}
+            />
+            <RoleChoice
+              label={teamBTitle.trim() || 'Team B'}
+              selected={battingFirst === 'teamB'}
+              onPress={() => setBattingFirst('teamB')}
+            />
+          </View>
+          {!!errors.battingFirst && (
+            <Text style={styles.error}>{errors.battingFirst}</Text>
+          )}
+        </>
+      )}
       <View style={{ marginTop: 40 }}>
         <Button
           length="long"
